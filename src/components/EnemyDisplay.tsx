@@ -66,7 +66,7 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
       </View>
 
       <View style={styles.spriteWrap}>
-        {stage === 1 ? <GlurpSprite size={100} row={0} /> : blob}
+        {stage === 1 ? <GlurpSprite size={100} /> : blob}
       </View>
 
       <View style={styles.hpRow}>

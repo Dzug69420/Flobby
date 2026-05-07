@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 import StageBackground from '../components/StageBackground';
@@ -16,13 +16,11 @@ export default function CombatScreen() {
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
-  const damageAnim = useRef(new Animated.Value(0)).current;
 
   const handleEndTurn = () => {
     if (isAnimating) return;
     setIsAnimating(true);
     endTurn();
-    // Brief lock to let end-turn resolve
     setTimeout(() => setIsAnimating(false), 500);
   };
 
@@ -38,7 +36,8 @@ export default function CombatScreen() {
       <StageBackground stageNumber={currentStage} />
 
       <SafeAreaView style={styles.safe}>
-        {/* Header */}
+
+        {/* ── Header ── */}
         <View style={styles.header}>
           <Text style={styles.stageText}>Stage {currentStage} / 11</Text>
           <View style={styles.pileRow}>
@@ -47,18 +46,8 @@ export default function CombatScreen() {
           </View>
         </View>
 
-        {/* Enemy */}
-        <View style={styles.enemySection}>
-          <EnemyDisplay
-            enemy={currentEnemy}
-            enemyHP={enemyHP}
-            enemyBlock={enemyBlock}
-            enemyTurnAction={enemyTurnAction}
-          />
-        </View>
-
-        {/* Player stats */}
-        <View style={styles.playerSection}>
+        {/* ── Battle row: player left, enemy right ── */}
+        <View style={styles.battleRow}>
           <PlayerStats
             hp={playerHP}
             maxHP={playerMaxHP}
@@ -66,10 +55,19 @@ export default function CombatScreen() {
             energy={playerEnergy}
             maxEnergy={playerMaxEnergy}
           />
+          <View style={styles.battleGap} />
+          <EnemyDisplay
+            enemy={currentEnemy}
+            enemyHP={enemyHP}
+            enemyBlock={enemyBlock}
+            enemyTurnAction={enemyTurnAction}
+            stage={currentStage}
+          />
         </View>
 
-        {/* Hand */}
+        {/* ── Hand ── */}
         <View style={styles.handSection}>
+          <Text style={styles.handLabel}>HAND  ({hand.length} cards)</Text>
           <HandArea
             hand={hand}
             masterPool={masterCardPool}
@@ -79,10 +77,11 @@ export default function CombatScreen() {
           />
         </View>
 
-        {/* End turn */}
+        {/* ── End turn ── */}
         <View style={styles.endTurnRow}>
           <EndTurnButton onPress={handleEndTurn} disabled={isAnimating} />
         </View>
+
       </SafeAreaView>
     </View>
   );
@@ -91,26 +90,50 @@ export default function CombatScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1 },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.xs,
-    paddingBottom: SPACING.xs,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingVertical: SPACING.sm,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  stageText: { color: COLORS.accentGold, fontSize: FONTS.stageInfo, fontWeight: 'bold' },
-  pileRow: { flexDirection: 'row', gap: 12 },
-  pileText: { color: COLORS.textSecondary, fontSize: FONTS.stageInfo },
-  enemySection: { flex: 3, justifyContent: 'center', paddingHorizontal: SPACING.sm, paddingTop: SPACING.sm },
-  playerSection: { paddingHorizontal: 0, paddingVertical: SPACING.xs },
-  handSection: { flex: 2, justifyContent: 'flex-end' },
+  stageText: {
+    color: COLORS.accentGold,
+    fontSize: FONTS.stageInfo + 2,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  pileRow: { flexDirection: 'row', gap: 14 },
+  pileText: { color: COLORS.textSecondary, fontSize: FONTS.stageInfo + 1 },
+
+  battleRow: {
+    flexDirection: 'row',
+    flex: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.xs,
+  },
+  battleGap: { width: SPACING.sm },
+
+  handSection: {
+    paddingTop: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  handLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    letterSpacing: 1,
+    marginBottom: 2,
+    marginLeft: 4,
+  },
+
   endTurnRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.sm,
-    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.md,
+    paddingTop: SPACING.sm,
   },
 });

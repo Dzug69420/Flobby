@@ -18,6 +18,7 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        overScrollMode="never"
       >
         {hand.map((card, index) => {
           const def = masterPool[card.definitionId];
@@ -40,6 +41,10 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
 }
 
 const styles = StyleSheet.create({
-  wrapper: { paddingVertical: 8 },
-  scrollContent: { paddingHorizontal: 8, alignItems: 'flex-end' },
+  wrapper: { paddingVertical: 6 },
+  scrollContent: {
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    gap: 2,
+  },
 });

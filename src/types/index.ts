@@ -1,0 +1,80 @@
+export type CardCategory = 'attack' | 'defense' | 'combo' | 'status';
+
+export interface CombatContext {
+  playerHP: number;
+  playerMaxHP: number;
+  playerBlock: number;
+  playerEnergy: number;
+  enemyHP: number;
+  enemyBlock: number;
+  cardsInHand: CardInstance[];
+  cardsInDiscard: CardInstance[];
+  cardsInDeck: CardInstance[];
+  turnNumber: number;
+}
+
+export interface CombatDelta {
+  playerHPChange?: number;
+  playerBlockChange?: number;
+  enemyHPChange?: number;
+  enemyBlockChange?: number;
+  drawCards?: number;
+}
+
+export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
+
+export interface CardDefinition {
+  id: string;
+  name: string;
+  category: CardCategory;
+  description: string;
+  cost: number;
+  effect: CardEffectFn;
+}
+
+export interface CardInstance {
+  instanceId: string;
+  definitionId: string;
+}
+
+export type AttackPattern =
+  | { type: 'consistent' }
+  | { type: 'alternating'; firstTurn: 'attack' | 'defend' }
+  | { type: 'boss_pattern' };
+
+export type BossMechanic = { type: 'block_reduction'; fraction: number };
+
+export interface EnemyDefinition {
+  id: string;
+  name: string;
+  maxHP: number;
+  baseAttack: number;
+  attackPattern: AttackPattern;
+  isBoss: boolean;
+  specialMechanic?: BossMechanic;
+  color: string;
+  bodySize: number;
+  faceEmoji: string;
+}
+
+export type GamePhase = 'start' | 'combat' | 'reward' | 'gameover' | 'victory';
+
+export interface GameState {
+  phase: GamePhase;
+  currentStage: number;
+  playerHP: number;
+  playerMaxHP: number;
+  playerBlock: number;
+  playerEnergy: number;
+  playerMaxEnergy: number;
+  deck: CardInstance[];
+  hand: CardInstance[];
+  discard: CardInstance[];
+  currentEnemy: EnemyDefinition | null;
+  enemyHP: number;
+  enemyBlock: number;
+  enemyTurnAction: 'attack' | 'defend' | null;
+  turnNumber: number;
+  rewardChoices: CardDefinition[];
+  masterCardPool: Record<string, CardDefinition>;
+}

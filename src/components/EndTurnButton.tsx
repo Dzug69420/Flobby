@@ -9,22 +9,11 @@ interface Props {
 
 export default function EndTurnButton({ onPress, disabled }: Props) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
-    if (!disabled) {
-      loopRef.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.04, duration: 600, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-        ])
-      );
-      loopRef.current.start();
-    } else {
-      loopRef.current?.stop();
+    if (disabled) {
       pulseAnim.setValue(1);
     }
-    return () => loopRef.current?.stop();
   }, [disabled]);
 
   return (

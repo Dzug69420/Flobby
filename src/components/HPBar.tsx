@@ -9,7 +9,7 @@ interface Props {
   showText?: boolean;
 }
 
-export default function HPBar({ current, max, height = 10, showText = true }: Props) {
+export default function HPBar({ current, max, height = 12, showText = true }: Props) {
   const widthAnim = useRef(new Animated.Value(current / max)).current;
 
   useEffect(() => {

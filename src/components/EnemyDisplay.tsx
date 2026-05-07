@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  blockText: { color: COLORS.blockColor, fontSize: 13, fontWeight: 'bold' },
-  intent: { fontSize: 13, fontWeight: 'bold', textAlign: 'center' },
+  blockText: { color: COLORS.blockColor, fontSize: 16, fontWeight: 'bold' },
+  intent: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
   intentAttack: { color: COLORS.accent },
   intentDefend: { color: COLORS.accentBlue },
 });

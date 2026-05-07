@@ -17,15 +17,15 @@ export const COLORS = {
 };
 
 export const FONTS = {
-  cardName: 14,
-  cardDesc: 11,
-  cardCost: 14,
-  statLabel: 14,
-  statValue: 20,
-  screenTitle: 36,
-  button: 18,
-  enemyName: 17,
-  stageInfo: 14,
+  cardName: 16,
+  cardDesc: 13,
+  cardCost: 16,
+  statLabel: 16,
+  statValue: 22,
+  screenTitle: 40,
+  button: 20,
+  enemyName: 19,
+  stageInfo: 16,
 };
 
 export const SPACING = {
@@ -37,7 +37,7 @@ export const SPACING = {
 };
 
 export const CARD = {
-  width: 92,
-  height: 132,
+  width: 105,
+  height: 150,
   borderRadius: 10,
 };

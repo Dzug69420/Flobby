@@ -17,7 +17,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -215,6 +215,7 @@ export default function CombatScreen() {
               enemyTurnAction={enemyTurnAction}
               stage={currentStage}
               enemyStatuses={enemyStatuses}
+              bossEnraged={bossEnraged}
             />
           </Animated.View>
         </View>

@@ -13,9 +13,10 @@ interface Props {
   enemyTurnAction: 'attack' | 'defend' | null;
   stage: number;
   enemyStatuses: StatusEffect[];
+  bossEnraged?: boolean;
 }
 
-export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses }: Props) {
+export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses, bossEnraged }: Props) {
   const wobble = useRef(new Animated.Value(1)).current;
   const intentBounce = useRef(new Animated.Value(0)).current;
 
@@ -66,9 +67,9 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
           borderRadius: enemy.bodySize / 2,
           backgroundColor: enemy.color,
           transform: [{ scale: wobble }],
-          shadowColor: isBoss ? COLORS.bossGold : enemy.color,
-          shadowRadius: isBoss ? 18 : 8,
-          shadowOpacity: isBoss ? 0.9 : 0.5,
+          shadowColor: bossEnraged ? '#ff5722' : isBoss ? COLORS.bossGold : enemy.color,
+          shadowRadius: bossEnraged ? 24 : isBoss ? 18 : 8,
+          shadowOpacity: bossEnraged ? 1.0 : isBoss ? 0.9 : 0.5,
           borderWidth: isBoss ? 2 : 0,
           borderColor: isBoss ? COLORS.bossGold : 'transparent',
         },
@@ -104,6 +105,9 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
         <Text style={styles.bossLabel}>
           ⚠️ BOSS — Reduces your block by {Math.round(enemy.specialMechanic.fraction * 100)}%!
         </Text>
+      )}
+      {bossEnraged && (
+        <Text style={styles.enragedLabel}>🔥 ENRAGED! +5 Strength!</Text>
       )}
       {isElite && enemy.eliteMechanic?.type === 'enrage' && (
         <Text style={styles.eliteLabel}>
@@ -191,6 +195,16 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginBottom: 2,
     textAlign: 'center',
+  },
+  enragedLabel: {
+    color: '#ff5722',
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginBottom: 2,
+    textAlign: 'center',
+    textShadowColor: '#ff0000',
+    textShadowRadius: 6,
+    textShadowOffset: { width: 0, height: 0 },
   },
   eliteLabel: {
     color: '#ce93d8',

@@ -72,7 +72,9 @@ export type AttackPattern =
   | { type: 'alternating'; firstTurn: 'attack' | 'defend' }
   | { type: 'boss_pattern' };
 
-export type BossMechanic = { type: 'block_reduction'; fraction: number };
+export type BossMechanic =
+  | { type: 'block_reduction'; fraction: number }
+  | { type: 'enraged'; attackBonus: number; threshold: number };
 export type EliteMechanic =
   | { type: 'enrage'; strengthPerSkill: number }
   | { type: 'wound_on_defend'; wounds: number }
@@ -149,6 +151,7 @@ export interface GameState {
   enemyHP: number;
   enemyBlock: number;
   enemyTurnAction: 'attack' | 'defend' | null;
+  bossEnraged: boolean;
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

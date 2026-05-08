@@ -117,7 +117,7 @@ export const ENEMIES: EnemyDefinition[] = [
   {
     id: 'flobby',
     name: 'Flobby',
-    maxHP: 100,
+    maxHP: 120,
     baseAttack: 15,
     attackPattern: { type: 'boss_pattern' },
     isBoss: true,

@@ -148,6 +148,7 @@ const initialState: GameState = {
   enemyHP: 0,
   enemyBlock: 0,
   enemyTurnAction: 'attack',
+  bossEnraged: false,
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -355,6 +356,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (modifiedDelta.drawCards) {
       get().drawCards(modifiedDelta.drawCards);
+    }
+
+    // Check boss enrage threshold (50% HP)
+    const afterState = get();
+    if (
+      afterState.currentEnemy?.isBoss &&
+      !afterState.bossEnraged &&
+      afterState.enemyHP <= afterState.currentEnemy.maxHP * 0.5
+    ) {
+      set({ bossEnraged: true });
+      // Boss gains Strength when enraged
+      const bossStrength: import('../types').StatusEffect[] = [{ type: 'strength', stacks: 5 }];
+      set((s) => ({ enemyStatuses: mergeStatuses(s.enemyStatuses, bossStrength) }));
     }
 
     if (get().enemyHP <= 0) {
@@ -675,6 +689,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyStatuses: enemyStartStatuses,
         exhaustPile: [],
         retainedCards: [],
+        bossEnraged: false,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

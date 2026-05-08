@@ -50,7 +50,7 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
                 definition={def}
                 onPlay={onPlay}
                 disabled={disabled}
-                affordable={playerEnergy >= def.cost}
+                affordable={!def.isUnplayable && playerEnergy >= def.cost}
                 index={index}
               />
             </View>

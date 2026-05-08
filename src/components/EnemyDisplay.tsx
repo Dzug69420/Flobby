@@ -43,8 +43,12 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
   }, [enemyTurnAction]);
 
   const isBoss = enemy.isBoss;
+  const isElite = enemy.isElite;
   const isAttacking = enemyTurnAction === 'attack';
-  const intentValue = isAttacking ? enemy.baseAttack : Math.floor(enemy.baseAttack * 0.8);
+  const enemyStrength = enemyStatuses.find((s) => s.type === 'strength')?.stacks ?? 0;
+  const intentValue = isAttacking
+    ? enemy.baseAttack + enemyStrength
+    : Math.floor(enemy.baseAttack * 0.8);
   const intentStatusIcons = isAttacking && enemy.attackStatuses && enemy.attackStatuses.length > 0
     ? enemy.attackStatuses.map((s) => {
         const icons: Record<string, string> = { vulnerable: '💢', weak: '🌀', frail: '💨', poison: '☠️' };
@@ -95,14 +99,25 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
         )}
       </Animated.View>
 
-      {/* Enemy name */}
+      {/* Enemy name + elite/boss labels */}
       {isBoss && enemy.specialMechanic?.type === 'block_reduction' && (
         <Text style={styles.bossLabel}>
           ⚠️ BOSS — Reduces your block by {Math.round(enemy.specialMechanic.fraction * 100)}%!
         </Text>
       )}
-      <Text style={[styles.enemyName, isBoss && styles.bossName]} numberOfLines={1}>
-        {enemy.name}
+      {isElite && enemy.eliteMechanic?.type === 'enrage' && (
+        <Text style={styles.eliteLabel}>
+          ⚠️ ELITE — Gains +{enemy.eliteMechanic.strengthPerSkill} Str per non-attack!
+        </Text>
+      )}
+      {isElite && enemy.eliteMechanic?.type === 'wound_on_defend' && (
+        <Text style={styles.eliteLabel}>⚠️ ELITE — Adds Wounds when defending!</Text>
+      )}
+      {isElite && enemy.eliteMechanic?.type === 'ritual' && (
+        <Text style={styles.eliteLabel}>⚠️ ELITE — Gains Strength each turn!</Text>
+      )}
+      <Text style={[styles.enemyName, isBoss && styles.bossName, isElite && styles.eliteName]} numberOfLines={1}>
+        {isElite ? '💀 ' : ''}{enemy.name}
       </Text>
 
       {/* Sprite */}
@@ -177,6 +192,15 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     textAlign: 'center',
   },
+  eliteLabel: {
+    color: '#ce93d8',
+    fontSize: 10,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  eliteName: { color: '#ce93d8', fontSize: 14 },
   enemyName: {
     color: COLORS.textPrimary,
     fontSize: 13,

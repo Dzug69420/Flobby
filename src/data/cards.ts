@@ -395,6 +395,49 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── STATUS / CURSE CARDS (added to deck mid-combat by enemies) ───────────────
+  wound: {
+    id: 'wound',
+    name: 'Wound',
+    category: 'status',
+    description: 'Unplayable.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+  dazed: {
+    id: 'dazed',
+    name: 'Dazed',
+    category: 'status',
+    description: 'Unplayable. Exhausts when drawn.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    exhaust: true,
+    effect: () => ({}),
+  },
+  slimed: {
+    id: 'slimed',
+    name: 'Slimed',
+    category: 'status',
+    description: 'Does nothing. Exhaust.',
+    cost: 1,
+    isStatusCard: true,
+    exhaust: true,
+    effect: () => ({}),
+  },
+  burn: {
+    id: 'burn',
+    name: 'Burn',
+    category: 'status',
+    description: 'Unplayable. Take 2 damage at end of your turn.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+
   // ── UPGRADED CARDS (+ variants) ──────────────────────────────────────────────
   strike_plus: {
     id: 'strike_plus', name: 'Bonk+', category: 'attack',

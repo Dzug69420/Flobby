@@ -55,6 +55,8 @@ export interface CardDefinition {
   rarity?: 'common' | 'uncommon' | 'rare';
   upgraded?: boolean;
   upgradeId?: string;
+  isStatusCard?: boolean;
+  isUnplayable?: boolean;
 }
 
 export interface CardInstance {
@@ -68,6 +70,10 @@ export type AttackPattern =
   | { type: 'boss_pattern' };
 
 export type BossMechanic = { type: 'block_reduction'; fraction: number };
+export type EliteMechanic =
+  | { type: 'enrage'; strengthPerSkill: number }
+  | { type: 'wound_on_defend'; wounds: number }
+  | { type: 'ritual'; strengthPerTurn: number };
 
 export interface EnemyDefinition {
   id: string;
@@ -76,7 +82,9 @@ export interface EnemyDefinition {
   baseAttack: number;
   attackPattern: AttackPattern;
   isBoss: boolean;
+  isElite?: boolean;
   specialMechanic?: BossMechanic;
+  eliteMechanic?: EliteMechanic;
   color: string;
   bodySize: number;
   faceEmoji: string;

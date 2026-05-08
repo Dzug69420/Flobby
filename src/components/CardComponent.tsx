@@ -113,10 +113,13 @@ export default function CardComponent({
   });
 
   const combinedY = Animated.add(slideAnim, hoverLift);
+  const isUnplayable = definition.isUnplayable;
   const borderColor = definition.upgraded
     ? '#ffd700'
+    : isUnplayable
+    ? '#555'
     : (CATEGORY_BORDER[definition.category] ?? COLORS.cardBorder);
-  const bannerColor = CATEGORY_BANNER[definition.category] ?? '#222';
+  const bannerColor = isUnplayable ? '#1a1a1a' : (CATEGORY_BANNER[definition.category] ?? '#222');
 
   return (
     <Pressable
@@ -162,9 +165,13 @@ export default function CardComponent({
 
         {/* Type label */}
         <View style={[styles.typeBar, { borderTopColor: borderColor + '55' }]}>
-          <Text style={[styles.typeText, { color: borderColor }]}>
-            {CATEGORY_TYPE_LABEL[definition.category]}
-          </Text>
+          {isUnplayable ? (
+            <Text style={styles.unplayableText}>UNPLAYABLE</Text>
+          ) : (
+            <Text style={[styles.typeText, { color: borderColor }]}>
+              {CATEGORY_TYPE_LABEL[definition.category]}
+            </Text>
+          )}
         </View>
       </Animated.View>
     </Pressable>
@@ -241,6 +248,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     alignItems: 'center',
     borderTopWidth: 1,
+  },
+  unplayableText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#666',
+    letterSpacing: 1,
   },
   typeText: {
     fontSize: 13,

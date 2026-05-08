@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
-import { ENEMIES } from '../data/enemies';
+import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
 import { ALL_RELICS, pickRandomRelic } from '../data/relics';
 import { pickRandomPotion } from '../data/potions';
@@ -78,6 +78,7 @@ interface GameActions {
   gainRelic: (relicId: string) => void;
   usePotion: (potionId: string) => void;
   gainPotion: (potionId: string) => void;
+  addStatusCardsToDeck: (cardDefId: string, count: number) => void;
   restartGame: () => void;
   goToMenu: () => void;
 }
@@ -186,6 +187,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const def = state.masterCardPool[cardInst.definitionId];
     if (!def) return;
+    if (def.isUnplayable) return;
     if (state.playerEnergy < def.cost) return;
 
     const ctx: CombatContext = {
@@ -271,6 +273,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerStatuses = mergeStatuses(playerStatuses, modifiedDelta.applyPlayerStatuses);
       }
 
+      // Enrage: enemy gains Strength when player plays a non-attack card
+      if (
+        s.currentEnemy?.eliteMechanic?.type === 'enrage' &&
+        def.category !== 'attack'
+      ) {
+        const strengthGain = s.currentEnemy.eliteMechanic.strengthPerSkill;
+        enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'strength', stacks: strengthGain }]);
+      }
+
       const newHand = s.hand.filter((c) => c.instanceId !== instanceId);
       const newDiscard = def.exhaust ? s.discard : [...s.discard, cardInst];
       const newCardsPlayedTotal = s.cardsPlayedTotal + 1;
@@ -349,10 +360,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
           .filter((s) => s.stacks > 0);
       }
 
+      // Apply Burn damage before enemy turn
+      const burnCards = state.discard.filter((c) => c.definitionId === 'burn').length
+        + state.hand.filter((c) => c.definitionId === 'burn').length
+        + state.deck.filter((c) => c.definitionId === 'burn').length;
+      if (burnCards > 0) {
+        playerHP = Math.max(0, playerHP - burnCards * 2);
+      }
+
+      // Ritual: enemy gains Strength each turn
+      if (enemy.eliteMechanic?.type === 'ritual') {
+        enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'strength', stacks: enemy.eliteMechanic.strengthPerTurn }]);
+      }
+
       // Enemy action
+      const enemyStrength = getStatusStacks(enemyStatuses, 'strength');
       if (action === 'attack') {
         enemyBlock = 0;
-        const dmg = Math.max(0, enemy.baseAttack - playerBlock);
+        const rawAttack = enemy.baseAttack + enemyStrength;
+        const dmg = Math.max(0, rawAttack - playerBlock);
         if (dmg > 0) {
           playerHP = Math.max(0, playerHP - dmg);
           // Bronze Scales: deal 3 thorns damage back when hit
@@ -366,6 +392,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       } else {
         enemyBlock += Math.floor(enemy.baseAttack * 0.8);
+        // Wound-on-defend: add Wound cards to player deck
+        // (handled after set via addStatusCardsToDeck call)
       }
       // Calipers: block was already handled above; now reset
       if (!hasRelic(relics, 'calipers')) {
@@ -408,13 +436,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
 
-    // Enemy may have died from poison
+    // Enemy may have died from poison or thorns
     if (get().enemyHP <= 0) {
       get().stageWon();
       return;
     }
 
+    // Wound-on-defend: add Wound cards when enemy defends
+    const afterState = get();
+    if (
+      afterState.enemyTurnAction === 'defend' &&
+      afterState.currentEnemy?.eliteMechanic?.type === 'wound_on_defend'
+    ) {
+      get().addStatusCardsToDeck('wound', afterState.currentEnemy.eliteMechanic.wounds);
+    }
+
     get().drawCards(HAND_SIZE);
+
+    // Dazed cards: auto-exhaust when drawn
+    set((s) => {
+      const dazed = s.hand.filter((c) => c.definitionId === 'dazed');
+      if (dazed.length === 0) return {};
+      return {
+        hand: s.hand.filter((c) => c.definitionId !== 'dazed'),
+      };
+    });
   },
 
   stageWon: () => {
@@ -488,8 +534,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (node.roomType === 'boss') {
         enemy = bossEnemy;
       } else if (node.roomType === 'elite') {
-        // Elite: pick from upper half of enemy pool
-        const elitePool = enemyPool.slice(Math.floor(enemyPool.length / 2));
+        // Elite: pick from dedicated elite pool
+        const elitePool = ELITE_ENEMIES;
         enemy = elitePool[Math.floor(Math.random() * elitePool.length)];
       } else {
         // Regular monster: scale difficulty by floor
@@ -682,6 +728,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const maxSlots = 3;
       if (state.potions.length >= maxSlots) return {};
       return { potions: [...state.potions, potionId] };
+    });
+  },
+
+  addStatusCardsToDeck: (cardDefId: string, count: number) => {
+    set((state) => {
+      const newCards: CardInstance[] = Array.from({ length: count }, () => ({
+        instanceId: generateId(),
+        definitionId: cardDefId,
+      }));
+      // Shuffle status cards into the draw deck
+      const newDeck = shuffle([...state.deck, ...newCards]);
+      return { deck: newDeck };
     });
   },
 

@@ -11,6 +11,8 @@ import EndTurnButton from '../components/EndTurnButton';
 import CardComponent from '../components/CardComponent';
 import RelicDisplay from '../components/RelicDisplay';
 import PotionSlots from '../components/PotionSlots';
+import CardTooltip from '../components/CardTooltip';
+import { CardDefinition } from '../types';
 
 export default function CombatScreen() {
   const {
@@ -26,6 +28,7 @@ export default function CombatScreen() {
   const [showSettings, setShowSettings] = useState(false);
   const [showDeckViewer, setShowDeckViewer] = useState(false);
   const [deckViewTab, setDeckViewTab] = useState<'deck' | 'discard'>('deck');
+  const [tooltipDef, setTooltipDef] = useState<CardDefinition | null>(null);
   const [stageFlash, setStageFlash] = useState(true);
   const isMounted = useRef(true);
 
@@ -354,7 +357,7 @@ export default function CombatScreen() {
                         <CardComponent
                           card={cardInst}
                           definition={def}
-                          onPlay={() => {}}
+                          onPlay={() => setTooltipDef(def)}
                           disabled={false}
                           affordable={true}
                           index={i}
@@ -370,6 +373,7 @@ export default function CombatScreen() {
 
       </SafeAreaView>
       </Animated.View>
+      <CardTooltip definition={tooltipDef} onClose={() => setTooltipDef(null)} />
     </View>
   );
 }

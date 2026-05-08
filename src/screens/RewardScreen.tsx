@@ -6,7 +6,7 @@ import { COLORS, FONTS, SPACING } from '../constants/theme';
 import CardComponent from '../components/CardComponent';
 
 export default function RewardScreen() {
-  const { rewardChoices, selectRewardCard, currentStage, playerHP, playerMaxHP } = useGameStore();
+  const { rewardChoices, selectRewardCard, currentStage, playerHP, playerMaxHP, gold, lastGoldReward } = useGameStore();
   const [chosen, setChosen] = useState<string | null>(null);
 
   const handlePick = (id: string) => {
@@ -27,9 +27,15 @@ export default function RewardScreen() {
     <LinearGradient colors={['#0a0a1a', '#1a1a2e']} style={styles.container}>
       <SafeAreaView style={styles.safe}>
         <Text style={styles.complete}>✨ Stage {currentStage} Complete!</Text>
-        <Text style={styles.healed}>+10 HP restored</Text>
+        <View style={styles.statsRow}>
+          <Text style={styles.healed}>+10 HP</Text>
+          {lastGoldReward > 0 && (
+            <Text style={styles.goldEarned}>+{lastGoldReward} 🪙</Text>
+          )}
+        </View>
         <View style={styles.hpRow}>
           <Text style={styles.hpText}>♥ {playerHP} / {playerMaxHP}</Text>
+          <Text style={styles.goldTotal}> 🪙 {gold}</Text>
         </View>
         <Text style={styles.prompt}>Choose a card — or rest to heal more:</Text>
 
@@ -97,20 +103,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 6,
   },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 6,
+    alignItems: 'center',
+  },
   healed: {
     color: COLORS.hpGreen,
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 6,
     textAlign: 'center',
+  },
+  goldEarned: {
+    color: COLORS.accentGold,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   hpRow: {
     marginBottom: SPACING.md,
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 14,
   },
   hpText: {
     color: '#ff8080',
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  goldTotal: {
+    color: COLORS.accentGold,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   restButton: {

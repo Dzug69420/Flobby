@@ -9,6 +9,7 @@ import GameOverScreen from './src/screens/GameOverScreen';
 import VictoryScreen from './src/screens/VictoryScreen';
 import MapScreen from './src/screens/MapScreen';
 import RestScreen from './src/screens/RestScreen';
+import ShopScreen from './src/screens/ShopScreen';
 
 function Navigator() {
   const phase = useGameStore((s) => s.phase);
@@ -18,6 +19,7 @@ function Navigator() {
     case 'combat':   return <CombatScreen />;
     case 'reward':   return <RewardScreen />;
     case 'rest':     return <RestScreen />;
+    case 'shop':     return <ShopScreen />;
     case 'gameover': return <GameOverScreen />;
     case 'victory':  return <VictoryScreen />;
     default:         return <StartScreen />;

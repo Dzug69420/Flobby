@@ -15,7 +15,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses,
+    playerStatuses, enemyStatuses, gold,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -127,6 +127,9 @@ export default function CombatScreen() {
               <Text style={styles.hpValue}>{playerHP}</Text>
               <Text style={styles.hpSlash}>/</Text>
               <Text style={styles.hpMax}>{playerMaxHP}</Text>
+            </View>
+            <View style={styles.goldBadgeHud}>
+              <Text style={styles.goldHudText}>🪙{gold}</Text>
             </View>
           </View>
 
@@ -371,6 +374,15 @@ const styles = StyleSheet.create({
   deckNum: { color: '#fff', fontSize: 48, fontWeight: 'bold' },
   deckIcon: { fontSize: 48 },
   hudBtn: { fontSize: 48 },
+  goldBadgeHud: {
+    backgroundColor: 'rgba(249,168,37,0.15)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#f9a825',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  goldHudText: { color: '#f9a825', fontSize: 13, fontWeight: 'bold' },
 
   // BATTLE
   battleArea: {

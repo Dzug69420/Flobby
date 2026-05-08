@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode } from '../types';
+import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
@@ -66,11 +66,24 @@ interface GameActions {
   upgradeCard: (instanceId: string) => void;
   travelToNode: (nodeId: string) => void;
   leaveRestSite: () => void;
+  buyShopCard: (cardId: string, price: number) => void;
+  removeCard: (instanceId: string, price: number) => void;
+  leaveShop: () => void;
   restartGame: () => void;
   goToMenu: () => void;
 }
 
 type GameStore = GameState & GameActions;
+
+function generateShopInventory(weights: Record<string, 'common' | 'uncommon' | 'rare'>): ShopItem[] {
+  const PRICES: Record<string, number> = { common: 50, uncommon: 85, rare: 130 };
+  const picked = pickRewardCards(REWARD_CARD_IDS, 4, weights);
+  return picked.map((id) => ({
+    cardId: id,
+    price: PRICES[weights[id] ?? 'common'] + Math.floor(Math.random() * 20) - 10,
+    sold: false,
+  }));
+}
 
 const initialState: GameState = {
   phase: 'start' as GamePhase,
@@ -78,6 +91,10 @@ const initialState: GameState = {
   map: [],
   currentFloor: 0,
   currentAct: 1,
+  gold: 99,
+  lastGoldReward: 0,
+  shopInventory: [],
+  cardRemovalCost: 75,
   playerHP: PLAYER_MAX_HP,
   playerMaxHP: PLAYER_MAX_HP,
   playerBlock: 0,
@@ -351,12 +368,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
   stageWon: () => {
     const state = get();
     if (state.currentEnemy?.isBoss) {
-      set({ phase: 'victory' });
+      const bossGold = 50;
+      set({ phase: 'victory', gold: state.gold + bossGold, lastGoldReward: bossGold });
       return;
     }
+    const isElite = state.map.find(
+      (n) => n.floor === state.currentFloor && n.roomType === 'elite'
+    );
+    const goldMin = isElite ? 25 : 10;
+    const goldMax = isElite ? 35 : 20;
+    const goldGained = goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1));
     const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
     const healedHP = Math.min(state.playerHP + 10, state.playerMaxHP);
-    set({ phase: 'reward', rewardChoices: choices, playerHP: healedHP });
+    set({
+      phase: 'reward',
+      rewardChoices: choices,
+      playerHP: healedHP,
+      gold: state.gold + goldGained,
+      lastGoldReward: goldGained,
+    });
   },
 
   selectRewardCard: (cardId: string | null) => {
@@ -432,8 +462,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Treasure: pick 1 of 3 rare-weighted cards, no HP heal
       const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
       set({ phase: 'reward', currentFloor: node.floor, map: updatedMap, rewardChoices: choices });
+    } else if (node.roomType === 'shop') {
+      const shopInventory = generateShopInventory(REWARD_CARD_WEIGHTS);
+      set({ phase: 'shop', currentFloor: node.floor, map: updatedMap, shopInventory });
     } else {
-      // shop, event — stub: advance floor, return to map
+      // event — stub: advance floor, return to map
       set({ currentFloor: node.floor, map: updatedMap, phase: 'map' });
     }
   },
@@ -441,6 +474,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
   leaveRestSite: () => {
     set({ phase: 'map' });
   },
+
+  buyShopCard: (cardId: string, price: number) => {
+    set((state) => {
+      if (state.gold < price) return {};
+      const newCard: CardInstance = { instanceId: generateId(), definitionId: cardId };
+      return {
+        gold: state.gold - price,
+        deck: [...state.deck, newCard],
+        shopInventory: state.shopInventory.map((item) =>
+          item.cardId === cardId ? { ...item, sold: true } : item
+        ),
+      };
+    });
+  },
+
+  removeCard: (instanceId: string, price: number) => {
+    set((state) => {
+      if (state.gold < price) return {};
+      const allPiles = ['deck', 'hand', 'discard'] as const;
+      const updates: Partial<GameState> = { gold: state.gold - price, cardRemovalCost: price + 25 };
+      for (const pile of allPiles) {
+        if (state[pile].some((c) => c.instanceId === instanceId)) {
+          (updates as Record<string, unknown>)[pile] = state[pile].filter((c) => c.instanceId !== instanceId);
+        }
+      }
+      return updates;
+    });
+  },
+
+  leaveShop: () => set({ phase: 'map' }),
 
   upgradeCard: (instanceId: string) => {
     set((state) => {

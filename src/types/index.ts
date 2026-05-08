@@ -96,7 +96,13 @@ export interface MapNode {
   enemyIndex?: number;
 }
 
-export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'gameover' | 'victory';
+
+export interface ShopItem {
+  cardId: string;
+  price: number;
+  sold: boolean;
+}
 
 export interface GameState {
   phase: GamePhase;
@@ -104,6 +110,10 @@ export interface GameState {
   map: MapNode[];
   currentFloor: number;
   currentAct: number;
+  gold: number;
+  lastGoldReward: number;
+  shopInventory: ShopItem[];
+  cardRemovalCost: number;
   playerHP: number;
   playerMaxHP: number;
   playerBlock: number;

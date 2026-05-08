@@ -416,6 +416,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 3;
       }
 
+      // Sentinel: when Sentinel card is exhausted, gain 2 energy
+      if (def.id === 'sentinel' && finalExhaust) {
+        playerEnergy = Math.min(playerEnergy + 2, s.playerMaxEnergy + 3);
+      }
+
       // Dead Branch: add a random card to hand when a card is exhausted
       // (handled post-set below for draw timing)
 

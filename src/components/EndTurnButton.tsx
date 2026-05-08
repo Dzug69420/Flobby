@@ -6,9 +6,12 @@ interface Props {
   onPress: () => void;
   disabled: boolean;
   turnNumber?: number;
+  handSize?: number;
+  energy?: number;
+  maxEnergy?: number;
 }
 
-export default function EndTurnButton({ onPress, disabled, turnNumber = 1 }: Props) {
+export default function EndTurnButton({ onPress, disabled, turnNumber = 1, handSize, energy, maxEnergy }: Props) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -35,8 +38,11 @@ export default function EndTurnButton({ onPress, disabled, turnNumber = 1 }: Pro
         activeOpacity={0.75}
       >
         <Text style={[styles.label, disabled && styles.labelDisabled]}>
-          End Turn {turnNumber}
+          End Turn
         </Text>
+        {!disabled && handSize !== undefined && handSize > 0 && (
+          <Text style={styles.subLabel}>{handSize} card{handSize !== 1 ? 's' : ''} in hand</Text>
+        )}
       </TouchableOpacity>
     </Animated.View>
   );
@@ -70,4 +76,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   labelDisabled: { color: '#555' },
+  subLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
 });

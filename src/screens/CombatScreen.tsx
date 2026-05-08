@@ -317,6 +317,9 @@ export default function CombatScreen() {
               onPress={handleEndTurn}
               disabled={isAnimating}
               turnNumber={turnNumber + 1}
+              handSize={hand.length}
+              energy={playerEnergy}
+              maxEnergy={playerMaxEnergy}
             />
             <Text style={styles.pileLabelRight}>🗑 {discard.length}</Text>
             {exhaustPile.length > 0 && (

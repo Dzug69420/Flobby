@@ -14,9 +14,11 @@ function getDeathQuip(stage: number): string {
 }
 
 export default function GameOverScreen() {
-  const { currentStage, currentFloor, deck, hand, discard, playerHP, currentEnemy, restartGame, goToMenu, relics, gold, currentRunScore, bestScore } = useGameStore();
+  const { currentStage, currentFloor, deck, hand, discard, playerHP, currentEnemy, restartGame, goToMenu, relics, gold, currentRunScore, bestScore, runHistory, runsCompleted } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
   const isNewBest = currentRunScore > 0 && currentRunScore >= bestScore;
+  const wins = runHistory.filter((r) => r.won).length;
+  const totalRuns = runHistory.length;
 
   return (
     <LinearGradient colors={['#1a0000', '#3d0000', '#0a0000']} style={styles.container}>
@@ -41,6 +43,23 @@ export default function GameOverScreen() {
             <Text style={styles.statLine}>Best Score: <Text style={styles.statVal}>⭐ {bestScore.toLocaleString()}</Text></Text>
           )}
         </View>
+
+        {/* Run History Preview */}
+        {runHistory.length > 1 && (
+          <View style={styles.historySection}>
+            <Text style={styles.historyTitle}>Recent Runs</Text>
+            {runHistory.slice(0, 3).map((r, i) => (
+              <View key={i} style={styles.historyRow}>
+                <Text style={[styles.historyWon, { color: r.won ? '#66bb6a' : '#e74c3c' }]}>
+                  {r.won ? '✓' : '✗'}
+                </Text>
+                <Text style={styles.historyText}>
+                  Floor {r.floor} · Asc {r.ascension} · ⭐{r.score}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <TouchableOpacity onPress={restartGame} style={styles.button} activeOpacity={0.85}>
           <Text style={styles.buttonText}>🔄  TRY AGAIN</Text>
@@ -98,4 +117,17 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(231,76,60,0.3)',
   },
   menuButtonText: { color: COLORS.textSecondary, fontSize: 16, fontWeight: 'bold' },
+  historySection: {
+    width: '100%',
+    marginBottom: 12,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#440000',
+  },
+  historyTitle: { color: '#888', fontSize: 12, marginBottom: 6 },
+  historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 2 },
+  historyWon: { fontSize: 14, fontWeight: 'bold', width: 16 },
+  historyText: { color: COLORS.textSecondary, fontSize: 12 },
 });

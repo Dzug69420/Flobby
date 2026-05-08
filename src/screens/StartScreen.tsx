@@ -10,7 +10,9 @@ type Panel = 'menu' | 'options' | 'controls';
 
 export default function StartScreen() {
   const goToCharacterSelect = useGameStore((s) => s.goToCharacterSelect);
-  const { ascensionLevel, runsCompleted, setAscensionLevel } = useGameStore();
+  const { ascensionLevel, runsCompleted, setAscensionLevel, bestScore, runHistory } = useGameStore();
+  const wins = runHistory.filter((r) => r.won).length;
+  const winRate = runHistory.length > 0 ? Math.round((wins / runHistory.length) * 100) : 0;
   const [panel, setPanel] = useState<Panel>('menu');
   const [showHelp, setShowHelp] = useState(false);
 
@@ -66,7 +68,14 @@ export default function StartScreen() {
           {panel === 'controls' && <ControlsPanel onBack={() => setPanel('menu')} />}
         </Animated.View>
 
-        <Text style={styles.footer}>3 energy · 6 cards per hand · 10 stages + boss</Text>
+        {bestScore > 0 && (
+        <Text style={styles.footer}>
+          Best: ⭐{bestScore.toLocaleString()} · Wins: {wins}/{runHistory.length} ({winRate}%)
+        </Text>
+      )}
+      {bestScore === 0 && (
+        <Text style={styles.footer}>3 energy · 6 cards per hand · 15 floors</Text>
+      )}
       </SafeAreaView>
     </LinearGradient>
   );

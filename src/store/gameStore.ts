@@ -4,6 +4,7 @@ import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
 import { ALL_RELICS, pickRandomRelic } from '../data/relics';
+import { pickRandomPotion } from '../data/potions';
 import { shuffle, pickRewardCards, clamp, generateId } from '../utils/gameLogic';
 
 const PLAYER_MAX_HP = 80;
@@ -75,6 +76,8 @@ interface GameActions {
   removeCard: (instanceId: string, price: number) => void;
   leaveShop: () => void;
   gainRelic: (relicId: string) => void;
+  usePotion: (potionId: string) => void;
+  gainPotion: (potionId: string) => void;
   restartGame: () => void;
   goToMenu: () => void;
 }
@@ -102,6 +105,7 @@ const initialState: GameState = {
   shopInventory: [],
   cardRemovalCost: 75,
   relics: ['burning_blood'],
+  potions: [],
   cardsPlayedTotal: 0,
   tookDamageThisCombat: false,
   restedLastSite: false,
@@ -549,9 +553,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });
     } else if (node.roomType === 'treasure') {
-      // Treasure: pick 1 of 3 rare-weighted cards, no HP heal
+      // Treasure: 3 rare-weighted cards + a free potion
       const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
-      set({ phase: 'reward', currentFloor: node.floor, map: updatedMap, rewardChoices: choices });
+      const treasurePotion = pickRandomPotion(state.potions);
+      const newPotions = state.potions.length < 3 ? [...state.potions, treasurePotion] : state.potions;
+      set({ phase: 'reward', currentFloor: node.floor, map: updatedMap, rewardChoices: choices, potions: newPotions });
     } else if (node.roomType === 'shop') {
       const shopInventory = generateShopInventory(REWARD_CARD_WEIGHTS);
       set({ phase: 'shop', currentFloor: node.floor, map: updatedMap, shopInventory });
@@ -599,6 +605,83 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => {
       if (state.relics.includes(relicId)) return {};
       return { relics: [...state.relics, relicId] };
+    });
+  },
+
+  usePotion: (potionId: string) => {
+    set((state) => {
+      if (!state.potions.includes(potionId)) return {};
+      const updates: Partial<GameState> = {
+        potions: state.potions.filter((p) => p !== potionId),
+      };
+      let playerHP = state.playerHP;
+      let playerBlock = state.playerBlock;
+      let enemyHP = state.enemyHP;
+      let enemyBlock = state.enemyBlock;
+      let playerEnergy = state.playerEnergy;
+      let playerStatuses = [...state.playerStatuses];
+      let enemyStatuses = [...state.enemyStatuses];
+      let drawCards = 0;
+
+      switch (potionId) {
+        case 'health_potion':
+          playerHP = Math.min(playerHP + Math.floor(state.playerMaxHP * 0.2), state.playerMaxHP);
+          break;
+        case 'block_potion':
+          playerBlock += 12;
+          break;
+        case 'attack_potion':
+          { const dmg = Math.max(0, 10 - enemyBlock); enemyBlock = Math.max(0, enemyBlock - 10); enemyHP = Math.max(0, enemyHP - dmg); }
+          break;
+        case 'fire_potion':
+          { const dmg = Math.max(0, 20 - enemyBlock); enemyBlock = Math.max(0, enemyBlock - 20); enemyHP = Math.max(0, enemyHP - dmg); }
+          break;
+        case 'energy_potion':
+          playerEnergy = Math.min(playerEnergy + 2, state.playerMaxEnergy + 3);
+          break;
+        case 'card_draw_potion':
+          drawCards = 3;
+          break;
+        case 'strength_potion':
+          playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: 3 }]);
+          break;
+        case 'dexterity_potion':
+          playerStatuses = mergeStatuses(playerStatuses, [{ type: 'dexterity', stacks: 3 }]);
+          break;
+        case 'poison_potion':
+          enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'poison', stacks: 6 }]);
+          break;
+        case 'vulnerable_potion':
+          enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'vulnerable', stacks: 3 }]);
+          break;
+      }
+
+      return {
+        ...updates,
+        playerHP, playerBlock, enemyHP, enemyBlock, playerEnergy, playerStatuses, enemyStatuses,
+      };
+    });
+
+    // Handle draw cards after state update
+    const drawN = (() => {
+      switch (potionId) {
+        case 'card_draw_potion': return 3;
+        default: return 0;
+      }
+    })();
+    if (drawN > 0) get().drawCards(drawN);
+
+    // Check if enemy died from potion damage
+    if (get().enemyHP <= 0 && get().phase === 'combat') {
+      get().stageWon();
+    }
+  },
+
+  gainPotion: (potionId: string) => {
+    set((state) => {
+      const maxSlots = 3;
+      if (state.potions.length >= maxSlots) return {};
+      return { potions: [...state.potions, potionId] };
     });
   },
 

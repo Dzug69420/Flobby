@@ -10,13 +10,14 @@ import HandArea from '../components/HandArea';
 import EndTurnButton from '../components/EndTurnButton';
 import CardComponent from '../components/CardComponent';
 import RelicDisplay from '../components/RelicDisplay';
+import PotionSlots from '../components/PotionSlots';
 
 export default function CombatScreen() {
   const {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -223,6 +224,11 @@ export default function CombatScreen() {
             {cardsPlayedThisTurn > 0 && (
               <Text style={styles.playedLabel}>▶ {cardsPlayedThisTurn}</Text>
             )}
+            <PotionSlots
+              potions={potions}
+              onUse={usePotion}
+              disabled={isAnimating}
+            />
           </View>
 
           <View style={styles.handWrapper}>

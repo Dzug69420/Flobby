@@ -115,6 +115,7 @@ export interface GameState {
   shopInventory: ShopItem[];
   cardRemovalCost: number;
   relics: string[];
+  potions: string[];
   cardsPlayedTotal: number;
   tookDamageThisCombat: boolean;
   restedLastSite: boolean;

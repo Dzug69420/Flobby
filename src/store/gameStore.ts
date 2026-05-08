@@ -106,6 +106,7 @@ interface GameActions {
   restartGame: () => void;
   selectCharacter: (characterId: string) => void;
   goToCharacterSelect: () => void;
+  transformCard: (instanceId: string) => void;
   selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
   goToMenu: () => void;
@@ -1005,6 +1006,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase };
     });
 
+    // Metamorphosis: transform a random card
+    if (event.id === 'metamorphosis' && choice.label !== 'Leave') {
+      const state2 = get();
+      const allCards2 = [...state2.deck, ...state2.hand, ...state2.discard];
+      if (allCards2.length > 0) {
+        const randomCard = allCards2[Math.floor(Math.random() * allCards2.length)];
+        get().transformCard(randomCard.instanceId);
+      }
+      set({ currentEvent: null, phase: 'map' });
+      return;
+    }
+
+    // Armory: add a random attack or defense card
+    if (event.id === 'armory') {
+      const state2 = get();
+      const isAttack = choice.emoji === '⚔️';
+      const pool = REWARD_CARD_IDS.filter((id) => {
+        const def = ALL_CARDS[id];
+        return isAttack ? def?.category === 'attack' : def?.category === 'defense';
+      });
+      const pickedCard = pool[Math.floor(Math.random() * pool.length)];
+      if (pickedCard) {
+        set((s) => ({
+          deck: [...s.deck, { instanceId: generateId(), definitionId: pickedCard }],
+          currentEvent: null, phase: 'map' as GamePhase,
+        }));
+      } else {
+        set({ currentEvent: null, phase: 'map' });
+      }
+      return;
+    }
+
     // Handle upgrade_card effect separately (requires showing a picker)
     if (choice.effect === 'upgrade_card') {
       const count = choice.effectValue ?? 1;
@@ -1063,6 +1096,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectCharacter: (characterId: string) => {
     set({ selectedCharacter: characterId });
+  },
+
+  transformCard: (instanceId: string) => {
+    set((state) => {
+      const card = [...state.deck, ...state.hand, ...state.discard].find(
+        (c) => c.instanceId === instanceId
+      );
+      if (!card) return {};
+      // Pick a random different card from the reward pool
+      const pool = REWARD_CARD_IDS.filter((id) => id !== card.definitionId);
+      const newDefId = pool[Math.floor(Math.random() * pool.length)];
+      const transformInPile = (pile: CardInstance[]) =>
+        pile.map((c) => c.instanceId === instanceId ? { ...c, definitionId: newDefId } : c);
+      return {
+        deck: transformInPile(state.deck),
+        hand: transformInPile(state.hand),
+        discard: transformInPile(state.discard),
+      };
+    });
   },
 
   selectBlessing: (blessingId: string) => {

@@ -119,6 +119,36 @@ export const ALL_EVENTS: EventDefinition[] = [
       { label: 'Push past', description: 'You don\'t have time for this.', effect: 'nothing', emoji: '🚪' },
     ],
   },
+  {
+    id: 'metamorphosis',
+    title: 'Strange Alchemy',
+    description: 'A glowing pool shimmers. Cards thrown in emerge changed.',
+    emoji: '🌀',
+    choices: [
+      { label: 'Transform a card', description: 'A random card in your deck becomes a different random card.', effect: 'nothing', emoji: '✨' },
+      { label: 'Leave', description: 'Some changes cannot be undone.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'bonfire',
+    title: 'The Bonfire',
+    description: 'Warm flames offer rejuvenation.',
+    emoji: '🏕️',
+    choices: [
+      { label: 'Warm yourself', description: 'Heal 15 HP.', effect: 'heal', effectValue: 15, emoji: '❤️' },
+      { label: 'Gain power', description: 'Take 8 damage to gain a random uncommon relic.', hpCost: 8, effect: 'relic', emoji: '✨' },
+    ],
+  },
+  {
+    id: 'armory',
+    title: 'The Armory',
+    description: 'An armory full of weapons and shields.',
+    emoji: '⚔️',
+    choices: [
+      { label: 'Take a weapon', description: 'Add a random Attack card to your deck.', effect: 'card', emoji: '⚔️' },
+      { label: 'Take a shield', description: 'Add a random Defense card to your deck.', effect: 'card', emoji: '🛡️' },
+    ],
+  },
 ];
 
 export function pickRandomEvent(): EventDefinition {

@@ -180,6 +180,7 @@ const initialState: GameState = {
   combatLog: [],
   attackCardsPlayedTotal: 0,
   attackPlayedThisTurn: false,
+  ritualDaggerBonus: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -309,6 +310,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Strength: flat damage bonus
       const strength = getStatusStacks(state.playerStatuses, 'strength');
       dmg += strength;
+      // Ritual Dagger: add accumulated bonus
+      if (def.id === 'ritual_dagger') {
+        dmg += state.ritualDaggerBonus;
+      }
       // Pen Nib: every 10th attack deals double damage
       if (isPenNibTurn) dmg *= 2;
       // Vulnerable: enemy takes 50% more damage
@@ -618,6 +623,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (def.id === 'feed' || def.id === 'feed_plus') {
         set((s) => ({ playerMaxHP: s.playerMaxHP + 3, playerHP: Math.min(s.playerHP + 3, s.playerMaxHP + 3) }));
       }
+      // Ritual Dagger: permanently gain +3 damage
+      if (def.id === 'ritual_dagger') {
+        set((s) => ({ ritualDaggerBonus: s.ritualDaggerBonus + 3 }));
+      }
       get().stageWon();
     }
   },
@@ -665,6 +674,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
         + state.deck.filter((c) => c.definitionId === 'burn').length;
       if (burnCards > 0) {
         playerHP = Math.max(0, playerHP - burnCards * 2);
+      }
+
+      // Decay curse: take 2 damage at end of turn
+      const decayCards = state.discard.concat(state.hand).concat(state.deck)
+        .filter((c) => c.definitionId === 'decay').length;
+      if (decayCards > 0) {
+        playerHP = Math.max(0, playerHP - 2 * decayCards);
+      }
+
+      // Regret curse: lose 1 HP per card in hand at end of turn
+      const regretCards = state.discard.concat(state.deck)
+        .filter((c) => c.definitionId === 'regret').length;
+      if (regretCards > 0) {
+        playerHP = Math.max(0, playerHP - state.hand.length * regretCards);
       }
 
       // Ritual: enemy gains Strength each turn

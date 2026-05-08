@@ -818,6 +818,48 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -10 }),
   },
 
+  // ── CURSE CARDS (persistent negative cards) ──────────────────────────────────
+  regret: {
+    id: 'regret',
+    name: 'Regret',
+    category: 'status',
+    description: 'Unplayable. At end of turn, lose 1 HP for each card in your hand.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+  decay: {
+    id: 'decay',
+    name: 'Decay',
+    category: 'status',
+    description: 'Unplayable. At end of turn, take 2 damage.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+  neows_lament: {
+    id: 'neows_lament',
+    name: "Neow's Lament",
+    category: 'status',
+    description: 'Unplayable. Enemies in first 3 combats have 1 additional Strength.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+  ritual_dagger: {
+    id: 'ritual_dagger',
+    name: 'Ritual Dagger',
+    category: 'attack',
+    description: 'Deal 15 damage. If this kills an enemy, permanently gain +3 damage.',
+    cost: 1,
+    rarity: 'rare',
+    exhaust: false,
+    effect: () => ({ enemyHPChange: -15 }),
+  },
+
   // ── STATUS / CURSE CARDS (added to deck mid-combat by enemies) ───────────────
   wound: {
     id: 'wound',
@@ -966,7 +1008,7 @@ export const REWARD_CARD_IDS = [
   'turtle_up',
   'toxic_cloud',
   'whirlwind', 'limit_break', 'feed',
-  'barricade', 'corruption', 'demon_form',
+  'barricade', 'corruption', 'demon_form', 'ritual_dagger',
   // Uncommon (new batch)
   'all_out_attack', 'body_slam', 'calculated_gamble', 'spot_weakness', 'pummel',
   'dark_embrace', 'feel_no_pain',
@@ -986,7 +1028,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   last_stand: 'uncommon', second_wind: 'uncommon', inflame: 'uncommon',
   entrench: 'uncommon', metallicize: 'uncommon',
   power_surge: 'rare', combo_strike: 'rare', turtle_up: 'rare', toxic_cloud: 'rare',
-  whirlwind: 'rare', limit_break: 'rare', feed: 'rare',
+  whirlwind: 'rare', limit_break: 'rare', feed: 'rare', ritual_dagger: 'rare',
   barricade: 'rare', corruption: 'rare', demon_form: 'rare',
   dark_embrace: 'uncommon', feel_no_pain: 'uncommon',
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',

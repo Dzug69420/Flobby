@@ -172,6 +172,7 @@ export interface GameState {
   combatLog: string[];
   attackCardsPlayedTotal: number;
   attackPlayedThisTurn: boolean;
+  ritualDaggerBonus: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

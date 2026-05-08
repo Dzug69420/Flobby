@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { CardInstance, CardDefinition } from '../types';
+import { CardInstance, CardDefinition, CombatContext } from '../types';
 import CardComponent from './CardComponent';
+import { computeCardPreview } from '../utils/gameLogic';
 
 interface Props {
   hand: CardInstance[];
@@ -9,13 +10,14 @@ interface Props {
   onPlay: (id: string) => void;
   disabled: boolean;
   playerEnergy: number;
+  combatCtx?: CombatContext;
 }
 
 const MAX_ROTATION = 12;
 const MAX_DROP_PX = 16;
 const CARD_OVERLAP = -18;
 
-export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy }: Props) {
+export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy, combatCtx }: Props) {
   const count = hand.length;
 
   return (
@@ -52,6 +54,7 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
                 disabled={disabled}
                 affordable={!def.isUnplayable && playerEnergy >= def.cost}
                 index={index}
+                preview={combatCtx ? computeCardPreview(def, combatCtx) : undefined}
               />
             </View>
           );

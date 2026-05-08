@@ -44,6 +44,52 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+export interface CardPreview {
+  damage?: number;
+  block?: number;
+  draw?: number;
+  heal?: number;
+  energy?: number;
+}
+
+export function computeCardPreview(
+  def: import('../types').CardDefinition,
+  ctx: import('../types').CombatContext
+): CardPreview {
+  if (def.isUnplayable) return {};
+  const rawDelta = def.effect(ctx);
+  const preview: CardPreview = {};
+
+  if (rawDelta.enemyHPChange && rawDelta.enemyHPChange < 0) {
+    let dmg = Math.abs(rawDelta.enemyHPChange);
+    const strength = ctx.playerStatuses.find((s) => s.type === 'strength')?.stacks ?? 0;
+    dmg += strength;
+    if (ctx.enemyStatuses.some((s) => s.type === 'vulnerable' && s.stacks > 0)) {
+      dmg = Math.floor(dmg * 1.5);
+    }
+    if (ctx.playerStatuses.some((s) => s.type === 'weak' && s.stacks > 0)) {
+      dmg = Math.floor(dmg * 0.75);
+    }
+    preview.damage = dmg;
+  }
+
+  if (rawDelta.playerBlockChange && rawDelta.playerBlockChange > 0) {
+    let block = rawDelta.playerBlockChange;
+    const dex = ctx.playerStatuses.find((s) => s.type === 'dexterity')?.stacks ?? 0;
+    block += dex;
+    if (ctx.playerStatuses.some((s) => s.type === 'frail' && s.stacks > 0)) {
+      block = Math.floor(block * 0.75);
+    }
+    preview.block = block;
+  }
+
+  if (rawDelta.drawCards) preview.draw = rawDelta.drawCards;
+  if (rawDelta.playerHPChange && rawDelta.playerHPChange > 0) preview.heal = rawDelta.playerHPChange;
+  if (rawDelta.energyChange && rawDelta.energyChange > 0) preview.energy = rawDelta.energyChange;
+
+  return preview;
+}
+
 export function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

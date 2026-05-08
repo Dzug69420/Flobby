@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, Pressable, Animated, StyleSheet } from 'react-native';
 import { CardDefinition, CardInstance } from '../types';
 import { COLORS, CARD } from '../constants/theme';
+import { CardPreview } from '../utils/gameLogic';
 
 interface Props {
   card: CardInstance;
@@ -11,6 +12,7 @@ interface Props {
   affordable: boolean;
   index: number;
   faceDown?: boolean;
+  preview?: CardPreview;
 }
 
 const CATEGORY_BANNER: Record<string, string> = {
@@ -52,7 +54,7 @@ const RARITY_COLORS: Record<string, string> = {
 };
 
 export default function CardComponent({
-  card, definition, onPlay, disabled, affordable, index, faceDown = false,
+  card, definition, onPlay, disabled, affordable, index, faceDown = false, preview,
 }: Props) {
   const slideAnim = useRef(new Animated.Value(120)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -153,6 +155,30 @@ export default function CardComponent({
         {/* Art area */}
         <View style={styles.artArea}>
           <Text style={styles.artEmoji}>{CATEGORY_ART[definition.category]}</Text>
+          {preview && (
+            <View style={styles.previewRow}>
+              {preview.damage !== undefined && (
+                <View style={styles.previewBadgeDmg}>
+                  <Text style={styles.previewText}>⚔️{preview.damage}</Text>
+                </View>
+              )}
+              {preview.block !== undefined && (
+                <View style={styles.previewBadgeBlock}>
+                  <Text style={styles.previewText}>🛡️{preview.block}</Text>
+                </View>
+              )}
+              {preview.heal !== undefined && (
+                <View style={styles.previewBadgeHeal}>
+                  <Text style={styles.previewText}>❤️{preview.heal}</Text>
+                </View>
+              )}
+              {preview.draw !== undefined && (
+                <View style={styles.previewBadgeDraw}>
+                  <Text style={styles.previewText}>🃏+{preview.draw}</Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Divider */}
@@ -229,8 +255,40 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
   },
-  artEmoji: { fontSize: 58 },
+  artEmoji: { fontSize: 48 },
+  previewRow: {
+    flexDirection: 'row',
+    gap: 4,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  previewBadgeDmg: {
+    backgroundColor: 'rgba(231,76,60,0.85)',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  previewBadgeBlock: {
+    backgroundColor: 'rgba(41,128,185,0.85)',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  previewBadgeHeal: {
+    backgroundColor: 'rgba(39,174,96,0.85)',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  previewBadgeDraw: {
+    backgroundColor: 'rgba(142,68,173,0.85)',
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  previewText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
   divider: { height: 1, marginHorizontal: 7, opacity: 0.45 },
   descArea: {
     paddingHorizontal: 7,

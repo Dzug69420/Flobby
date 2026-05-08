@@ -139,6 +139,7 @@ const initialState: GameState = {
   deck: [],
   hand: [],
   discard: [],
+  exhaustPile: [],
   currentEnemy: null,
   enemyHP: 0,
   enemyBlock: 0,
@@ -307,6 +308,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       const newHand = s.hand.filter((c) => c.instanceId !== instanceId);
       const newDiscard = def.exhaust ? s.discard : [...s.discard, cardInst];
+      const newExhaustPile = def.exhaust ? [...s.exhaustPile, cardInst] : s.exhaustPile;
       const newCardsPlayedTotal = s.cardsPlayedTotal + 1;
 
       // Nunchaku: every 10th card gives +1 energy
@@ -334,6 +336,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         tookDamageThisCombat: newTookDamage,
         playerStatuses,
         enemyStatuses,
+        exhaustPile: newExhaustPile,
       };
     });
 
@@ -622,6 +625,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyTurnAction: computeEnemyAction(enemy.attackPattern, 0),
         playerStatuses: startStatuses,
         enemyStatuses: enemyStartStatuses,
+        exhaustPile: [],
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

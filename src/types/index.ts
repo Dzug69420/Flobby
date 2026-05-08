@@ -138,6 +138,7 @@ export interface GameState {
   deck: CardInstance[];
   hand: CardInstance[];
   discard: CardInstance[];
+  exhaustPile: CardInstance[];
   currentEnemy: EnemyDefinition | null;
   enemyHP: number;
   enemyBlock: number;

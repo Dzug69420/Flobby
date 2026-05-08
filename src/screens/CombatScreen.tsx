@@ -17,7 +17,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -111,6 +111,16 @@ export default function CombatScreen() {
   if (!currentEnemy) return null;
 
   const viewCards = deckViewTab === 'deck' ? deck : discard;
+
+  const combatCtx = {
+    playerHP, playerMaxHP, playerBlock, playerEnergy,
+    enemyHP, enemyBlock,
+    cardsInHand: hand,
+    cardsInDiscard: discard,
+    cardsInDeck: deck,
+    turnNumber, cardsPlayedThisTurn,
+    playerStatuses, enemyStatuses,
+  };
 
   return (
     <View style={styles.root}>
@@ -238,6 +248,7 @@ export default function CombatScreen() {
               onPlay={handlePlayCard}
               disabled={isAnimating}
               playerEnergy={playerEnergy}
+              combatCtx={combatCtx}
             />
           </View>
 
@@ -248,6 +259,9 @@ export default function CombatScreen() {
               turnNumber={turnNumber + 1}
             />
             <Text style={styles.pileLabelRight}>🗑 {discard.length}</Text>
+            {exhaustPile.length > 0 && (
+              <Text style={styles.pileLabelRight}>🔥 {exhaustPile.length}</Text>
+            )}
           </View>
         </View>
 

@@ -861,6 +861,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Burning Blood: heal 6 HP after every combat
     const burningBloodHeal = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
 
+    // Gremlin Horn: gain 1 energy and draw 1 card when an enemy dies
+    if (hasRelic(state.relics, 'gremlin_horn') && !state.currentEnemy?.isBoss) {
+      set((s) => ({ playerEnergy: Math.min(s.playerEnergy + 1, s.playerMaxEnergy + 3) }));
+      get().drawCards(1);
+    }
+
     if (state.currentEnemy?.isBoss) {
       const bossGold = 50;
       const newAscension = Math.min(state.ascensionLevel + 1, 10);
@@ -1006,6 +1012,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const remaining = shuffledNormal.slice(fromNormal);
 
       const ascHP = Math.floor(enemy.maxHP * ascensionEnemyHPMultiplier(state.ascensionLevel));
+
+      // Neow's Lament: first 3 enemies start with +1 Strength
+      const neowLaments = [...state.deck, ...state.hand, ...state.discard]
+        .filter((c) => c.definitionId === 'neows_lament').length;
+      if (neowLaments > 0 && node.floor < 3) {
+        enemyStartStatuses = mergeStatuses(enemyStartStatuses, [{ type: 'strength', stacks: 1 }]);
+      }
+
       set({
         phase: 'combat',
         currentFloor: node.floor,

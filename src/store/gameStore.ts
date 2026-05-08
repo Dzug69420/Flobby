@@ -272,7 +272,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (def.isUnplayable) return;
     const isXCost = def.cost === -1;
     const isSkillCard = def.category === 'defense' || def.category === 'status';
-    const sneckoCost = state.sneckoCosts[instanceId];
+    // Masterful Stab: costs 0 if player has no block
+    const isMasterfulFree = def.id === 'masterful_stab' && state.playerBlock === 0;
+    const sneckoCost = isMasterfulFree ? 0 : state.sneckoCosts[instanceId];
     const baseCost = sneckoCost !== undefined ? sneckoCost : def.cost;
     const effectiveCost = (state.activePowers.includes('corruption') && isSkillCard) ? 0 : baseCost;
     if (!isXCost && state.playerEnergy < effectiveCost) return;
@@ -491,6 +493,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
     ) {
       get().drawCards(3);
     }
+
+    // Exhume: move top exhaust card back to hand
+    if (def.id === 'exhume') {
+      set((s) => {
+        if (s.exhaustPile.length === 0) return {};
+        const topExhaust = s.exhaustPile[s.exhaustPile.length - 1];
+        return {
+          hand: [...s.hand, topExhaust],
+          exhaustPile: s.exhaustPile.slice(0, -1),
+        };
+      });
+    }
+
+    // Apotheosis: temporarily upgrade all cards in deck
+    if (def.id === 'apotheosis') {
+      set((s) => {
+        const upgradeAll = (pile: CardInstance[]) =>
+          pile.map((c) => {
+            const d = s.masterCardPool[c.definitionId];
+            if (d?.upgradeId) return { ...c, definitionId: d.upgradeId };
+            return c;
+          });
+        return {
+          deck: upgradeAll(s.deck),
+          hand: upgradeAll(s.hand),
+          discard: upgradeAll(s.discard),
+        };
+      });
+    }
+
+    // Masterful Stab: costs 0 if no block
+    // (Already handled in card effect - but we need to actually make it free)
+    // The check happens before playing, we'll handle cost override in affordability
 
     // Wild Strike: add a Wound to deck
     if (def.id === 'wild_strike') {

@@ -440,6 +440,106 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── DECK MANIPULATION CARDS ──────────────────────────────────────────────────
+  exhume: {
+    id: 'exhume',
+    name: 'Exhume',
+    category: 'status',
+    description: 'Put a card from your Exhaust pile into your hand. Exhaust.',
+    cost: 1,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ drawCards: 0 }),
+  },
+  recycle: {
+    id: 'recycle',
+    name: 'Recycle',
+    category: 'status',
+    description: 'Exhaust a card in your hand. Gain Energy equal to its cost.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ energyChange: 0 }),
+  },
+  apotheosis: {
+    id: 'apotheosis',
+    name: 'Apotheosis',
+    category: 'status',
+    description: 'Upgrade ALL cards in your deck for the rest of combat. Exhaust.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({}),
+  },
+  masterful_stab: {
+    id: 'masterful_stab',
+    name: 'Masterful Stab',
+    category: 'attack',
+    description: 'Costs 0 if you have no Block. Deal 12 damage.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({ enemyHPChange: -12 }),
+  },
+  glacier: {
+    id: 'glacier',
+    name: 'Glacier',
+    category: 'defense',
+    description: 'Gain 7 Block. Draw 2 cards.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({ playerBlockChange: 7, drawCards: 2 }),
+  },
+  offering: {
+    id: 'offering',
+    name: 'Offering',
+    category: 'status',
+    description: 'Lose 6 HP. Gain 2 Energy. Draw 3 cards. Exhaust.',
+    cost: 0,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ playerHPChange: -6, energyChange: 2, drawCards: 3 }),
+  },
+  swift_strike: {
+    id: 'swift_strike',
+    name: 'Swift Strike',
+    category: 'attack',
+    description: 'Deal 7 damage twice.',
+    cost: 2,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -15, hits: 2 }),
+  },
+  dropkick: {
+    id: 'dropkick',
+    name: 'Dropkick',
+    category: 'attack',
+    description: 'Deal 5 damage. If enemy is Vulnerable, draw 1 card and gain 1 Energy.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => {
+      const isVuln = ctx.enemyStatuses.some((s) => s.type === 'vulnerable' && s.stacks > 0);
+      return {
+        enemyHPChange: -5,
+        drawCards: isVuln ? 1 : 0,
+        energyChange: isVuln ? 1 : 0,
+      };
+    },
+  },
+  shockwave: {
+    id: 'shockwave',
+    name: 'Shockwave',
+    category: 'attack',
+    description: 'Deal 15 damage. Apply 3 Vulnerable and 3 Weak.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({
+      enemyHPChange: -15,
+      applyEnemyStatuses: [
+        { type: 'vulnerable', stacks: 3 },
+        { type: 'weak', stacks: 3 },
+      ],
+    }),
+  },
+
   // ── SPECIAL MECHANIC CARDS ───────────────────────────────────────────────────
   shiv: {
     id: 'shiv',
@@ -854,10 +954,13 @@ export const REWARD_CARD_IDS = [
   'rage', 'desperation', 'last_stand', 'second_wind',
   'inflame', 'entrench', 'metallicize',
   // Common (new)
-  'twin_strike_heavy',
+  'twin_strike_heavy', 'swift_strike',
+  // Uncommon (deck manipulation)
+  'recycle', 'masterful_stab', 'glacier', 'dropkick',
   // Uncommon (scry/utility batch)
   'battle_trance', 'seeing_red', 'bloodletting', 'warcry',
   // Rare
+  'exhume', 'apotheosis', 'offering', 'shockwave',
   'fiend_fire',
   'power_surge', 'combo_strike',
   'turtle_up',
@@ -888,7 +991,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   dark_embrace: 'uncommon', feel_no_pain: 'uncommon',
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
-  twin_strike_heavy: 'common',
+  twin_strike_heavy: 'common', swift_strike: 'common',
+  recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
+  exhume: 'rare', apotheosis: 'rare', offering: 'rare', shockwave: 'rare',
   shiv: 'common', true_grit: 'common', headbutt: 'common', anger: 'common',
   clothesline: 'common', wild_strike: 'common', sword_boomerang: 'common',
   clash: 'uncommon', sentinel: 'uncommon', burning_pact: 'uncommon',

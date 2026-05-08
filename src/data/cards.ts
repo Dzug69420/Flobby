@@ -395,6 +395,87 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── X COST CARDS ─────────────────────────────────────────────────────────────
+  whirlwind: {
+    id: 'whirlwind',
+    name: 'Whirlwind',
+    category: 'attack',
+    description: 'Deal 5 damage X times (X = energy spent).',
+    cost: -1,
+    rarity: 'rare',
+    effect: (ctx) => ({ enemyHPChange: -(5 * ctx.playerEnergy), hits: ctx.playerEnergy }),
+  },
+  all_out_attack: {
+    id: 'all_out_attack',
+    name: 'All-Out Attack',
+    category: 'attack',
+    description: 'Deal 3 damage for each card in hand.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({ enemyHPChange: -(3 * ctx.cardsInHand.length) }),
+  },
+  body_slam: {
+    id: 'body_slam',
+    name: 'Body Slam',
+    category: 'attack',
+    description: 'Deal damage equal to your current block.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({ enemyHPChange: -Math.max(5, ctx.playerBlock) }),
+  },
+  calculated_gamble: {
+    id: 'calculated_gamble',
+    name: 'Calculated Gamble',
+    category: 'status',
+    description: 'Discard your hand, then draw that many cards. Exhaust.',
+    cost: 0,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: (ctx) => ({ drawCards: ctx.cardsInHand.length }),
+  },
+  feed: {
+    id: 'feed',
+    name: 'Feed',
+    category: 'attack',
+    description: 'Deal 10 damage. If fatal, gain 3 max HP. Exhaust.',
+    cost: 1,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ enemyHPChange: -10 }),
+  },
+  spot_weakness: {
+    id: 'spot_weakness',
+    name: 'Spot Weakness',
+    category: 'attack',
+    description: 'If enemy intends to attack, gain 3 Strength.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ applyPlayerStatuses: [{ type: 'strength', stacks: 3 }] }),
+  },
+  limit_break: {
+    id: 'limit_break',
+    name: 'Limit Break',
+    category: 'power',
+    description: 'Double your Strength. Exhaust.',
+    cost: 1,
+    rarity: 'rare',
+    exhaust: true,
+    effect: (ctx) => {
+      const str = ctx.playerStatuses.find((s) => s.type === 'strength')?.stacks ?? 0;
+      return { applyPlayerStatuses: [{ type: 'strength', stacks: str }] };
+    },
+  },
+  pummel: {
+    id: 'pummel',
+    name: 'Pummel',
+    category: 'attack',
+    description: 'Deal 2 damage 4 times. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ enemyHPChange: -8, hits: 4 }),
+  },
+
   // ── INNATE / RETAIN CARDS ────────────────────────────────────────────────────
   prepared: {
     id: 'prepared',
@@ -564,6 +645,9 @@ export const REWARD_CARD_IDS = [
   'power_surge', 'combo_strike',
   'turtle_up',
   'toxic_cloud',
+  'whirlwind', 'limit_break', 'feed',
+  // Uncommon (new batch)
+  'all_out_attack', 'body_slam', 'calculated_gamble', 'spot_weakness', 'pummel',
 ];
 
 // Weighted reward pool by rarity
@@ -580,4 +664,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   last_stand: 'uncommon', second_wind: 'uncommon', inflame: 'uncommon',
   entrench: 'uncommon', metallicize: 'uncommon',
   power_surge: 'rare', combo_strike: 'rare', turtle_up: 'rare', toxic_cloud: 'rare',
+  whirlwind: 'rare', limit_break: 'rare', feed: 'rare',
+  all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
+  spot_weakness: 'uncommon', pummel: 'uncommon',
 };

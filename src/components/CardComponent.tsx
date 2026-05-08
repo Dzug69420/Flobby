@@ -144,7 +144,7 @@ export default function CardComponent({
         {/* Top banner: cost + name + rarity dot */}
         <View style={[styles.banner, { backgroundColor: bannerColor }]}>
           <View style={[styles.costBadge, { backgroundColor: borderColor }]}>
-            <Text style={styles.costText}>{definition.cost}</Text>
+            <Text style={styles.costText}>{definition.cost === -1 ? 'X' : definition.cost}</Text>
           </View>
           <Text style={styles.cardName} numberOfLines={1}>{definition.name}</Text>
           {definition.rarity && (

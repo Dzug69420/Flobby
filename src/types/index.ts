@@ -40,6 +40,7 @@ export interface CombatDelta {
   energyChange?: number;
   applyEnemyStatuses?: StatusEffect[];
   applyPlayerStatuses?: StatusEffect[];
+  hits?: number;
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;

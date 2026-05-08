@@ -213,7 +213,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const def = state.masterCardPool[cardInst.definitionId];
     if (!def) return;
     if (def.isUnplayable) return;
-    if (state.playerEnergy < def.cost) return;
+    const isXCost = def.cost === -1;
+    if (!isXCost && state.playerEnergy < def.cost) return;
+    if (isXCost && state.playerEnergy < 1) return;
 
     const ctx: CombatContext = {
       playerHP: state.playerHP,
@@ -269,7 +271,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let playerBlock = s.playerBlock;
       let enemyHP = s.enemyHP;
       let enemyBlock = s.enemyBlock;
-      let playerEnergy = s.playerEnergy - def.cost;
+      const cardCost = def.cost === -1 ? s.playerEnergy : def.cost;
+      let playerEnergy = s.playerEnergy - cardCost;
       let playerStatuses = [...s.playerStatuses];
       let enemyStatuses = [...s.enemyStatuses];
 
@@ -280,10 +283,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock = Math.max(0, playerBlock + modifiedDelta.playerBlockChange);
       }
       if (modifiedDelta.enemyHPChange) {
-        const rawDmg = Math.abs(modifiedDelta.enemyHPChange);
-        const blockAbsorbed = Math.min(enemyBlock, rawDmg);
-        enemyBlock = enemyBlock - blockAbsorbed;
-        enemyHP = Math.max(0, enemyHP - (rawDmg - blockAbsorbed));
+        const totalDmg = Math.abs(modifiedDelta.enemyHPChange);
+        const numHits = modifiedDelta.hits ?? 1;
+        const dmgPerHit = Math.floor(totalDmg / numHits);
+        const remainder = totalDmg - dmgPerHit * numHits;
+        for (let h = 0; h < numHits; h++) {
+          const hitDmg = dmgPerHit + (h === numHits - 1 ? remainder : 0);
+          const blockAbsorbed = Math.min(enemyBlock, hitDmg);
+          enemyBlock = Math.max(0, enemyBlock - blockAbsorbed);
+          enemyHP = Math.max(0, enemyHP - (hitDmg - blockAbsorbed));
+        }
       }
       if (modifiedDelta.enemyBlockChange) {
         enemyBlock = Math.max(0, enemyBlock + modifiedDelta.enemyBlockChange);

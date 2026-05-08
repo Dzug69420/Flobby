@@ -90,6 +90,7 @@ export const ENEMIES: EnemyDefinition[] = [
     color: '#7f8c8d',
     bodySize: 130,
     faceEmoji: '😑',
+    startingBlock: 10,
   },
   {
     id: 'voidblob',
@@ -102,6 +103,7 @@ export const ENEMIES: EnemyDefinition[] = [
     bodySize: 95,
     faceEmoji: '😈',
     attackStatuses: [{ type: 'poison', stacks: 2 }],
+    startingStatuses: [{ type: 'strength', stacks: 1 }],
   },
   {
     id: 'lord_sludge',

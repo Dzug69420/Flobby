@@ -97,6 +97,8 @@ export interface EnemyDefinition {
   bodySize: number;
   faceEmoji: string;
   attackStatuses?: StatusEffect[];
+  startingBlock?: number;
+  startingStatuses?: StatusEffect[];
 }
 
 export type RoomType = 'monster' | 'elite' | 'rest' | 'shop' | 'treasure' | 'event' | 'boss';

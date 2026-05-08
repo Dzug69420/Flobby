@@ -908,7 +908,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         map: updatedMap,
         currentEnemy: enemy,
         enemyHP: ascHP,
-        enemyBlock: 0,
+        enemyBlock: enemy.startingBlock ?? 0,
         playerBlock: startBlock,
         playerEnergy: startEnergy,
         deck: remaining,
@@ -920,7 +920,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         tookDamageThisCombat: false,
         enemyTurnAction: computeEnemyAction(enemy.attackPattern, 0),
         playerStatuses: startStatuses,
-        enemyStatuses: enemyStartStatuses,
+        enemyStatuses: enemy.startingStatuses
+          ? mergeStatuses(enemyStartStatuses, enemy.startingStatuses)
+          : enemyStartStatuses,
         exhaustPile: [],
         retainedCards: [],
         bossEnraged: false,

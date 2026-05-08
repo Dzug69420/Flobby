@@ -107,7 +107,7 @@ export interface MapNode {
   enemyIndex?: number;
 }
 
-export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
 
 export interface ShopItem {
   cardId: string;

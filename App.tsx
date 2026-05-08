@@ -11,11 +11,13 @@ import MapScreen from './src/screens/MapScreen';
 import RestScreen from './src/screens/RestScreen';
 import ShopScreen from './src/screens/ShopScreen';
 import EventScreen from './src/screens/EventScreen';
+import BlessingScreen from './src/screens/BlessingScreen';
 
 function Navigator() {
   const phase = useGameStore((s) => s.phase);
   switch (phase) {
     case 'start':    return <StartScreen />;
+    case 'blessing': return <BlessingScreen />;
     case 'map':      return <MapScreen />;
     case 'combat':   return <CombatScreen />;
     case 'reward':   return <RewardScreen />;

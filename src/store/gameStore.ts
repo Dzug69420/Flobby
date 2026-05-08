@@ -97,6 +97,7 @@ interface GameActions {
   addStatusCardsToDeck: (cardDefId: string, count: number) => void;
   resolveEvent: (choiceIndex: number) => void;
   restartGame: () => void;
+  selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
   goToMenu: () => void;
 }
@@ -162,7 +163,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const deck = shuffle(buildStartingDeck());
     const maxHP = ascensionMaxHP(PLAYER_MAX_HP, ascensionLevel);
     set({
-      phase: 'map',
+      phase: 'blessing',
       currentStage: 1,
       currentFloor: 0,
       currentAct: 1,
@@ -918,6 +919,53 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: upgradeInPile(state.hand),
         discard: upgradeInPile(state.discard),
       };
+    });
+  },
+
+  selectBlessing: (blessingId: string) => {
+    set((state) => {
+      let gold = state.gold;
+      let playerHP = state.playerHP;
+      let playerMaxHP = state.playerMaxHP;
+      let relics = [...state.relics];
+      let potions = [...state.potions];
+      let deck = [...state.deck];
+
+      switch (blessingId) {
+        case 'bonus_gold':
+          gold += 100;
+          break;
+        case 'relic':
+          { const r = pickRandomRelic(relics, 'common'); if (r) relics.push(r); }
+          break;
+        case 'extra_hp':
+          playerMaxHP += 10;
+          playerHP = playerMaxHP;
+          break;
+        case 'remove_card': {
+          const strike = deck.find((c) => c.definitionId === 'strike');
+          if (strike) deck = deck.filter((c) => c.instanceId !== strike.instanceId);
+          break;
+        }
+        case 'upgrade_two': {
+          let count = 0;
+          deck = deck.map((c) => {
+            if (count >= 2) return c;
+            const def = state.masterCardPool[c.definitionId];
+            if (def?.upgradeId) { count++; return { ...c, definitionId: def.upgradeId }; }
+            return c;
+          });
+          break;
+        }
+        case 'two_potions':
+          if (potions.length < 2) {
+            potions = [...potions, pickRandomPotion(potions)];
+            if (potions.length < 2) potions = [...potions, pickRandomPotion(potions)];
+          }
+          break;
+      }
+
+      return { phase: 'map', gold, playerHP, playerMaxHP, relics, potions, deck };
     });
   },
 

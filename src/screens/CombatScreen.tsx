@@ -44,6 +44,19 @@ export default function CombatScreen() {
   const enemyActionAnim = useRef(new Animated.Value(0)).current;
   const deckHoverAnim = useRef(new Animated.Value(1)).current;
   const settingsHoverAnim = useRef(new Animated.Value(1)).current;
+  const screenShakeAnim = useRef(new Animated.Value(0)).current;
+
+  const shakeScreen = () => {
+    screenShakeAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(screenShakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
+      Animated.timing(screenShakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
+      Animated.timing(screenShakeAnim, { toValue: 6, duration: 45, useNativeDriver: true }),
+      Animated.timing(screenShakeAnim, { toValue: -4, duration: 45, useNativeDriver: true }),
+      Animated.timing(screenShakeAnim, { toValue: 2, duration: 40, useNativeDriver: true }),
+      Animated.timing(screenShakeAnim, { toValue: 0, duration: 40, useNativeDriver: true }),
+    ]).start();
+  };
 
   const animateOverlay = (visible: boolean) => {
     Animated.timing(overlayOpacity, {
@@ -89,6 +102,7 @@ export default function CombatScreen() {
         : `${enemyName} attacks!`;
       setTurnMessage(nextAction === 'attack' ? attackMsg : `${enemyName} braces up!`);
       animateEnemyAction(nextAction);
+      if (nextAction === 'attack') shakeScreen();
     }, 1200);
     setTimeout(() => endTurn(), 2100);
     setTimeout(() => {
@@ -126,6 +140,7 @@ export default function CombatScreen() {
     <View style={styles.root}>
       <StageBackground stageNumber={currentStage} />
 
+      <Animated.View style={[{ flex: 1 }, { transform: [{ translateX: screenShakeAnim }] }]}>
       <SafeAreaView style={styles.safe}>
 
         {/* ── TOP HUD ── */}
@@ -353,6 +368,7 @@ export default function CombatScreen() {
         )}
 
       </SafeAreaView>
+      </Animated.View>
     </View>
   );
 }

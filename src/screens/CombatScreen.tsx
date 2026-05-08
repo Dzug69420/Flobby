@@ -9,13 +9,14 @@ import PlayerStats from '../components/PlayerStats';
 import HandArea from '../components/HandArea';
 import EndTurnButton from '../components/EndTurnButton';
 import CardComponent from '../components/CardComponent';
+import RelicDisplay from '../components/RelicDisplay';
 
 export default function CombatScreen() {
   const {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold,
+    playerStatuses, enemyStatuses, gold, relics,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -162,6 +163,13 @@ export default function CombatScreen() {
             </Pressable>
           </View>
         </View>
+
+        {/* ── RELIC ROW ── */}
+        {relics.length > 0 && (
+          <View style={styles.relicRow}>
+            <RelicDisplay relics={relics} />
+          </View>
+        )}
 
         {/* ── BATTLE AREA ── */}
         <View style={styles.battleArea}>
@@ -383,6 +391,13 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   goldHudText: { color: '#f9a825', fontSize: 13, fontWeight: 'bold' },
+
+  relicRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
 
   // BATTLE
   battleArea: {

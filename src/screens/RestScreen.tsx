@@ -10,20 +10,21 @@ import CardComponent from '../components/CardComponent';
 export default function RestScreen() {
   const {
     playerHP, playerMaxHP, deck, hand, discard, masterCardPool,
-    upgradeCard, leaveRestSite,
+    relics, upgradeCard, leaveRestSite,
   } = useGameStore();
+  const hasRegalPillow = relics.includes('regal_pillow');
   const [mode, setMode] = useState<'choose' | 'smith' | 'done'>('choose');
   const [smithed, setSmithed] = useState<string | null>(null);
 
-  const healAmount = Math.floor(playerMaxHP * 0.3);
+  const baseHeal = Math.floor(playerMaxHP * 0.3);
+  const healAmount = baseHeal + (hasRegalPillow ? 15 : 0);
 
   const handleRest = () => {
-    // Heal is applied immediately in leaveRestSite via store (we pass heal flag)
     useGameStore.setState((s) => ({
       playerHP: Math.min(s.playerHP + healAmount, s.playerMaxHP),
     }));
     setMode('done');
-    setTimeout(() => leaveRestSite(), 600);
+    setTimeout(() => leaveRestSite(true), 600);
   };
 
   const allCards = [...deck, ...hand, ...discard];
@@ -36,7 +37,7 @@ export default function RestScreen() {
     if (smithed) return;
     setSmithed(instanceId);
     upgradeCard(instanceId);
-    setTimeout(() => leaveRestSite(), 700);
+    setTimeout(() => leaveRestSite(false), 700);
   };
 
   return (
@@ -52,7 +53,9 @@ export default function RestScreen() {
               <Text style={styles.optionEmoji}>🛌</Text>
               <Text style={styles.optionTitle}>Rest</Text>
               <Text style={styles.optionDesc}>Heal {healAmount} HP</Text>
-              <Text style={styles.optionSub}>({Math.round(30)}% of max)</Text>
+              <Text style={styles.optionSub}>
+                (30%{hasRegalPillow ? ' + Regal Pillow +15' : ''})
+              </Text>
             </TouchableOpacity>
 
             {/* Smith */}

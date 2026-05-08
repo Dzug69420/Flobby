@@ -114,6 +114,10 @@ export interface GameState {
   lastGoldReward: number;
   shopInventory: ShopItem[];
   cardRemovalCost: number;
+  relics: string[];
+  cardsPlayedTotal: number;
+  tookDamageThisCombat: boolean;
+  restedLastSite: boolean;
   playerHP: number;
   playerMaxHP: number;
   playerBlock: number;

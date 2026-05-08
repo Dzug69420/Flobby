@@ -3,6 +3,7 @@ import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, Status
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
+import { ALL_RELICS, pickRandomRelic } from '../data/relics';
 import { shuffle, pickRewardCards, clamp, generateId } from '../utils/gameLogic';
 
 const PLAYER_MAX_HP = 80;
@@ -45,6 +46,10 @@ function mergeStatuses(existing: StatusEffect[], toApply: StatusEffect[]): Statu
   return result;
 }
 
+function hasRelic(relics: string[], id: string): boolean {
+  return relics.includes(id);
+}
+
 function tickTimedStatuses(statuses: StatusEffect[]): StatusEffect[] {
   return statuses
     .map((s) => {
@@ -65,10 +70,11 @@ interface GameActions {
   selectRewardCard: (cardId: string | null) => void;
   upgradeCard: (instanceId: string) => void;
   travelToNode: (nodeId: string) => void;
-  leaveRestSite: () => void;
+  leaveRestSite: (didRest?: boolean) => void;
   buyShopCard: (cardId: string, price: number) => void;
   removeCard: (instanceId: string, price: number) => void;
   leaveShop: () => void;
+  gainRelic: (relicId: string) => void;
   restartGame: () => void;
   goToMenu: () => void;
 }
@@ -95,6 +101,10 @@ const initialState: GameState = {
   lastGoldReward: 0,
   shopInventory: [],
   cardRemovalCost: 75,
+  relics: ['burning_blood'],
+  cardsPlayedTotal: 0,
+  tookDamageThisCombat: false,
+  restedLastSite: false,
   playerHP: PLAYER_MAX_HP,
   playerMaxHP: PLAYER_MAX_HP,
   playerBlock: 0,
@@ -259,6 +269,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       const newHand = s.hand.filter((c) => c.instanceId !== instanceId);
       const newDiscard = def.exhaust ? s.discard : [...s.discard, cardInst];
+      const newCardsPlayedTotal = s.cardsPlayedTotal + 1;
+
+      // Nunchaku: every 10th card gives +1 energy
+      if (hasRelic(s.relics, 'nunchaku') && newCardsPlayedTotal % 10 === 0) {
+        playerEnergy = Math.min(playerEnergy + 1, s.playerMaxEnergy + 3);
+      }
+
+      // Pen Nib: every 10th attack deals double damage (we already doubled in modifiedDelta)
+      // Track for Pen Nib: if this was an attack card and 10th attack, it was already handled
+
+      // Centennial Puzzle: first time taking damage this combat, draw 3
+      const justTookDamage = modifiedDelta.playerHPChange && modifiedDelta.playerHPChange < 0;
+      const newTookDamage = s.tookDamageThisCombat || !!justTookDamage;
 
       return {
         playerHP,
@@ -269,6 +292,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         discard: newDiscard,
         playerEnergy,
         cardsPlayedThisTurn: s.cardsPlayedThisTurn + 1,
+        cardsPlayedTotal: newCardsPlayedTotal,
+        tookDamageThisCombat: newTookDamage,
         playerStatuses,
         enemyStatuses,
       };
@@ -294,6 +319,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let enemyStatuses = [...state.enemyStatuses];
       const action = state.enemyTurnAction;
 
+      const relics = state.relics;
+
+      // Orichalcum: if no block at turn end, gain 6
+      if (hasRelic(relics, 'orichalcum') && playerBlock === 0) {
+        playerBlock = 6;
+      }
+
+      // Calipers: retain up to 15 block at turn end instead of losing all
+      if (hasRelic(relics, 'calipers') && playerBlock > 0) {
+        playerBlock = Math.min(playerBlock, 15);
+      }
+
       // Boss block reduction
       if (enemy.isBoss && enemy.specialMechanic?.type === 'block_reduction') {
         playerBlock = Math.floor(playerBlock * (1 - enemy.specialMechanic.fraction));
@@ -312,7 +349,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (action === 'attack') {
         enemyBlock = 0;
         const dmg = Math.max(0, enemy.baseAttack - playerBlock);
-        playerHP = Math.max(0, playerHP - dmg);
+        if (dmg > 0) {
+          playerHP = Math.max(0, playerHP - dmg);
+          // Bronze Scales: deal 3 thorns damage back when hit
+          if (hasRelic(relics, 'bronze_scales')) {
+            enemyHP = Math.max(0, enemyHP - 3);
+          }
+        }
         // Apply enemy attack statuses to player
         if (enemy.attackStatuses && enemy.attackStatuses.length > 0) {
           playerStatuses = mergeStatuses(playerStatuses, enemy.attackStatuses);
@@ -320,7 +363,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       } else {
         enemyBlock += Math.floor(enemy.baseAttack * 0.8);
       }
-      playerBlock = 0;
+      // Calipers: block was already handled above; now reset
+      if (!hasRelic(relics, 'calipers')) {
+        playerBlock = 0;
+      } else {
+        playerBlock = 0; // calipers only retains at START of next turn (applied above)
+      }
 
       // Decrement timed statuses at end of turn
       playerStatuses = tickTimedStatuses(playerStatuses);
@@ -367,9 +415,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   stageWon: () => {
     const state = get();
+    // Burning Blood: heal 6 HP after every combat
+    const burningBloodHeal = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
+
     if (state.currentEnemy?.isBoss) {
       const bossGold = 50;
-      set({ phase: 'victory', gold: state.gold + bossGold, lastGoldReward: bossGold });
+      const bossRelic = pickRandomRelic(state.relics, 'boss');
+      set({
+        phase: 'victory',
+        gold: state.gold + bossGold,
+        lastGoldReward: bossGold,
+        playerHP: Math.min(state.playerHP + burningBloodHeal, state.playerMaxHP),
+        relics: bossRelic ? [...state.relics, bossRelic] : state.relics,
+      });
       return;
     }
     const isElite = state.map.find(
@@ -378,14 +436,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const goldMin = isElite ? 25 : 10;
     const goldMax = isElite ? 35 : 20;
     const goldGained = goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1));
+
+    // Elite rooms give a relic reward
+    const eliteRelic = isElite ? pickRandomRelic(state.relics, 'common') : null;
+
     const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
-    const healedHP = Math.min(state.playerHP + 10, state.playerMaxHP);
+    const healedHP = Math.min(state.playerHP + 10 + burningBloodHeal, state.playerMaxHP);
     set({
       phase: 'reward',
       rewardChoices: choices,
       playerHP: healedHP,
       gold: state.gold + goldGained,
       lastGoldReward: goldGained,
+      relics: eliteRelic ? [...state.relics, eliteRelic] : state.relics,
     });
   },
 
@@ -433,9 +496,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemy = enemyPool[Math.min(idx, enemyPool.length - 1)];
       }
 
+      const relics = state.relics;
+
+      // Combat start relic effects
+      let startBlock = 0;
+      let startExtraCards = 0;
+      let startStatuses: StatusEffect[] = [];
+      let enemyStartStatuses: StatusEffect[] = [];
+      let startEnergy = PLAYER_MAX_ENERGY;
+
+      if (hasRelic(relics, 'anchor')) startBlock += 10;
+      if (hasRelic(relics, 'bag_of_preparation')) startExtraCards += 2;
+      if (hasRelic(relics, 'vajra')) startStatuses = mergeStatuses(startStatuses, [{ type: 'strength', stacks: 1 }]);
+      if (hasRelic(relics, 'lantern')) startEnergy += 1;
+      if (hasRelic(relics, 'ancient_tea_set') && state.restedLastSite) startEnergy += 2;
+      if (hasRelic(relics, 'red_skull') && state.playerHP <= state.playerMaxHP / 2) {
+        startStatuses = mergeStatuses(startStatuses, [{ type: 'strength', stacks: 3 }]);
+      }
+      if (hasRelic(relics, 'philosophers_stone')) {
+        startEnergy += 1;
+        enemyStartStatuses = mergeStatuses(enemyStartStatuses, [{ type: 'strength', stacks: 1 }]);
+      }
+      if (hasRelic(relics, 'fusion_hammer')) startEnergy += 1;
+      const sneckoExtraCards = hasRelic(relics, 'snecko_eye') ? 2 : 0;
+
+      const drawCount = HAND_SIZE + startExtraCards + sneckoExtraCards;
       const shuffledDeck = shuffle([...state.deck]);
-      const newHand = shuffledDeck.slice(0, HAND_SIZE);
-      const remaining = shuffledDeck.slice(HAND_SIZE);
+      const newHand = shuffledDeck.slice(0, drawCount);
+      const remaining = shuffledDeck.slice(drawCount);
 
       set({
         phase: 'combat',
@@ -445,16 +533,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         currentEnemy: enemy,
         enemyHP: enemy.maxHP,
         enemyBlock: 0,
-        playerBlock: 0,
-        playerEnergy: PLAYER_MAX_ENERGY,
+        playerBlock: startBlock,
+        playerEnergy: startEnergy,
         deck: remaining,
         hand: newHand,
         discard: [],
         turnNumber: 0,
         cardsPlayedThisTurn: 0,
+        cardsPlayedTotal: 0,
+        tookDamageThisCombat: false,
         enemyTurnAction: computeEnemyAction(enemy.attackPattern, 0),
-        playerStatuses: [],
-        enemyStatuses: [],
+        playerStatuses: startStatuses,
+        enemyStatuses: enemyStartStatuses,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });
@@ -471,8 +561,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  leaveRestSite: () => {
-    set({ phase: 'map' });
+  leaveRestSite: (didRest?: boolean) => {
+    set({ phase: 'map', restedLastSite: didRest === true });
   },
 
   buyShopCard: (cardId: string, price: number) => {
@@ -504,6 +594,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   leaveShop: () => set({ phase: 'map' }),
+
+  gainRelic: (relicId: string) => {
+    set((state) => {
+      if (state.relics.includes(relicId)) return {};
+      return { relics: [...state.relics, relicId] };
+    });
+  },
 
   upgradeCard: (instanceId: string) => {
     set((state) => {

@@ -34,7 +34,7 @@ const COL_WIDTH = 62;
 const ROW_HEIGHT = 54;
 
 export default function MapScreen() {
-  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode } = useGameStore();
+  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold } = useGameStore();
 
   const allCards = deck.length + hand.length + discard.length;
   const floors = [...new Set(map.map((n) => n.floor))].sort((a, b) => b - a); // top to bottom (boss at top)
@@ -63,6 +63,7 @@ export default function MapScreen() {
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.statBadge}>♥ {playerHP}/{playerMaxHP}</Text>
+            <Text style={styles.statBadge}>🪙 {gold}</Text>
             <Text style={styles.statBadge}>🃏 {allCards}</Text>
           </View>
         </View>

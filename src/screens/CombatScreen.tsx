@@ -348,7 +348,8 @@ export default function CombatScreen() {
               >
                 <Text style={[styles.overlayBtnText, styles.overlayBtnTextDanger]}>🏠  QUIT TO MENU</Text>
               </TouchableOpacity>
-              <Text style={styles.overlayHint}>Stage {currentStage} · {playerHP}/{playerMaxHP} HP</Text>
+              <Text style={styles.overlayHint}>Floor {currentStage} · {playerHP}/{playerMaxHP} HP · 🪙{gold}</Text>
+              <Text style={styles.overlayHint}>{relics.length} relic{relics.length !== 1 ? 's' : ''} · {deck.length + hand.length + discard.length} cards</Text>
             </View>
           </View>
         )}
@@ -382,6 +383,22 @@ export default function CombatScreen() {
                   );
                 })}
               </View>
+
+              {/* Deck Stats */}
+              {deckViewTab === 'deck' && (
+                <View style={styles.deckStats}>
+                  {(['attack', 'defense', 'combo', 'power', 'status'] as const).map((cat) => {
+                    const count = deck.filter((c) => masterCardPool[c.definitionId]?.category === cat).length;
+                    if (count === 0) return null;
+                    const catColors: Record<string, string> = { attack: '#e74c3c', defense: '#4fc3f7', combo: '#f5a623', power: '#66bb6a', status: '#9b59b6' };
+                    return (
+                      <Text key={cat} style={[styles.deckStatText, { color: catColors[cat] }]}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}: {count}
+                      </Text>
+                    );
+                  })}
+                </View>
+              )}
 
               {/* Category Filter */}
               <View style={styles.filterRow}>
@@ -733,6 +750,16 @@ const styles = StyleSheet.create({
   },
   tabText: { color: COLORS.textSecondary, fontSize: 14, fontWeight: 'bold' },
   tabTextActive: { color: COLORS.accentGold },
+  deckStats: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  deckStatText: { fontSize: 11, fontWeight: 'bold' },
   filterRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',

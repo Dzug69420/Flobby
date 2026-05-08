@@ -178,6 +178,7 @@ const initialState: GameState = {
   activePowers: [],
   combatLog: [],
   attackCardsPlayedTotal: 0,
+  attackPlayedThisTurn: false,
   sneckoCosts: {},
   bottledCardId: null,
   turnNumber: 0,
@@ -415,6 +416,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 3;
       }
 
+      // Dead Branch: add a random card to hand when a card is exhausted
+      // (handled post-set below for draw timing)
+
       // Centennial Puzzle: first time player takes damage this combat, draw 3
       const justTookDamage2 = modifiedDelta.playerHPChange && modifiedDelta.playerHPChange < 0;
       if (justTookDamage2 && !s.tookDamageThisCombat && hasRelic(s.relics, 'centennial_puzzle')) {
@@ -461,6 +465,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         activePowers,
         combatLog: newLog,
         attackCardsPlayedTotal: newAttackTotal,
+        attackPlayedThisTurn: s.attackPlayedThisTurn || isAttackCard,
         sneckoCosts: newSneckoCosts,
       };
     });
@@ -514,6 +519,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
           discard: s.discard.slice(0, -1),
         };
       });
+    }
+
+    // Compute whether card was exhausted (needed for Dead Branch post-set)
+    const cardWasExhausted = def.exhaust || (state.activePowers.includes('corruption') &&
+      (def.category === 'defense' || def.category === 'status'));
+
+    // Dead Branch: add random card to hand when a card is exhausted
+    if (cardWasExhausted && get().relics.includes('dead_branch')) {
+      const randomCardId = REWARD_CARD_IDS[Math.floor(Math.random() * REWARD_CARD_IDS.length)];
+      set((s) => ({
+        hand: [...s.hand, { instanceId: generateId(), definitionId: randomCardId }],
+      }));
     }
 
     // Dark Embrace: draw 1 card when a card is exhausted
@@ -642,7 +659,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: 2 }]);
       }
 
-      // (Art of War handled via artOfWarActive flag below)
+      // Art of War: if no attacks played last turn, gain 1 energy next turn
+      // (tracked via attackPlayedThisTurn, applied at turn start)
 
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
@@ -663,10 +681,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         return !def?.retain;
       });
 
-      // Corruption: skills played this turn were exhausted (already handled in playCard)
-      const finalEnergy = state.activePowers.includes('corruption')
-        ? PLAYER_MAX_ENERGY
-        : PLAYER_MAX_ENERGY;
+      // Art of War: gain 1 energy if no attacks played last turn
+      const artOfWarBonus = hasRelic(relics, 'art_of_war') && !state.attackPlayedThisTurn ? 1 : 0;
 
       return {
         playerHP,
@@ -680,8 +696,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: retainCards,
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
-        playerEnergy: finalEnergy,
+        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus,
         cardsPlayedThisTurn: 0,
+        attackPlayedThisTurn: false,
         combatLog: newCombatLog,
       };
     });
@@ -905,6 +922,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         activePowers: [],
         combatLog: [],
         attackCardsPlayedTotal: 0,
+        attackPlayedThisTurn: false,
         sneckoCosts: {},
       });
     } else if (node.roomType === 'rest') {

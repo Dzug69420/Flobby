@@ -159,6 +159,7 @@ export interface GameState {
   activePowers: string[];
   combatLog: string[];
   attackCardsPlayedTotal: number;
+  attackPlayedThisTurn: boolean;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   turnNumber: number;

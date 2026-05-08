@@ -5,7 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 
 export default function VictoryScreen() {
-  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold } = useGameStore();
+  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold, currentRunScore, bestScore } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -38,6 +38,13 @@ export default function VictoryScreen() {
           <Text style={styles.statLine}>Runs Completed: <Text style={styles.statVal}>🏆 {runsCompleted}</Text></Text>
           {ascensionLevel > 0 && (
             <Text style={styles.statLine}>Ascension Unlocked: <Text style={[styles.statVal, { color: '#ce93d8' }]}>Asc {ascensionLevel}</Text></Text>
+          )}
+          <Text style={styles.statLine}>Score: <Text style={[styles.statVal, { color: '#66bb6a' }]}>⭐ {currentRunScore.toLocaleString()}</Text></Text>
+          {bestScore > currentRunScore && (
+            <Text style={styles.statLine}>Best Score: <Text style={styles.statVal}>⭐ {bestScore.toLocaleString()}</Text></Text>
+          )}
+          {bestScore === currentRunScore && currentRunScore > 0 && (
+            <Text style={[styles.statLine, { color: COLORS.accentGold }]}>🏆 NEW BEST SCORE!</Text>
           )}
           <Text style={styles.statLine}>All 15 floors cleared! 🎉</Text>
         </View>

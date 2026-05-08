@@ -14,8 +14,9 @@ function getDeathQuip(stage: number): string {
 }
 
 export default function GameOverScreen() {
-  const { currentStage, deck, hand, discard, playerHP, currentEnemy, restartGame, goToMenu } = useGameStore();
+  const { currentStage, currentFloor, deck, hand, discard, playerHP, currentEnemy, restartGame, goToMenu, relics, gold, currentRunScore, bestScore } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
+  const isNewBest = currentRunScore > 0 && currentRunScore >= bestScore;
 
   return (
     <LinearGradient colors={['#1a0000', '#3d0000', '#0a0000']} style={styles.container}>
@@ -25,12 +26,20 @@ export default function GameOverScreen() {
         <Text style={styles.subtitle}>{getDeathQuip(currentStage)}</Text>
 
         <View style={styles.statsBox}>
-          <Text style={styles.statLine}>Reached Stage: <Text style={styles.statVal}>{currentStage} / 11</Text></Text>
+          <Text style={styles.statLine}>Reached Floor: <Text style={styles.statVal}>{currentFloor + 1} / 15</Text></Text>
           {currentEnemy && (
             <Text style={styles.statLine}>Killed by: <Text style={styles.statVal}>{currentEnemy.name} {currentEnemy.faceEmoji}</Text></Text>
           )}
           <Text style={styles.statLine}>Final Deck Size: <Text style={styles.statVal}>{deckSize} cards</Text></Text>
-          <Text style={styles.statLine}>HP at death: <Text style={styles.statVal}>{playerHP}</Text></Text>
+          <Text style={styles.statLine}>Relics Collected: <Text style={styles.statVal}>{relics.length}</Text></Text>
+          <Text style={styles.statLine}>Gold Remaining: <Text style={styles.statVal}>🪙 {gold}</Text></Text>
+          {currentRunScore > 0 && (
+            <Text style={styles.statLine}>Score: <Text style={[styles.statVal, isNewBest && { color: COLORS.accentGold }]}>⭐ {currentRunScore.toLocaleString()}</Text></Text>
+          )}
+          {isNewBest && <Text style={[styles.statLine, { color: COLORS.accentGold, fontWeight: 'bold' }]}>🏆 New Best Score!</Text>}
+          {bestScore > currentRunScore && bestScore > 0 && (
+            <Text style={styles.statLine}>Best Score: <Text style={styles.statVal}>⭐ {bestScore.toLocaleString()}</Text></Text>
+          )}
         </View>
 
         <TouchableOpacity onPress={restartGame} style={styles.button} activeOpacity={0.85}>

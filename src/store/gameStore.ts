@@ -132,6 +132,8 @@ const initialState: GameState = {
   restedLastSite: false,
   ascensionLevel: 0,
   runsCompleted: 0,
+  currentRunScore: 0,
+  bestScore: 0,
   playerHP: PLAYER_MAX_HP,
   playerMaxHP: PLAYER_MAX_HP,
   playerBlock: 0,
@@ -480,7 +482,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     if (get().playerHP <= 0) {
-      set({ phase: 'gameover' });
+      const s = get();
+      const score = Math.floor(
+        (s.currentFloor + 1) * 50 +
+        s.relics.length * 25 +
+        s.gold * 0.25
+      );
+      set({ phase: 'gameover', currentRunScore: score, bestScore: Math.max(s.bestScore, score) });
       return;
     }
 
@@ -520,6 +528,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const bossGold = 50;
       const bossRelic = pickRandomRelic(state.relics, 'boss');
       const newAscension = Math.min(state.ascensionLevel + 1, 10);
+      // Score calculation
+      const score = Math.floor(
+        (state.currentFloor + 1) * 50 +         // floors cleared
+        state.playerHP * 2 +                      // HP remaining
+        state.gold * 0.5 +                        // gold
+        state.relics.length * 25 +               // relics collected
+        (state.deck.length + state.hand.length + state.discard.length) * 5 + // deck size
+        state.ascensionLevel * 100               // ascension bonus
+      );
+      const newBestScore = Math.max(state.bestScore, score);
       set({
         phase: 'victory',
         gold: state.gold + bossGold,
@@ -528,6 +546,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         relics: bossRelic ? [...state.relics, bossRelic] : state.relics,
         ascensionLevel: newAscension,
         runsCompleted: state.runsCompleted + 1,
+        currentRunScore: score,
+        bestScore: newBestScore,
       });
       return;
     }
@@ -974,13 +994,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   restartGame: () => {
-    const { ascensionLevel, runsCompleted } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted });
+    const { ascensionLevel, runsCompleted, bestScore } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore });
     get().startGame();
   },
 
   goToMenu: () => {
-    const { ascensionLevel, runsCompleted } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted });
+    const { ascensionLevel, runsCompleted, bestScore } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore });
   },
 }));

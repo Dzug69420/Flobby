@@ -133,6 +133,8 @@ export interface GameState {
   restedLastSite: boolean;
   ascensionLevel: number;
   runsCompleted: number;
+  currentRunScore: number;
+  bestScore: number;
   playerHP: number;
   playerMaxHP: number;
   playerBlock: number;

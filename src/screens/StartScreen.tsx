@@ -8,6 +8,7 @@ type Panel = 'menu' | 'options' | 'controls';
 
 export default function StartScreen() {
   const startGame = useGameStore((s) => s.startGame);
+  const { ascensionLevel, runsCompleted, setAscensionLevel } = useGameStore();
   const [panel, setPanel] = useState<Panel>('menu');
 
   const titleAnim = useRef(new Animated.Value(0)).current;
@@ -45,7 +46,16 @@ export default function StartScreen() {
 
         {/* Panel content */}
         <Animated.View style={[styles.panelWrap, { opacity: contentAnim }]}>
-          {panel === 'menu' && <MenuPanel onStart={startGame} onOptions={() => setPanel('options')} onControls={() => setPanel('controls')} />}
+          {panel === 'menu' && (
+            <MenuPanel
+              onStart={startGame}
+              onOptions={() => setPanel('options')}
+              onControls={() => setPanel('controls')}
+              ascensionLevel={ascensionLevel}
+              runsCompleted={runsCompleted}
+              onAscensionChange={setAscensionLevel}
+            />
+          )}
           {panel === 'options' && <OptionsPanel onBack={() => setPanel('menu')} />}
           {panel === 'controls' && <ControlsPanel onBack={() => setPanel('menu')} />}
         </Animated.View>
@@ -58,13 +68,50 @@ export default function StartScreen() {
 
 /* ─── Sub-panels ──────────────────────────────────────────── */
 
-function MenuPanel({ onStart, onOptions, onControls }: { onStart: () => void; onOptions: () => void; onControls: () => void }) {
+const ASC_LABELS = [
+  'Normal', 'A1: Elites +HP', 'A2: -10% Heal', 'A3: Coming soon',
+  'A4: Enemy +10%HP', 'A5: Coming soon', 'A6: Coming soon',
+  'A7: -5 MaxHP', 'A8: Coming soon', 'A9: Coming soon', 'A10: Master',
+];
+
+function MenuPanel({
+  onStart, onOptions, onControls,
+  ascensionLevel, runsCompleted, onAscensionChange,
+}: {
+  onStart: () => void; onOptions: () => void; onControls: () => void;
+  ascensionLevel: number; runsCompleted: number;
+  onAscensionChange: (l: number) => void;
+}) {
   return (
     <View style={styles.menuButtons}>
       <MenuButton label="⚔️  START GAME" onPress={onStart} primary />
+
+      {/* Ascension selector */}
+      <View style={styles.ascRow}>
+        <TouchableOpacity
+          style={styles.ascArrow}
+          onPress={() => onAscensionChange(ascensionLevel - 1)}
+          disabled={ascensionLevel <= 0}
+        >
+          <Text style={[styles.ascArrowText, ascensionLevel <= 0 && { opacity: 0.3 }]}>◀</Text>
+        </TouchableOpacity>
+        <View style={styles.ascBadge}>
+          <Text style={styles.ascLevel}>Asc {ascensionLevel}</Text>
+          <Text style={styles.ascLabel}>{ASC_LABELS[ascensionLevel] ?? ''}</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.ascArrow}
+          onPress={() => onAscensionChange(ascensionLevel + 1)}
+          disabled={ascensionLevel >= Math.min(runsCompleted, 10)}
+        >
+          <Text style={[styles.ascArrowText, ascensionLevel >= Math.min(runsCompleted, 10) && { opacity: 0.3 }]}>▶</Text>
+        </TouchableOpacity>
+      </View>
+
       <MenuButton label="⚙️  OPTIONS" onPress={onOptions} />
       <MenuButton label="🎮  CONTROLS" onPress={onControls} />
-      <Text style={styles.hint}>Defeat 10 stages and face Flobby!</Text>
+      {runsCompleted > 0 && <Text style={styles.hint}>🏆 {runsCompleted} run{runsCompleted > 1 ? 's' : ''} completed</Text>}
+      <Text style={styles.hint}>Defeat the boss to unlock higher ascensions!</Text>
     </View>
   );
 }
@@ -204,6 +251,27 @@ const styles = StyleSheet.create({
   menuBtnTextPrimary: { color: '#000' },
 
   hint: { color: COLORS.textSecondary, textAlign: 'center', fontSize: 13, marginTop: 4 },
+  ascRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginVertical: 6,
+  },
+  ascArrow: { padding: 8 },
+  ascArrowText: { color: COLORS.accentGold, fontSize: 18 },
+  ascBadge: {
+    backgroundColor: 'rgba(249,168,37,0.12)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.accentGold,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'center',
+    minWidth: 140,
+  },
+  ascLevel: { color: COLORS.accentGold, fontSize: 16, fontWeight: 'bold' },
+  ascLabel: { color: COLORS.textSecondary, fontSize: 11 },
   footer: { position: 'absolute', bottom: 28, color: COLORS.textSecondary, fontSize: 11, textAlign: 'center' },
 
   /* Sub-panel shared */

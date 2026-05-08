@@ -5,6 +5,7 @@ import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
 import { ALL_RELICS, pickRandomRelic } from '../data/relics';
 import { pickRandomPotion } from '../data/potions';
+import { pickRandomEvent } from '../data/events';
 import { shuffle, pickRewardCards, clamp, generateId } from '../utils/gameLogic';
 
 const PLAYER_MAX_HP = 80;
@@ -51,6 +52,21 @@ function hasRelic(relics: string[], id: string): boolean {
   return relics.includes(id);
 }
 
+function ascensionMaxHP(base: number, level: number): number {
+  if (level >= 7) return base - 5;
+  return base;
+}
+
+function ascensionHealMultiplier(level: number): number {
+  if (level >= 2) return 0.9;
+  return 1.0;
+}
+
+function ascensionEnemyHPMultiplier(level: number): number {
+  if (level >= 4) return 1.1;
+  return 1.0;
+}
+
 function tickTimedStatuses(statuses: StatusEffect[]): StatusEffect[] {
   return statuses
     .map((s) => {
@@ -79,7 +95,9 @@ interface GameActions {
   usePotion: (potionId: string) => void;
   gainPotion: (potionId: string) => void;
   addStatusCardsToDeck: (cardDefId: string, count: number) => void;
+  resolveEvent: (choiceIndex: number) => void;
   restartGame: () => void;
+  setAscensionLevel: (level: number) => void;
   goToMenu: () => void;
 }
 
@@ -107,9 +125,12 @@ const initialState: GameState = {
   cardRemovalCost: 75,
   relics: ['burning_blood'],
   potions: [],
+  currentEvent: null,
   cardsPlayedTotal: 0,
   tookDamageThisCombat: false,
   restedLastSite: false,
+  ascensionLevel: 0,
+  runsCompleted: 0,
   playerHP: PLAYER_MAX_HP,
   playerMaxHP: PLAYER_MAX_HP,
   playerBlock: 0,
@@ -134,15 +155,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   startGame: () => {
+    const { ascensionLevel, runsCompleted } = get();
     const map = generateMap();
     const deck = shuffle(buildStartingDeck());
+    const maxHP = ascensionMaxHP(PLAYER_MAX_HP, ascensionLevel);
     set({
       phase: 'map',
       currentStage: 1,
       currentFloor: 0,
       currentAct: 1,
-      playerHP: PLAYER_MAX_HP,
-      playerMaxHP: PLAYER_MAX_HP,
+      playerHP: maxHP,
+      playerMaxHP: maxHP,
       playerBlock: 0,
       playerEnergy: PLAYER_MAX_ENERGY,
       deck,
@@ -471,12 +494,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (state.currentEnemy?.isBoss) {
       const bossGold = 50;
       const bossRelic = pickRandomRelic(state.relics, 'boss');
+      const newAscension = Math.min(state.ascensionLevel + 1, 10);
       set({
         phase: 'victory',
         gold: state.gold + bossGold,
         lastGoldReward: bossGold,
         playerHP: Math.min(state.playerHP + burningBloodHeal, state.playerMaxHP),
         relics: bossRelic ? [...state.relics, bossRelic] : state.relics,
+        ascensionLevel: newAscension,
+        runsCompleted: state.runsCompleted + 1,
       });
       return;
     }
@@ -575,13 +601,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newHand = shuffledDeck.slice(0, drawCount);
       const remaining = shuffledDeck.slice(drawCount);
 
+      const ascHP = Math.floor(enemy.maxHP * ascensionEnemyHPMultiplier(state.ascensionLevel));
       set({
         phase: 'combat',
         currentFloor: node.floor,
         currentStage: node.floor + 1,
         map: updatedMap,
         currentEnemy: enemy,
-        enemyHP: enemy.maxHP,
+        enemyHP: ascHP,
         enemyBlock: 0,
         playerBlock: startBlock,
         playerEnergy: startEnergy,
@@ -607,8 +634,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } else if (node.roomType === 'shop') {
       const shopInventory = generateShopInventory(REWARD_CARD_WEIGHTS);
       set({ phase: 'shop', currentFloor: node.floor, map: updatedMap, shopInventory });
+    } else if (node.roomType === 'event') {
+      const event = pickRandomEvent();
+      set({ phase: 'event', currentFloor: node.floor, map: updatedMap, currentEvent: event });
     } else {
-      // event — stub: advance floor, return to map
       set({ currentFloor: node.floor, map: updatedMap, phase: 'map' });
     }
   },
@@ -731,6 +760,106 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  resolveEvent: (choiceIndex: number) => {
+    const state = get();
+    const event = state.currentEvent;
+    if (!event) return;
+    const choice = event.choices[choiceIndex];
+    if (!choice) return;
+
+    set((s) => {
+      let playerHP = s.playerHP;
+      let gold = s.gold;
+      let relics = [...s.relics];
+      let potions = [...s.potions];
+
+      // Gold cost
+      if (choice.goldCost && gold < choice.goldCost) return {};
+      if (choice.goldCost) gold -= choice.goldCost;
+
+      // HP cost
+      if (choice.hpCost) playerHP = Math.max(1, playerHP - choice.hpCost);
+
+      // Effect
+      switch (choice.effect) {
+        case 'heal': {
+          const healAmt = choice.effectValue && choice.effectValue <= 30
+            ? Math.floor(s.playerMaxHP * choice.effectValue / 100)
+            : (choice.effectValue ?? 0);
+          playerHP = Math.min(playerHP + healAmt, s.playerMaxHP);
+          break;
+        }
+        case 'gold':
+          // Wheel of change: 50/50
+          if (event.id === 'wheel_of_change') {
+            if (Math.random() < 0.5) gold += choice.effectValue ?? 0;
+            else playerHP = Math.max(1, playerHP - 20);
+          } else {
+            gold += choice.effectValue ?? 0;
+          }
+          break;
+        case 'relic': {
+          const newRelic = pickRandomRelic(relics, 'uncommon');
+          if (newRelic) relics.push(newRelic);
+          // Dead adventurer: add wounds
+          if (event.id === 'dead_adventurer') {
+            const woundCards: CardInstance[] = [
+              { instanceId: generateId(), definitionId: 'wound' },
+              { instanceId: generateId(), definitionId: 'wound' },
+            ];
+            return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase,
+              deck: shuffle([...s.deck, ...woundCards]) };
+          }
+          break;
+        }
+        case 'add_potion': {
+          const newPotion = pickRandomPotion(s.potions);
+          if (s.potions.length < 3) potions.push(newPotion);
+          if (choice.effectValue) gold += choice.effectValue;
+          break;
+        }
+        case 'nothing':
+          break;
+        case 'add_wounds': {
+          const n = choice.effectValue ?? 1;
+          const wounds: CardInstance[] = Array.from({ length: n }, () => ({
+            instanceId: generateId(), definitionId: 'wound',
+          }));
+          return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase,
+            deck: shuffle([...s.deck, ...wounds]) };
+        }
+      }
+
+      return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase };
+    });
+
+    // Handle upgrade_card effect separately (requires showing a picker)
+    if (choice.effect === 'upgrade_card') {
+      const count = choice.effectValue ?? 1;
+      // Auto-upgrade random upgradable cards
+      const state2 = get();
+      const allCards = [...state2.deck, ...state2.hand, ...state2.discard];
+      const upgradable = allCards.filter((c) => {
+        const def = state2.masterCardPool[c.definitionId];
+        return def?.upgradeId;
+      });
+      const toUpgrade = shuffle(upgradable).slice(0, count);
+      for (const card of toUpgrade) {
+        get().upgradeCard(card.instanceId);
+      }
+      set({ currentEvent: null, phase: 'map' });
+    }
+    // Handle remove_card (auto-remove weakest card)
+    if (choice.effect === 'remove_card') {
+      const state2 = get();
+      const allCards = [...state2.deck, ...state2.hand, ...state2.discard];
+      const strikes = allCards.filter((c) => c.definitionId === 'strike' || c.definitionId === 'defend');
+      const toRemove = strikes[0] ?? allCards[0];
+      if (toRemove) get().removeCard(toRemove.instanceId, 0);
+      set({ currentEvent: null, phase: 'map' });
+    }
+  },
+
   addStatusCardsToDeck: (cardDefId: string, count: number) => {
     set((state) => {
       const newCards: CardInstance[] = Array.from({ length: count }, () => ({
@@ -760,10 +889,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  setAscensionLevel: (level: number) => {
+    set({ ascensionLevel: Math.max(0, Math.min(10, level)) });
+  },
+
   restartGame: () => {
-    set(initialState);
+    const { ascensionLevel, runsCompleted } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted });
     get().startGame();
   },
 
-  goToMenu: () => set({ ...initialState }),
+  goToMenu: () => {
+    const { ascensionLevel, runsCompleted } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted });
+  },
 }));

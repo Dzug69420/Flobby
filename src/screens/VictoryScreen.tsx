@@ -5,7 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 
 export default function VictoryScreen() {
-  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu } = useGameStore();
+  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -34,7 +34,12 @@ export default function VictoryScreen() {
         <View style={styles.statsBox}>
           <Text style={styles.statLine}>Remaining HP: <Text style={styles.statVal}>{playerHP} / {playerMaxHP}</Text></Text>
           <Text style={styles.statLine}>Final Deck Size: <Text style={styles.statVal}>{deckSize} cards</Text></Text>
-          <Text style={styles.statLine}>All 11 stages cleared! 🎉</Text>
+          <Text style={styles.statLine}>Gold Remaining: <Text style={styles.statVal}>🪙 {gold}</Text></Text>
+          <Text style={styles.statLine}>Runs Completed: <Text style={styles.statVal}>🏆 {runsCompleted}</Text></Text>
+          {ascensionLevel > 0 && (
+            <Text style={styles.statLine}>Ascension Unlocked: <Text style={[styles.statVal, { color: '#ce93d8' }]}>Asc {ascensionLevel}</Text></Text>
+          )}
+          <Text style={styles.statLine}>All 15 floors cleared! 🎉</Text>
         </View>
 
         <TouchableOpacity onPress={restartGame} style={styles.button} activeOpacity={0.85}>

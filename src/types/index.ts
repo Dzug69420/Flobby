@@ -104,7 +104,7 @@ export interface MapNode {
   enemyIndex?: number;
 }
 
-export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
 
 export interface ShopItem {
   cardId: string;
@@ -124,9 +124,12 @@ export interface GameState {
   cardRemovalCost: number;
   relics: string[];
   potions: string[];
+  currentEvent: import('../data/events').EventDefinition | null;
   cardsPlayedTotal: number;
   tookDamageThisCombat: boolean;
   restedLastSite: boolean;
+  ascensionLevel: number;
+  runsCompleted: number;
   playerHP: number;
   playerMaxHP: number;
   playerBlock: number;

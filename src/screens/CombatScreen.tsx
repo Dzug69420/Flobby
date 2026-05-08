@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -256,6 +256,21 @@ export default function CombatScreen() {
           </View>
         )}
 
+        {/* ── COMBAT LOG ── */}
+        {combatLog.length > 0 && (
+          <View style={styles.combatLog} pointerEvents="none">
+            {combatLog.slice(0, 3).map((entry, i) => (
+              <Text
+                key={i}
+                style={[styles.combatLogEntry, { opacity: 1 - i * 0.3 }]}
+                numberOfLines={1}
+              >
+                {entry}
+              </Text>
+            ))}
+          </View>
+        )}
+
         {/* ── BOTTOM BAR ── */}
         <View style={styles.bottomBar}>
           <View style={styles.energySection}>
@@ -448,6 +463,22 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   goldHudText: { color: '#f9a825', fontSize: 13, fontWeight: 'bold' },
+
+  combatLog: {
+    position: 'absolute',
+    left: 8,
+    bottom: 120,
+    gap: 2,
+    zIndex: 5,
+  },
+  combatLogEntry: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 10,
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
 
   relicRow: {
     paddingHorizontal: 12,

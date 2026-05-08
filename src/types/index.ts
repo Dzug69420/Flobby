@@ -70,6 +70,8 @@ export interface CardInstance {
 export type AttackPattern =
   | { type: 'consistent' }
   | { type: 'alternating'; firstTurn: 'attack' | 'defend' }
+  | { type: 'cycle'; pattern: Array<'attack' | 'defend'> }
+  | { type: 'random'; attackChance: number }
   | { type: 'boss_pattern' };
 
 export type BossMechanic =
@@ -154,6 +156,7 @@ export interface GameState {
   enemyTurnAction: 'attack' | 'defend' | null;
   bossEnraged: boolean;
   activePowers: string[];
+  combatLog: string[];
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

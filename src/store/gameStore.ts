@@ -23,10 +23,16 @@ function buildStartingDeck(): CardInstance[] {
 }
 
 function computeEnemyAction(
-  pattern: { type: string; firstTurn?: string },
+  pattern: { type: string; firstTurn?: string; pattern?: string[]; attackChance?: number },
   turnNumber: number
 ): 'attack' | 'defend' {
   if (pattern.type === 'consistent' || pattern.type === 'boss_pattern') return 'attack';
+  if (pattern.type === 'cycle' && pattern.pattern) {
+    return (pattern.pattern[turnNumber % pattern.pattern.length] ?? 'attack') as 'attack' | 'defend';
+  }
+  if (pattern.type === 'random') {
+    return Math.random() < (pattern.attackChance ?? 0.7) ? 'attack' : 'defend';
+  }
   const isEven = turnNumber % 2 === 0;
   const attackOnEven = pattern.firstTurn === 'attack';
   return isEven === attackOnEven ? 'attack' : 'defend';
@@ -154,6 +160,7 @@ const initialState: GameState = {
   enemyTurnAction: 'attack',
   bossEnraged: false,
   activePowers: [],
+  combatLog: [],
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -364,6 +371,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (finalExhaust && s.activePowers.includes('feel_no_pain')) {
         playerBlock += 3;
       }
+
+      // Combat log entry
+      let logMsg = `Played ${def.name}`;
+      if (modifiedDelta.enemyHPChange && modifiedDelta.enemyHPChange < 0) {
+        logMsg += ` → ${Math.abs(modifiedDelta.enemyHPChange)} dmg`;
+      }
+      if (modifiedDelta.playerBlockChange && modifiedDelta.playerBlockChange > 0) {
+        logMsg += ` → +${modifiedDelta.playerBlockChange} block`;
+      }
+      const newLog = [logMsg, ...s.combatLog].slice(0, 6);
       const newCardsPlayedTotal = s.cardsPlayedTotal + 1;
 
       // Nunchaku: every 10th card gives +1 energy
@@ -393,6 +410,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyStatuses,
         exhaustPile: newExhaustPile,
         activePowers,
+        combatLog: newLog,
       };
     });
 
@@ -526,6 +544,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
 
+      // Combat log for enemy action
+      const enemyLogMsg = action === 'attack'
+        ? `${enemy.name} attacked for ${Math.max(0, enemy.baseAttack + getStatusStacks(enemyStatuses, 'strength') - (state.playerBlock ?? 0))} dmg`
+        : `${enemy.name} defended`;
+      const newCombatLog = [enemyLogMsg, ...state.combatLog].slice(0, 6);
+
       // Separate retained cards from cards to discard
       const retainCards = state.hand.filter((c) => {
         const def = state.masterCardPool[c.definitionId];
@@ -555,6 +579,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         discard: [...state.discard, ...discardCards],
         playerEnergy: finalEnergy,
         cardsPlayedThisTurn: 0,
+        combatLog: newCombatLog,
       };
     });
 
@@ -754,6 +779,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         retainedCards: [],
         bossEnraged: false,
         activePowers: [],
+        combatLog: [],
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

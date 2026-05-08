@@ -11,6 +11,7 @@ export interface CombatContext {
   cardsInDiscard: CardInstance[];
   cardsInDeck: CardInstance[];
   turnNumber: number;
+  cardsPlayedThisTurn: number;
 }
 
 export interface CombatDelta {
@@ -19,6 +20,7 @@ export interface CombatDelta {
   enemyHPChange?: number;
   enemyBlockChange?: number;
   drawCards?: number;
+  energyChange?: number;
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
@@ -75,6 +77,7 @@ export interface GameState {
   enemyBlock: number;
   enemyTurnAction: 'attack' | 'defend' | null;
   turnNumber: number;
+  cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];
   masterCardPool: Record<string, CardDefinition>;
 }

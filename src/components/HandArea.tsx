@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { CardInstance, CardDefinition } from '../types';
 import CardComponent from './CardComponent';
 
@@ -11,40 +11,69 @@ interface Props {
   playerEnergy: number;
 }
 
+const MAX_ROTATION = 12;
+const MAX_DROP_PX = 16;
+const CARD_OVERLAP = -18;
+
 export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy }: Props) {
+  const count = hand.length;
+
   return (
-    <View style={styles.wrapper}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        overScrollMode="never"
-      >
+    <View style={styles.container}>
+      <View style={[styles.fanRow, { paddingTop: MAX_DROP_PX + 8 }]}>
         {hand.map((card, index) => {
           const def = masterPool[card.definitionId];
           if (!def) return null;
+
+          const midIndex = (count - 1) / 2;
+          const offset = index - midIndex;
+          const normalized = count > 1 ? offset / midIndex : 0;
+
+          const rotation = normalized * MAX_ROTATION;
+          const translateY = Math.abs(normalized) * MAX_DROP_PX;
+          const zIndex = count - Math.round(Math.abs(offset));
+
           return (
-            <CardComponent
+            <View
               key={card.instanceId}
-              card={card}
-              definition={def}
-              onPlay={onPlay}
-              disabled={disabled}
-              affordable={playerEnergy >= def.cost}
-              index={index}
-            />
+              style={[
+                styles.cardWrapper,
+                {
+                  transform: [{ rotate: `${rotation}deg` }, { translateY }],
+                  zIndex,
+                  marginHorizontal: CARD_OVERLAP / 2,
+                },
+              ]}
+            >
+              <CardComponent
+                card={card}
+                definition={def}
+                onPlay={onPlay}
+                disabled={disabled}
+                affordable={playerEnergy >= def.cost}
+                index={index}
+              />
+            </View>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { paddingVertical: 6 },
-  scrollContent: {
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    gap: 2,
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    overflow: 'visible',
+  },
+  fanRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  cardWrapper: {
+    overflow: 'visible',
   },
 });

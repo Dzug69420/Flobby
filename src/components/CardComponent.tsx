@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Animated, StyleSheet } from 'react-native';
 import { CardDefinition, CardInstance } from '../types';
-import { COLORS, FONTS, CARD } from '../constants/theme';
+import { COLORS, CARD } from '../constants/theme';
 
 interface Props {
   card: CardInstance;
@@ -13,29 +13,46 @@ interface Props {
   faceDown?: boolean;
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  attack: '⚔️',
-  defense: '🛡️',
-  combo: '⚡',
-  status: '✨',
+const CATEGORY_BANNER: Record<string, string> = {
+  attack: '#5a1010',
+  defense: '#0d2b55',
+  combo: '#5a3a00',
+  status: '#30105a',
 };
 
-const CATEGORY_COLOR: Record<string, string> = {
+const CATEGORY_BORDER: Record<string, string> = {
   attack: '#e74c3c',
   defense: '#4fc3f7',
   combo: '#f5a623',
   status: '#9b59b6',
 };
 
-export default function CardComponent({ card, definition, onPlay, disabled, affordable, index, faceDown = false }: Props) {
+const CATEGORY_TYPE_LABEL: Record<string, string> = {
+  attack: 'ATTACK',
+  defense: 'SKILL',
+  combo: 'COMBO',
+  status: 'STATUS',
+};
+
+const CATEGORY_ART: Record<string, string> = {
+  attack: '⚔️',
+  defense: '🛡️',
+  combo: '⚡',
+  status: '✨',
+};
+
+export default function CardComponent({
+  card, definition, onPlay, disabled, affordable, index, faceDown = false,
+}: Props) {
   const slideAnim = useRef(new Animated.Value(120)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const hoverLift = useRef(new Animated.Value(0)).current;
   const flipAnim = useRef(new Animated.Value(faceDown ? 0 : 1)).current;
 
   useEffect(() => {
     Animated.spring(slideAnim, {
       toValue: 0,
-      delay: index * 60,
+      delay: index * 55,
       useNativeDriver: true,
       tension: 80,
       friction: 10,
@@ -46,8 +63,8 @@ export default function CardComponent({ card, definition, onPlay, disabled, affo
     if (!faceDown) {
       Animated.timing(flipAnim, {
         toValue: 1,
-        duration: 400,
-        delay: index * 250,
+        duration: 350,
+        delay: index * 180,
         useNativeDriver: true,
       }).start();
     }
@@ -56,9 +73,28 @@ export default function CardComponent({ card, definition, onPlay, disabled, affo
   const handlePress = () => {
     if (disabled || !affordable) return;
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 1.12, duration: 80, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1.08, duration: 70, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 70, useNativeDriver: true }),
     ]).start(() => onPlay(card.instanceId));
+  };
+
+  const handleHoverIn = () => {
+    if (disabled || !affordable) return;
+    Animated.spring(hoverLift, {
+      toValue: -45,
+      useNativeDriver: true,
+      tension: 200,
+      friction: 12,
+    }).start();
+  };
+
+  const handleHoverOut = () => {
+    Animated.spring(hoverLift, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 200,
+      friction: 12,
+    }).start();
   };
 
   const rotateY = flipAnim.interpolate({
@@ -66,31 +102,57 @@ export default function CardComponent({ card, definition, onPlay, disabled, affo
     outputRange: ['180deg', '90deg', '0deg'],
   });
 
-  const cardOpacity = !affordable ? 0.4 : 1;
-  const borderColor = CATEGORY_COLOR[definition.category] ?? COLORS.cardBorder;
+  const combinedY = Animated.add(slideAnim, hoverLift);
+  const borderColor = CATEGORY_BORDER[definition.category] ?? COLORS.cardBorder;
+  const bannerColor = CATEGORY_BANNER[definition.category] ?? '#222';
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.8} disabled={disabled || !affordable}>
+    <Pressable
+      onPress={handlePress}
+      onHoverIn={handleHoverIn}
+      onHoverOut={handleHoverOut}
+      disabled={disabled || !affordable}
+    >
       <Animated.View
         style={[
           styles.card,
           {
-            transform: [{ translateY: slideAnim }, { scale: scaleAnim }, { rotateY }],
-            opacity: cardOpacity,
             borderColor,
+            opacity: affordable ? 1 : 0.45,
+            transform: [{ translateY: combinedY }, { scale: scaleAnim }, { rotateY }],
+            shadowColor: borderColor,
           },
         ]}
       >
-        {/* Cost pip */}
-        <View style={[styles.costBadge, { backgroundColor: borderColor }]}>
-          <Text style={styles.costText}>{definition.cost}</Text>
+        {/* Top banner: cost + name */}
+        <View style={[styles.banner, { backgroundColor: bannerColor }]}>
+          <View style={[styles.costBadge, { backgroundColor: borderColor }]}>
+            <Text style={styles.costText}>{definition.cost}</Text>
+          </View>
+          <Text style={styles.cardName} numberOfLines={1}>{definition.name}</Text>
         </View>
 
-        <Text style={styles.name} numberOfLines={2}>{definition.name}</Text>
-        <Text style={styles.emoji}>{CATEGORY_EMOJI[definition.category]}</Text>
-        <Text style={styles.desc} numberOfLines={3}>{definition.description}</Text>
+        {/* Art area */}
+        <View style={styles.artArea}>
+          <Text style={styles.artEmoji}>{CATEGORY_ART[definition.category]}</Text>
+        </View>
+
+        {/* Divider */}
+        <View style={[styles.divider, { backgroundColor: borderColor }]} />
+
+        {/* Description */}
+        <View style={styles.descArea}>
+          <Text style={styles.descText} numberOfLines={3}>{definition.description}</Text>
+        </View>
+
+        {/* Type label */}
+        <View style={[styles.typeBar, { borderTopColor: borderColor + '55' }]}>
+          <Text style={[styles.typeText, { color: borderColor }]}>
+            {CATEGORY_TYPE_LABEL[definition.category]}
+          </Text>
+        </View>
       </Animated.View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -98,43 +160,67 @@ const styles = StyleSheet.create({
   card: {
     width: CARD.width,
     height: CARD.height,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#111827',
     borderRadius: CARD.borderRadius,
     borderWidth: 2,
-    padding: 6,
+    overflow: 'hidden',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.6,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  banner: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 7,
   },
   costBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#fff',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.55)',
+    flexShrink: 0,
   },
-  costText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
-  name: {
-    color: COLORS.textPrimary,
-    fontSize: FONTS.cardName,
+  costText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  cardName: {
+    color: '#fff',
+    fontSize: 17,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
+    flex: 1,
+    letterSpacing: 0.2,
   },
-  emoji: { fontSize: 26 },
-  desc: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.cardDesc,
+  artArea: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  artEmoji: { fontSize: 58 },
+  divider: { height: 1, marginHorizontal: 7, opacity: 0.45 },
+  descArea: {
+    paddingHorizontal: 7,
+    paddingVertical: 6,
+    minHeight: 52,
+    justifyContent: 'center',
+  },
+  descText: {
+    color: '#bbb',
+    fontSize: 14,
     textAlign: 'center',
+    lineHeight: 18,
+  },
+  typeBar: {
+    paddingVertical: 5,
+    alignItems: 'center',
+    borderTopWidth: 1,
+  },
+  typeText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    letterSpacing: 2,
   },
 });

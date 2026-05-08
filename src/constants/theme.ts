@@ -37,7 +37,7 @@ export const SPACING = {
 };
 
 export const CARD = {
-  width: 105,
-  height: 150,
-  borderRadius: 10,
+  width: 176,
+  height: 247,
+  borderRadius: 13,
 };

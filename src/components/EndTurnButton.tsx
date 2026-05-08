@@ -1,19 +1,29 @@
 import React, { useEffect, useRef } from 'react';
 import { TouchableOpacity, Text, Animated, StyleSheet } from 'react-native';
-import { COLORS, FONTS } from '../constants/theme';
+import { COLORS } from '../constants/theme';
 
 interface Props {
   onPress: () => void;
   disabled: boolean;
+  turnNumber?: number;
 }
 
-export default function EndTurnButton({ onPress, disabled }: Props) {
+export default function EndTurnButton({ onPress, disabled, turnNumber = 1 }: Props) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (disabled) {
       pulseAnim.setValue(1);
+      return;
     }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.03, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
   }, [disabled]);
 
   return (
@@ -22,9 +32,11 @@ export default function EndTurnButton({ onPress, disabled }: Props) {
         onPress={onPress}
         disabled={disabled}
         style={[styles.button, disabled && styles.buttonDisabled]}
-        activeOpacity={0.8}
+        activeOpacity={0.75}
       >
-        <Text style={[styles.label, disabled && styles.labelDisabled]}>END TURN</Text>
+        <Text style={[styles.label, disabled && styles.labelDisabled]}>
+          End Turn {turnNumber}
+        </Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -32,24 +44,30 @@ export default function EndTurnButton({ onPress, disabled }: Props) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: COLORS.accentGold,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: 'rgba(20,20,35,0.9)',
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLORS.accentGold,
     shadowColor: COLORS.accentGold,
+    shadowOffset: { width: 0, height: 0 },
     shadowRadius: 8,
     shadowOpacity: 0.5,
-    elevation: 4,
+    elevation: 5,
+    minWidth: 90,
+    alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#555',
+    borderColor: '#444',
     shadowOpacity: 0,
+    backgroundColor: 'rgba(20,20,35,0.6)',
   },
   label: {
-    color: '#000',
-    fontSize: FONTS.button,
+    color: COLORS.accentGold,
+    fontSize: 28,
     fontWeight: 'bold',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  labelDisabled: { color: '#888' },
+  labelDisabled: { color: '#555' },
 });

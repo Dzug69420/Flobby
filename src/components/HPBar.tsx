@@ -20,12 +20,14 @@ export default function HPBar({ current, max, height = 12, showText = true }: Pr
     }).start();
   }, [current, max]);
 
-  const ratio = current / max;
-  const barColor = ratio > 0.5 ? COLORS.hpGreen : ratio > 0.25 ? COLORS.hpYellow : COLORS.hpLow;
-
   const widthInterpolated = widthAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['0%', '100%'],
+  });
+
+  const barColor = widthAnim.interpolate({
+    inputRange: [0, 0.25, 0.5, 1],
+    outputRange: ['#e03030', '#e03030', '#f5a623', '#4caf50'],
   });
 
   return (

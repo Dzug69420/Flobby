@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import { EnemyDefinition } from '../types';
-import { COLORS, FONTS, SPACING } from '../constants/theme';
+import { COLORS } from '../constants/theme';
 import HPBar from './HPBar';
-import GlurpSprite from './GlurpSprite';
+import SlimeSprite from './SlimeSprite';
 
 interface Props {
   enemy: EnemyDefinition;
@@ -15,28 +15,39 @@ interface Props {
 
 export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage }: Props) {
   const wobble = useRef(new Animated.Value(1)).current;
+  const intentBounce = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (stage === 1) return; // sprite handles its own animation
+    if (stage === 1) return;
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(wobble, { toValue: 1.06, duration: 800, useNativeDriver: true }),
-        Animated.timing(wobble, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(wobble, { toValue: 1.05, duration: 1400, useNativeDriver: true }),
+        Animated.timing(wobble, { toValue: 1, duration: 1400, useNativeDriver: true }),
       ])
     );
     loop.start();
     return () => loop.stop();
   }, [stage]);
 
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(intentBounce, { toValue: -4, duration: 900, useNativeDriver: true }),
+        Animated.timing(intentBounce, { toValue: 0, duration: 900, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [enemyTurnAction]);
+
   const isBoss = enemy.isBoss;
-  const intentText = enemyTurnAction === 'attack'
-    ? `⚔️  ${enemy.baseAttack} dmg`
-    : '🛡️  Defending';
+  const isAttacking = enemyTurnAction === 'attack';
+  const intentValue = isAttacking ? enemy.baseAttack : Math.floor(enemy.baseAttack * 0.8);
 
   const blob = (
     <Animated.View
       style={[
-        styles.slimeBody,
+        styles.blob,
         {
           width: enemy.bodySize,
           height: enemy.bodySize * 0.85,
@@ -44,46 +55,64 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
           backgroundColor: enemy.color,
           transform: [{ scale: wobble }],
           shadowColor: isBoss ? COLORS.bossGold : enemy.color,
-          shadowRadius: isBoss ? 16 : 6,
-          shadowOpacity: isBoss ? 0.8 : 0.4,
+          shadowRadius: isBoss ? 18 : 8,
+          shadowOpacity: isBoss ? 0.9 : 0.5,
+          borderWidth: isBoss ? 2 : 0,
+          borderColor: isBoss ? COLORS.bossGold : 'transparent',
         },
       ]}
     >
-      <Text style={[styles.face, { fontSize: enemy.bodySize * 0.38 }]}>{enemy.faceEmoji}</Text>
-      {isBoss && <Text style={[styles.bossEmoji, { fontSize: enemy.bodySize * 0.22 }]}>😈</Text>}
+      <Text style={[styles.blobFace, { fontSize: enemy.bodySize * 0.38 }]}>{enemy.faceEmoji}</Text>
+      {isBoss && <Text style={[styles.bossEmoji, { fontSize: enemy.bodySize * 0.2 }]}>😈</Text>}
     </Animated.View>
   );
 
   return (
     <View style={[styles.container, isBoss && styles.bossContainer]}>
-      {isBoss && <Text style={styles.bossLabel}>⚠️ Halves your block!</Text>}
 
-      <View style={styles.nameRow}>
-        <Text style={[styles.name, isBoss && styles.bossName]} numberOfLines={1} adjustsFontSizeToFit>
-          {enemy.name}
+      {/* Intent badge — floats above the enemy */}
+      <Animated.View
+        style={[
+          styles.intentBadge,
+          isAttacking ? styles.intentAttackBg : styles.intentDefendBg,
+          { transform: [{ translateY: intentBounce }] },
+        ]}
+      >
+        <Text style={styles.intentIcon}>{isAttacking ? '🗡️' : '🛡️'}</Text>
+        <Text style={[styles.intentValue, isAttacking ? styles.intentAttackColor : styles.intentDefendColor]}>
+          {intentValue}
         </Text>
-        {isBoss && <Text style={styles.bossTag}>BOSS</Text>}
-      </View>
+      </Animated.View>
 
+      {/* Enemy name */}
+      {isBoss && enemy.specialMechanic?.type === 'block_reduction' && (
+        <Text style={styles.bossLabel}>
+          ⚠️ BOSS — Reduces your block by {Math.round(enemy.specialMechanic.fraction * 100)}%!
+        </Text>
+      )}
+      <Text style={[styles.enemyName, isBoss && styles.bossName]} numberOfLines={1}>
+        {enemy.name}
+      </Text>
+
+      {/* Sprite */}
       <View style={styles.spriteWrap}>
-        {stage === 1 ? <GlurpSprite size={100} /> : blob}
+        {stage === 1 ? <SlimeSprite size={180} /> : blob}
       </View>
 
-      <View style={styles.hpRow}>
-        <HPBar current={enemyHP} max={enemy.maxHP} height={9} showText={true} />
+      {/* Block badge */}
+      {enemyBlock > 0 && (
+        <View style={styles.blockBadge}>
+          <Text style={styles.blockIcon}>🛡️</Text>
+          <Text style={styles.blockNum}>{enemyBlock}</Text>
+        </View>
+      )}
+
+      {/* HP bar */}
+      <View style={styles.hpSection}>
+        <Text style={styles.hpLabel}>{enemyHP}/{enemy.maxHP}</Text>
+        <HPBar current={enemyHP} max={enemy.maxHP} height={14} showText={false} />
       </View>
 
-      <View style={styles.statusRow}>
-        {enemyBlock > 0 && (
-          <Text style={styles.blockText}>🛡️ {enemyBlock}</Text>
-        )}
-        <Text
-          style={[styles.intent, enemyTurnAction === 'attack' ? styles.intentAttack : styles.intentDefend]}
-          numberOfLines={1}
-        >
-          {intentText}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -91,70 +120,100 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(22,33,62,0.88)',
-    borderRadius: 14,
-    padding: SPACING.sm,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.surfaceRaised,
+    justifyContent: 'flex-end',
+    paddingBottom: 10,
   },
-  bossContainer: {
-    borderColor: COLORS.bossGold,
-    borderWidth: 2,
+  bossContainer: {},
+
+  intentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginBottom: 6,
+    borderWidth: 1.5,
+    shadowRadius: 6,
+    shadowOpacity: 0.6,
+    elevation: 4,
   },
+  intentAttackBg: {
+    backgroundColor: 'rgba(160,20,20,0.85)',
+    borderColor: '#e74c3c',
+    shadowColor: '#e74c3c',
+  },
+  intentDefendBg: {
+    backgroundColor: 'rgba(15,60,130,0.85)',
+    borderColor: '#4fc3f7',
+    shadowColor: '#4fc3f7',
+  },
+  intentIcon: { fontSize: 15 },
+  intentValue: { fontSize: 17, fontWeight: 'bold' },
+  intentAttackColor: { color: '#ff8080' },
+  intentDefendColor: { color: COLORS.accentBlue },
+
   bossLabel: {
     color: COLORS.accentGold,
     fontSize: 10,
-    marginBottom: 2,
+    fontWeight: 'bold',
     fontStyle: 'italic',
+    marginBottom: 2,
     textAlign: 'center',
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-    width: '100%',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  name: {
+  enemyName: {
     color: COLORS.textPrimary,
-    fontSize: FONTS.enemyName,
+    fontSize: 13,
     fontWeight: 'bold',
-    flexShrink: 1,
+    marginBottom: 6,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
-  bossName: { color: COLORS.bossGold },
-  bossTag: {
-    backgroundColor: COLORS.accent,
-    color: '#fff',
-    fontSize: 9,
-    fontWeight: 'bold',
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
+  bossName: { color: COLORS.bossGold, fontSize: 14 },
+
   spriteWrap: {
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    height: 104,
   },
-  slimeBody: {
+  blob: {
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+    elevation: 6,
     shadowOffset: { width: 0, height: 4 },
   },
-  face: { textAlign: 'center' },
+  blobFace: { textAlign: 'center' },
   bossEmoji: { textAlign: 'center', marginTop: -4 },
-  hpRow: { width: '100%', marginBottom: 6 },
-  statusRow: {
-    width: '100%',
+
+  blockBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: COLORS.blockColor,
+    gap: 2,
+    marginBottom: 4,
   },
-  blockText: { color: COLORS.blockColor, fontSize: 16, fontWeight: 'bold' },
-  intent: { fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
-  intentAttack: { color: COLORS.accent },
-  intentDefend: { color: COLORS.accentBlue },
+  blockIcon: { fontSize: 11 },
+  blockNum: { color: COLORS.blockColor, fontSize: 12, fontWeight: 'bold' },
+
+  hpSection: {
+    width: '50%',
+    alignItems: 'center',
+    gap: 3,
+  },
+  hpLabel: {
+    color: '#ff6b6b',
+    fontSize: 26,
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0,0,0,0.9)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
 });

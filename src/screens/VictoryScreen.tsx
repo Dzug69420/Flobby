@@ -1,14 +1,25 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, Animated, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 
 export default function VictoryScreen() {
-  const { playerHP, playerMaxHP, deck, hand, discard, restartGame } = useGameStore();
+  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.08, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
 
   return (
     <LinearGradient colors={['#000000', '#2d2000', '#4a3000']} style={styles.container}>
@@ -28,6 +39,9 @@ export default function VictoryScreen() {
 
         <TouchableOpacity onPress={restartGame} style={styles.button} activeOpacity={0.85}>
           <Text style={styles.buttonText}>🔄  PLAY AGAIN</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={goToMenu} style={styles.menuButton} activeOpacity={0.8}>
+          <Text style={styles.menuButtonText}>🏠  MAIN MENU</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
@@ -73,6 +87,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOpacity: 0.6,
     elevation: 5,
+    marginBottom: 12,
   },
   buttonText: { color: '#000', fontSize: FONTS.button, fontWeight: 'bold', letterSpacing: 1 },
+  menuButton: {
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.35)',
+  },
+  menuButtonText: { color: COLORS.textSecondary, fontSize: 16, fontWeight: 'bold' },
 });

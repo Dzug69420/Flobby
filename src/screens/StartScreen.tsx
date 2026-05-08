@@ -7,7 +7,7 @@ import { COLORS, FONTS, SPACING } from '../constants/theme';
 type Panel = 'menu' | 'options' | 'controls';
 
 export default function StartScreen() {
-  const startGame = useGameStore((s) => s.startGame);
+  const goToCharacterSelect = useGameStore((s) => s.goToCharacterSelect);
   const { ascensionLevel, runsCompleted, setAscensionLevel } = useGameStore();
   const [panel, setPanel] = useState<Panel>('menu');
 
@@ -48,7 +48,7 @@ export default function StartScreen() {
         <Animated.View style={[styles.panelWrap, { opacity: contentAnim }]}>
           {panel === 'menu' && (
             <MenuPanel
-              onStart={startGame}
+              onStart={goToCharacterSelect}
               onOptions={() => setPanel('options')}
               onControls={() => setPanel('controls')}
               ascensionLevel={ascensionLevel}

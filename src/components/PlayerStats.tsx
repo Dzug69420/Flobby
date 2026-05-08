@@ -12,9 +12,10 @@ interface Props {
   energy: number;
   maxEnergy: number;
   playerStatuses: StatusEffect[];
+  characterEmoji?: string;
 }
 
-export default function PlayerStats({ hp, maxHP, block, playerStatuses }: Props) {
+export default function PlayerStats({ hp, maxHP, block, playerStatuses, characterEmoji }: Props) {
   const prevHp = useRef(hp);
   const prevBlock = useRef(block);
   const [damageText, setDamageText] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export default function PlayerStats({ hp, maxHP, block, playerStatuses }: Props)
     <View style={styles.container}>
       {/* Character sprite */}
       <View style={styles.spriteWrap}>
-        <Text style={styles.sprite}>🧙</Text>
+        <Text style={styles.sprite}>{characterEmoji ?? '🧙'}</Text>
         {block > 0 && (
           <View style={styles.blockBadge}>
             <Text style={styles.blockIcon}>🛡️</Text>

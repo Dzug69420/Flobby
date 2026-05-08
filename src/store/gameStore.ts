@@ -4,6 +4,7 @@ import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
 import { ALL_RELICS, pickRandomRelic } from '../data/relics';
+import { ALL_CHARACTERS } from '../data/characters';
 import { pickRandomPotion } from '../data/potions';
 import { pickRandomEvent } from '../data/events';
 import { shuffle, pickRewardCards, clamp, generateId } from '../utils/gameLogic';
@@ -97,6 +98,8 @@ interface GameActions {
   addStatusCardsToDeck: (cardDefId: string, count: number) => void;
   resolveEvent: (choiceIndex: number) => void;
   restartGame: () => void;
+  selectCharacter: (characterId: string) => void;
+  goToCharacterSelect: () => void;
   selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
   goToMenu: () => void;
@@ -132,6 +135,7 @@ const initialState: GameState = {
   restedLastSite: false,
   ascensionLevel: 0,
   runsCompleted: 0,
+  selectedCharacter: 'blobguard',
   currentRunScore: 0,
   bestScore: 0,
   playerHP: PLAYER_MAX_HP,
@@ -162,10 +166,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   startGame: () => {
-    const { ascensionLevel, runsCompleted } = get();
+    const { ascensionLevel, runsCompleted, selectedCharacter } = get();
+    const charDef = ALL_CHARACTERS[selectedCharacter] ?? ALL_CHARACTERS['blobguard'];
     const map = generateMap();
-    const deck = shuffle(buildStartingDeck());
-    const maxHP = ascensionMaxHP(PLAYER_MAX_HP, ascensionLevel);
+
+    // Build character-specific starting deck
+    const deckCards: CardInstance[] = [];
+    for (const entry of charDef.startingDeck) {
+      for (let i = 0; i < entry.count; i++) {
+        deckCards.push({ instanceId: generateId(), definitionId: entry.cardId });
+      }
+    }
+    const deck = shuffle(deckCards);
+
+    const baseMaxHP = charDef.maxHP;
+    const maxHP = ascensionMaxHP(baseMaxHP, ascensionLevel);
     set({
       phase: 'blessing',
       currentStage: 1,
@@ -188,6 +203,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerStatuses: [],
       enemyStatuses: [],
       map,
+      relics: [charDef.startingRelic],
     });
   },
 
@@ -1005,6 +1021,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  selectCharacter: (characterId: string) => {
+    set({ selectedCharacter: characterId });
+  },
+
   selectBlessing: (blessingId: string) => {
     set((state) => {
       let gold = state.gold;
@@ -1057,13 +1077,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   restartGame: () => {
-    const { ascensionLevel, runsCompleted, bestScore } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted, bestScore });
+    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter });
     get().startGame();
   },
 
+  goToCharacterSelect: () => {
+    set({ phase: 'character_select' });
+  },
+
   goToMenu: () => {
-    const { ascensionLevel, runsCompleted, bestScore } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted, bestScore });
+    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter });
   },
 }));

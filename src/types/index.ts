@@ -109,7 +109,7 @@ export interface MapNode {
   enemyIndex?: number;
 }
 
-export type GamePhase = 'start' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'character_select' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
 
 export interface ShopItem {
   cardId: string;
@@ -135,6 +135,7 @@ export interface GameState {
   restedLastSite: boolean;
   ascensionLevel: number;
   runsCompleted: number;
+  selectedCharacter: string;
   currentRunScore: number;
   bestScore: number;
   playerHP: number;

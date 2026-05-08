@@ -13,13 +13,14 @@ import RelicDisplay from '../components/RelicDisplay';
 import PotionSlots from '../components/PotionSlots';
 import CardTooltip from '../components/CardTooltip';
 import { CardDefinition } from '../types';
+import { ALL_CHARACTERS } from '../data/characters';
 
 export default function CombatScreen() {
   const {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -223,6 +224,7 @@ export default function CombatScreen() {
             energy={playerEnergy}
             maxEnergy={playerMaxEnergy}
             playerStatuses={playerStatuses}
+            characterEmoji={ALL_CHARACTERS[selectedCharacter]?.emoji}
           />
           <Animated.View style={[styles.enemyWrapper, enemyActionTransform]}>
             <EnemyDisplay

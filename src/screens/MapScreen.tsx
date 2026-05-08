@@ -1,13 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
-  ScrollView, Animated, Pressable,
+  ScrollView, Animated, Pressable, Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore } from '../store/gameStore';
 import { MapNode, RoomType } from '../types';
 import { roomEmoji } from '../data/map';
 import { COLORS } from '../constants/theme';
+import { ALL_RELICS } from '../data/relics';
+import { ALL_CHARACTERS } from '../data/characters';
 
 const ROOM_COLORS: Record<RoomType, string> = {
   monster:  '#c0392b',
@@ -34,7 +36,8 @@ const COL_WIDTH = 62;
 const ROW_HEIGHT = 54;
 
 export default function MapScreen() {
-  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold } = useGameStore();
+  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold, potions, selectedCharacter, ascensionLevel, currentRunScore, masterCardPool, activePowers } = useGameStore();
+  const [showStats, setShowStats] = useState(false);
 
   const allCards = deck.length + hand.length + discard.length;
   const floors = [...new Set(map.map((n) => n.floor))].sort((a, b) => b - a); // top to bottom (boss at top)
@@ -65,6 +68,9 @@ export default function MapScreen() {
             <Text style={styles.statBadge}>♥ {playerHP}/{playerMaxHP}</Text>
             <Text style={styles.statBadge}>🪙 {gold}</Text>
             <Text style={styles.statBadge}>🃏 {allCards}</Text>
+            <TouchableOpacity onPress={() => setShowStats(true)}>
+              <Text style={styles.statBadge}>📊</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -159,9 +165,97 @@ export default function MapScreen() {
 
         <Text style={styles.hint}>Tap a glowing room to travel there</Text>
       </SafeAreaView>
+
+      {/* Run Stats Modal */}
+      <Modal visible={showStats} transparent animationType="slide" onRequestClose={() => setShowStats(false)}>
+        <Pressable style={statsStyles.backdrop} onPress={() => setShowStats(false)}>
+          <Pressable style={statsStyles.panel} onPress={(e) => e.stopPropagation()}>
+            <Text style={statsStyles.title}>📊 Run Statistics</Text>
+
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Character</Text>
+              <Text style={statsStyles.value}>
+                {ALL_CHARACTERS[selectedCharacter]?.emoji} {ALL_CHARACTERS[selectedCharacter]?.name}
+              </Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Ascension</Text>
+              <Text style={statsStyles.value}>{ascensionLevel}</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Current Floor</Text>
+              <Text style={statsStyles.value}>{currentFloor + 1} / 15</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>HP</Text>
+              <Text style={statsStyles.value}>♥ {playerHP} / {playerMaxHP}</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Gold</Text>
+              <Text style={statsStyles.value}>🪙 {gold}</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Deck Size</Text>
+              <Text style={statsStyles.value}>🃏 {allCards}</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Relics</Text>
+              <Text style={statsStyles.value}>{relics.map((r) => ALL_RELICS[r]?.emoji ?? '').join(' ')}</Text>
+            </View>
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Potions</Text>
+              <Text style={statsStyles.value}>{potions.length > 0 ? `${potions.length} held` : 'None'}</Text>
+            </View>
+            {activePowers.length > 0 && (
+              <View style={statsStyles.row}>
+                <Text style={statsStyles.label}>Active Powers</Text>
+                <Text style={statsStyles.value}>{activePowers.join(', ')}</Text>
+              </View>
+            )}
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Score So Far</Text>
+              <Text style={[statsStyles.value, { color: COLORS.accentGold }]}>⭐ {currentRunScore}</Text>
+            </View>
+
+            <TouchableOpacity style={statsStyles.closeBtn} onPress={() => setShowStats(false)}>
+              <Text style={statsStyles.closeBtnText}>Close</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </LinearGradient>
   );
 }
+
+const statsStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  panel: {
+    backgroundColor: '#111827',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    padding: 20,
+    gap: 10,
+    maxHeight: '80%',
+  },
+  title: { color: COLORS.accentGold, fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 6 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  label: { color: COLORS.textSecondary, fontSize: 13 },
+  value: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
+  closeBtn: {
+    marginTop: 8,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeBtnText: { color: COLORS.textSecondary, fontSize: 14 },
+});
 
 const styles = StyleSheet.create({
   root: { flex: 1 },

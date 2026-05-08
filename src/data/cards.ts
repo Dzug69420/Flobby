@@ -383,6 +383,51 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
       applyPlayerStatuses: [{ type: 'metallicize', stacks: 3 }],
     }),
   },
+  barricade: {
+    id: 'barricade',
+    name: 'Barricade',
+    category: 'power',
+    description: 'Block no longer expires at the end of your turn.',
+    cost: 3,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  corruption: {
+    id: 'corruption',
+    name: 'Corruption',
+    category: 'power',
+    description: 'Skills cost 0. Whenever you play a Skill, Exhaust it.',
+    cost: 3,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  demon_form: {
+    id: 'demon_form',
+    name: 'Demon Form',
+    category: 'power',
+    description: 'Gain 2 Strength at the start of each turn.',
+    cost: 3,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  dark_embrace: {
+    id: 'dark_embrace',
+    name: 'Dark Embrace',
+    category: 'power',
+    description: 'Whenever a card is Exhausted, draw 1 card.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({}),
+  },
+  feel_no_pain: {
+    id: 'feel_no_pain',
+    name: 'Feel No Pain',
+    category: 'power',
+    description: 'Whenever a card is Exhausted, gain 3 Block.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({}),
+  },
   toxic_cloud: {
     id: 'toxic_cloud',
     name: 'Toxic Cloud',
@@ -646,8 +691,10 @@ export const REWARD_CARD_IDS = [
   'turtle_up',
   'toxic_cloud',
   'whirlwind', 'limit_break', 'feed',
+  'barricade', 'corruption', 'demon_form',
   // Uncommon (new batch)
   'all_out_attack', 'body_slam', 'calculated_gamble', 'spot_weakness', 'pummel',
+  'dark_embrace', 'feel_no_pain',
 ];
 
 // Weighted reward pool by rarity
@@ -665,6 +712,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   entrench: 'uncommon', metallicize: 'uncommon',
   power_surge: 'rare', combo_strike: 'rare', turtle_up: 'rare', toxic_cloud: 'rare',
   whirlwind: 'rare', limit_break: 'rare', feed: 'rare',
+  barricade: 'rare', corruption: 'rare', demon_form: 'rare',
+  dark_embrace: 'uncommon', feel_no_pain: 'uncommon',
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
 };

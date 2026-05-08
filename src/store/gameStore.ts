@@ -149,6 +149,7 @@ const initialState: GameState = {
   enemyBlock: 0,
   enemyTurnAction: 'attack',
   bossEnraged: false,
+  activePowers: [],
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -218,7 +219,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!def) return;
     if (def.isUnplayable) return;
     const isXCost = def.cost === -1;
-    if (!isXCost && state.playerEnergy < def.cost) return;
+    const isSkillCard = def.category === 'defense' || def.category === 'status';
+    const effectiveCost = (state.activePowers.includes('corruption') && isSkillCard) ? 0 : def.cost;
+    if (!isXCost && state.playerEnergy < effectiveCost) return;
     if (isXCost && state.playerEnergy < 1) return;
 
     const ctx: CombatContext = {
@@ -275,8 +278,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let playerBlock = s.playerBlock;
       let enemyHP = s.enemyHP;
       let enemyBlock = s.enemyBlock;
-      const cardCost = def.cost === -1 ? s.playerEnergy : def.cost;
-      let playerEnergy = s.playerEnergy - cardCost;
+      const isSkillForCorruption = def.category === 'defense' || def.category === 'status';
+      const actualCost = (s.activePowers.includes('corruption') && isSkillForCorruption)
+        ? 0
+        : def.cost === -1 ? s.playerEnergy : def.cost;
+      let playerEnergy = s.playerEnergy - actualCost;
       let playerStatuses = [...s.playerStatuses];
       let enemyStatuses = [...s.enemyStatuses];
 
@@ -320,9 +326,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'strength', stacks: strengthGain }]);
       }
 
+      // Register power cards
+      let activePowers = [...s.activePowers];
+      if (def.category === 'power' && !activePowers.includes(def.id)) {
+        activePowers.push(def.id);
+      }
+
+      // Corruption: skills cost 0 and exhaust
+      const isSkill = def.category === 'defense' || def.category === 'status';
+      const isCorrupted = s.activePowers.includes('corruption');
+      const finalExhaust = def.exhaust || (isCorrupted && isSkill);
+      if (isCorrupted && isSkill) {
+        modifiedDelta.energyChange = (modifiedDelta.energyChange ?? 0) + def.cost;
+      }
+
       const newHand = s.hand.filter((c) => c.instanceId !== instanceId);
-      const newDiscard = def.exhaust ? s.discard : [...s.discard, cardInst];
-      const newExhaustPile = def.exhaust ? [...s.exhaustPile, cardInst] : s.exhaustPile;
+      const newDiscard = finalExhaust ? s.discard : [...s.discard, cardInst];
+      const newExhaustPile = finalExhaust ? [...s.exhaustPile, cardInst] : s.exhaustPile;
+
+      // Feel No Pain: gain 3 block when a card is exhausted
+      if (finalExhaust && s.activePowers.includes('feel_no_pain')) {
+        playerBlock += 3;
+      }
       const newCardsPlayedTotal = s.cardsPlayedTotal + 1;
 
       // Nunchaku: every 10th card gives +1 energy
@@ -351,11 +376,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerStatuses,
         enemyStatuses,
         exhaustPile: newExhaustPile,
+        activePowers,
       };
     });
 
     if (modifiedDelta.drawCards) {
       get().drawCards(modifiedDelta.drawCards);
+    }
+
+    // Dark Embrace: draw 1 card when a card is exhausted
+    const afterExhaust = get();
+    if (
+      (def.exhaust || (afterExhaust.activePowers.includes('corruption') &&
+        (def.category === 'defense' || def.category === 'status'))) &&
+      afterExhaust.activePowers.includes('dark_embrace')
+    ) {
+      get().drawCards(1);
     }
 
     // Check boss enrage threshold (50% HP)
@@ -448,12 +484,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Wound-on-defend: add Wound cards to player deck
         // (handled after set via addStatusCardsToDeck call)
       }
-      // Calipers: block was already handled above; now reset
-      if (!hasRelic(relics, 'calipers')) {
+      // Barricade: block never expires
+      if (!state.activePowers.includes('barricade') && !hasRelic(relics, 'calipers')) {
         playerBlock = 0;
-      } else {
-        playerBlock = 0; // calipers only retains at START of next turn (applied above)
+      } else if (!state.activePowers.includes('barricade')) {
+        playerBlock = 0; // calipers handled above
       }
+      // (if barricade is active, playerBlock remains as-is)
 
       // Decrement timed statuses at end of turn
       playerStatuses = tickTimedStatuses(playerStatuses);
@@ -462,7 +499,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Metallicize: gain block at start of next turn
       const metallicize = getStatusStacks(playerStatuses, 'metallicize');
       if (metallicize > 0) {
-        playerBlock = metallicize;
+        playerBlock += metallicize;
+      }
+
+      // Demon Form: gain 2 Strength at start of each turn
+      if (state.activePowers.includes('demon_form')) {
+        playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: 2 }]);
       }
 
       const nextTurn = state.turnNumber + 1;
@@ -478,6 +520,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         return !def?.retain;
       });
 
+      // Corruption: skills played this turn were exhausted (already handled in playCard)
+      const finalEnergy = state.activePowers.includes('corruption')
+        ? PLAYER_MAX_ENERGY
+        : PLAYER_MAX_ENERGY;
+
       return {
         playerHP,
         playerBlock,
@@ -490,7 +537,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: retainCards,
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
-        playerEnergy: PLAYER_MAX_ENERGY,
+        playerEnergy: finalEnergy,
         cardsPlayedThisTurn: 0,
       };
     });
@@ -690,6 +737,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         exhaustPile: [],
         retainedCards: [],
         bossEnraged: false,
+        activePowers: [],
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

@@ -19,7 +19,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -193,10 +193,24 @@ export default function CombatScreen() {
           </View>
         </View>
 
-        {/* ── RELIC ROW ── */}
-        {relics.length > 0 && (
+        {/* ── RELIC + POWERS ROW ── */}
+        {(relics.length > 0 || activePowers.length > 0) && (
           <View style={styles.relicRow}>
             <RelicDisplay relics={relics} />
+            {activePowers.length > 0 && (
+              <View style={styles.powersRow}>
+                {activePowers.map((pid) => {
+                  const def = masterCardPool[pid];
+                  if (!def) return null;
+                  return (
+                    <View key={pid} style={styles.powerBadge}>
+                      <Text style={styles.powerEmoji}>🔋</Text>
+                      <Text style={styles.powerName}>{def.name}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </View>
         )}
 
@@ -438,7 +452,26 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.05)',
+    gap: 4,
   },
+  powersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  powerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(102,187,106,0.15)',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#66bb6a',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  powerEmoji: { fontSize: 10 },
+  powerName: { color: '#66bb6a', fontSize: 10, fontWeight: 'bold' },
 
   // BATTLE
   battleArea: {

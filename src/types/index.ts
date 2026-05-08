@@ -152,6 +152,7 @@ export interface GameState {
   enemyBlock: number;
   enemyTurnAction: 'attack' | 'defend' | null;
   bossEnraged: boolean;
+  activePowers: string[];
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

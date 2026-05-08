@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem } from '../types';
+import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem, RunRecord } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
@@ -183,6 +183,7 @@ const initialState: GameState = {
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
+  runHistory: [],
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -728,7 +729,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
         s.relics.length * 25 +
         s.gold * 0.25
       );
-      set({ phase: 'gameover', currentRunScore: score, bestScore: Math.max(s.bestScore, score) });
+      const record: RunRecord = {
+        floor: s.currentFloor + 1,
+        score,
+        won: false,
+        character: s.selectedCharacter,
+        ascension: s.ascensionLevel,
+        deckSize: s.deck.length + s.hand.length + s.discard.length,
+        relicCount: s.relics.length,
+      };
+      set({
+        phase: 'gameover',
+        currentRunScore: score,
+        bestScore: Math.max(s.bestScore, score),
+        runHistory: [record, ...s.runHistory].slice(0, 10),
+      });
       return;
     }
 
@@ -1236,11 +1251,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   selectBossRelic: (relicId: string) => {
-    set((state) => ({
-      phase: 'victory',
-      relics: [...state.relics, relicId],
-      bossRelicChoices: [],
-    }));
+    set((state) => {
+      const record: RunRecord = {
+        floor: state.currentFloor + 1,
+        score: state.currentRunScore,
+        won: true,
+        character: state.selectedCharacter,
+        ascension: state.ascensionLevel,
+        deckSize: state.deck.length + state.hand.length + state.discard.length,
+        relicCount: state.relics.length + 1,
+      };
+      return {
+        phase: 'victory',
+        relics: [...state.relics, relicId],
+        bossRelicChoices: [],
+        runHistory: [record, ...state.runHistory].slice(0, 10),
+      };
+    });
   },
 
   selectCharacter: (characterId: string) => {
@@ -1335,8 +1362,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   restartGame: () => {
-    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter });
+    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter, runHistory } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter, runHistory });
     get().startGame();
   },
 
@@ -1345,7 +1372,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   goToMenu: () => {
-    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter } = get();
-    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter });
+    const { ascensionLevel, runsCompleted, bestScore, selectedCharacter, runHistory } = get();
+    set({ ...initialState, ascensionLevel, runsCompleted, bestScore, selectedCharacter, runHistory });
   },
 }));

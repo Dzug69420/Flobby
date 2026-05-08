@@ -8,6 +8,7 @@ interface Props {
   card: CardInstance;
   definition: CardDefinition;
   onPlay: (id: string) => void;
+  onLongPress?: (definition: CardDefinition) => void;
   disabled: boolean;
   affordable: boolean;
   index: number;
@@ -55,7 +56,7 @@ const RARITY_COLORS: Record<string, string> = {
 };
 
 export default function CardComponent({
-  card, definition, onPlay, disabled, affordable, index, faceDown = false, preview, overrideCost,
+  card, definition, onPlay, onLongPress, disabled, affordable, index, faceDown = false, preview, overrideCost,
 }: Props) {
   const slideAnim = useRef(new Animated.Value(120)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -127,6 +128,7 @@ export default function CardComponent({
   return (
     <Pressable
       onPress={handlePress}
+      onLongPress={onLongPress ? () => onLongPress(definition) : undefined}
       onHoverIn={handleHoverIn}
       onHoverOut={handleHoverOut}
       disabled={disabled || !affordable}

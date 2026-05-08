@@ -8,6 +8,7 @@ interface Props {
   hand: CardInstance[];
   masterPool: Record<string, CardDefinition>;
   onPlay: (id: string) => void;
+  onLongPress?: (def: CardDefinition) => void;
   disabled: boolean;
   playerEnergy: number;
   combatCtx?: CombatContext;
@@ -18,7 +19,7 @@ const MAX_ROTATION = 12;
 const MAX_DROP_PX = 16;
 const CARD_OVERLAP = -18;
 
-export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy, combatCtx, sneckoCosts }: Props) {
+export default function HandArea({ hand, masterPool, onPlay, onLongPress, disabled, playerEnergy, combatCtx, sneckoCosts }: Props) {
   const count = hand.length;
 
   return (
@@ -54,6 +55,7 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
                 card={card}
                 definition={def}
                 onPlay={onPlay}
+                onLongPress={onLongPress}
                 disabled={disabled}
                 affordable={!def.isUnplayable && playerEnergy >= effectiveCost}
                 index={index}

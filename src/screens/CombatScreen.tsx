@@ -305,6 +305,7 @@ export default function CombatScreen() {
               hand={hand}
               masterPool={masterCardPool}
               onPlay={handlePlayCard}
+              onLongPress={(def) => setTooltipDef(def)}
               disabled={isAnimating}
               playerEnergy={playerEnergy}
               combatCtx={combatCtx}

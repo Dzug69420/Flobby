@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Animated, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
+import { ALL_RELICS } from '../data/relics';
 
 export default function VictoryScreen() {
-  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold, currentRunScore, bestScore } = useGameStore();
+  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold, currentRunScore, bestScore, relics } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -49,6 +50,23 @@ export default function VictoryScreen() {
           <Text style={styles.statLine}>All 15 floors cleared! 🎉</Text>
         </View>
 
+        {/* Relics Gallery */}
+        {relics.length > 0 && (
+          <View style={styles.relicsSection}>
+            <Text style={styles.relicsTitle}>Relics Collected ({relics.length})</Text>
+            <View style={styles.relicsRow}>
+              {relics.map((id) => {
+                const def = ALL_RELICS[id];
+                return (
+                  <View key={id} style={styles.relicBadge}>
+                    <Text style={styles.relicEmoji}>{def?.emoji ?? '?'}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
         <TouchableOpacity onPress={restartGame} style={styles.button} activeOpacity={0.85}>
           <Text style={styles.buttonText}>🔄  PLAY AGAIN</Text>
         </TouchableOpacity>
@@ -90,6 +108,27 @@ const styles = StyleSheet.create({
   },
   statLine: { color: COLORS.textSecondary, fontSize: 15, marginBottom: SPACING.xs },
   statVal: { color: COLORS.bossGold, fontWeight: 'bold' },
+  relicsSection: {
+    width: '100%',
+    marginBottom: SPACING.md,
+  },
+  relicsTitle: { color: COLORS.textSecondary, fontSize: 12, marginBottom: 8 },
+  relicsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  relicBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,215,0,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  relicEmoji: { fontSize: 18 },
   button: {
     backgroundColor: COLORS.bossGold,
     paddingHorizontal: 40,

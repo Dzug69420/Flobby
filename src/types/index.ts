@@ -114,7 +114,7 @@ export interface MapNode {
   enemyIndex?: number;
 }
 
-export type GamePhase = 'start' | 'character_select' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'character_select' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'boss_relic' | 'gameover' | 'victory';
 
 export interface ShopItem {
   cardId: string;
@@ -164,6 +164,7 @@ export interface GameState {
   attackPlayedThisTurn: boolean;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
+  bossRelicChoices: string[];
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

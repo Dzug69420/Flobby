@@ -3,7 +3,7 @@ import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, Status
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
 import { generateMap, markNodeVisited } from '../data/map';
-import { ALL_RELICS, pickRandomRelic } from '../data/relics';
+import { ALL_RELICS, pickRandomRelic, BOSS_RELICS } from '../data/relics';
 import { ALL_CHARACTERS } from '../data/characters';
 import { pickRandomPotion } from '../data/potions';
 import { pickRandomEvent } from '../data/events';
@@ -118,6 +118,7 @@ interface GameActions {
   addStatusCardsToDeck: (cardDefId: string, count: number) => void;
   resolveEvent: (choiceIndex: number) => void;
   restartGame: () => void;
+  selectBossRelic: (relicId: string) => void;
   selectCharacter: (characterId: string) => void;
   goToCharacterSelect: () => void;
   transformCard: (instanceId: string) => void;
@@ -181,6 +182,7 @@ const initialState: GameState = {
   attackPlayedThisTurn: false,
   sneckoCosts: {},
   bottledCardId: null,
+  bossRelicChoices: [],
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -764,7 +766,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (state.currentEnemy?.isBoss) {
       const bossGold = 50;
-      const bossRelic = pickRandomRelic(state.relics, 'boss');
       const newAscension = Math.min(state.ascensionLevel + 1, 10);
       // Score calculation
       const score = Math.floor(
@@ -776,16 +777,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
         state.ascensionLevel * 100               // ascension bonus
       );
       const newBestScore = Math.max(state.bestScore, score);
+      // Pick 3 distinct boss relics for the player to choose from
+      const allBossRelics = BOSS_RELICS.filter((r) => !state.relics.includes(r));
+      const shuffledBossRelics = allBossRelics.sort(() => Math.random() - 0.5).slice(0, 3);
+
       set({
-        phase: 'victory',
+        phase: shuffledBossRelics.length > 0 ? 'boss_relic' : 'victory',
         gold: state.gold + bossGold,
         lastGoldReward: bossGold,
         playerHP: Math.min(state.playerHP + burningBloodHeal, state.playerMaxHP),
-        relics: bossRelic ? [...state.relics, bossRelic] : state.relics,
         ascensionLevel: newAscension,
         runsCompleted: state.runsCompleted + 1,
         currentRunScore: score,
         bestScore: newBestScore,
+        bossRelicChoices: shuffledBossRelics,
       });
       return;
     }
@@ -1228,6 +1233,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         discard: upgradeInPile(state.discard),
       };
     });
+  },
+
+  selectBossRelic: (relicId: string) => {
+    set((state) => ({
+      phase: 'victory',
+      relics: [...state.relics, relicId],
+      bossRelicChoices: [],
+    }));
   },
 
   selectCharacter: (characterId: string) => {

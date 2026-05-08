@@ -189,14 +189,19 @@ export default function CardComponent({
           <Text style={styles.descText} numberOfLines={3}>{definition.description}</Text>
         </View>
 
-        {/* Type label */}
+        {/* Type label + keywords */}
         <View style={[styles.typeBar, { borderTopColor: borderColor + '55' }]}>
           {isUnplayable ? (
             <Text style={styles.unplayableText}>UNPLAYABLE</Text>
           ) : (
-            <Text style={[styles.typeText, { color: borderColor }]}>
-              {CATEGORY_TYPE_LABEL[definition.category]}
-            </Text>
+            <View style={styles.typeRow}>
+              <Text style={[styles.typeText, { color: borderColor }]}>
+                {CATEGORY_TYPE_LABEL[definition.category]}
+              </Text>
+              {definition.innate && <Text style={styles.keywordBadge}>★</Text>}
+              {definition.retain && <Text style={styles.keywordBadgeRetain}>↩</Text>}
+              {definition.exhaust && <Text style={styles.keywordBadgeExhaust}>✖</Text>}
+            </View>
           )}
         </View>
       </Animated.View>
@@ -313,6 +318,10 @@ const styles = StyleSheet.create({
     color: '#666',
     letterSpacing: 1,
   },
+  typeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  keywordBadge: { color: '#f9a825', fontSize: 11, fontWeight: 'bold' },
+  keywordBadgeRetain: { color: '#80deea', fontSize: 11, fontWeight: 'bold' },
+  keywordBadgeExhaust: { color: '#ff8f8f', fontSize: 11, fontWeight: 'bold' },
   typeText: {
     fontSize: 13,
     fontWeight: 'bold',

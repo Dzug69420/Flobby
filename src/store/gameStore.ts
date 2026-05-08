@@ -140,6 +140,7 @@ const initialState: GameState = {
   hand: [],
   discard: [],
   exhaustPile: [],
+  retainedCards: [],
   currentEnemy: null,
   enemyHP: 0,
   enemyBlock: 0,
@@ -441,6 +442,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
 
+      // Separate retained cards from cards to discard
+      const retainCards = state.hand.filter((c) => {
+        const def = state.masterCardPool[c.definitionId];
+        return def?.retain;
+      });
+      const discardCards = state.hand.filter((c) => {
+        const def = state.masterCardPool[c.definitionId];
+        return !def?.retain;
+      });
+
       return {
         playerHP,
         playerBlock,
@@ -450,8 +461,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyStatuses,
         turnNumber: nextTurn,
         enemyTurnAction: nextAction,
-        hand: [],
-        discard: [...state.discard, ...state.hand],
+        hand: retainCards,
+        retainedCards: retainCards,
+        discard: [...state.discard, ...discardCards],
         playerEnergy: PLAYER_MAX_ENERGY,
         cardsPlayedThisTurn: 0,
       };
@@ -599,10 +611,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (hasRelic(relics, 'fusion_hammer')) startEnergy += 1;
       const sneckoExtraCards = hasRelic(relics, 'snecko_eye') ? 2 : 0;
 
+      // Separate innate cards from the rest
+      const allDeckCards = [...state.deck];
+      const innateDefs = allDeckCards.filter((c) => state.masterCardPool[c.definitionId]?.innate);
+      const normalDefs = allDeckCards.filter((c) => !state.masterCardPool[c.definitionId]?.innate);
+      const shuffledNormal = shuffle(normalDefs);
+
       const drawCount = HAND_SIZE + startExtraCards + sneckoExtraCards;
-      const shuffledDeck = shuffle([...state.deck]);
-      const newHand = shuffledDeck.slice(0, drawCount);
-      const remaining = shuffledDeck.slice(drawCount);
+      const fromNormal = Math.max(0, drawCount - innateDefs.length);
+      const newHand = [...innateDefs, ...shuffledNormal.slice(0, fromNormal)];
+      const remaining = shuffledNormal.slice(fromNormal);
 
       const ascHP = Math.floor(enemy.maxHP * ascensionEnemyHPMultiplier(state.ascensionLevel));
       set({
@@ -626,6 +644,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerStatuses: startStatuses,
         enemyStatuses: enemyStartStatuses,
         exhaustPile: [],
+        retainedCards: [],
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

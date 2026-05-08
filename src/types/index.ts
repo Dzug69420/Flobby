@@ -57,6 +57,8 @@ export interface CardDefinition {
   upgradeId?: string;
   isStatusCard?: boolean;
   isUnplayable?: boolean;
+  innate?: boolean;
+  retain?: boolean;
 }
 
 export interface CardInstance {
@@ -139,6 +141,7 @@ export interface GameState {
   hand: CardInstance[];
   discard: CardInstance[];
   exhaustPile: CardInstance[];
+  retainedCards: CardInstance[];
   currentEnemy: EnemyDefinition | null;
   enemyHP: number;
   enemyBlock: number;

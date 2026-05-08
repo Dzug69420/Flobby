@@ -395,6 +395,38 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── INNATE / RETAIN CARDS ────────────────────────────────────────────────────
+  prepared: {
+    id: 'prepared',
+    name: 'Prepared',
+    category: 'status',
+    description: 'Gain 1 energy. Draw 1 card. Retain.',
+    cost: 0,
+    rarity: 'uncommon',
+    retain: true,
+    effect: () => ({ energyChange: 1, drawCards: 1 }),
+  },
+  vigilance: {
+    id: 'vigilance',
+    name: 'Vigilance',
+    category: 'defense',
+    description: 'Gain 8 block. Retain.',
+    cost: 2,
+    rarity: 'uncommon',
+    retain: true,
+    effect: () => ({ playerBlockChange: 8 }),
+  },
+  preemptive_strike: {
+    id: 'preemptive_strike',
+    name: 'First Strike',
+    category: 'attack',
+    description: 'Innate. Deal 10 damage.',
+    cost: 1,
+    rarity: 'uncommon',
+    innate: true,
+    effect: () => ({ enemyHPChange: -10 }),
+  },
+
   // ── STATUS / CURSE CARDS (added to deck mid-combat by enemies) ───────────────
   wound: {
     id: 'wound',
@@ -523,6 +555,7 @@ export const REWARD_CARD_IDS = [
   'flex',
   // Uncommon
   'armor_break', 'flurry', 'execute', 'bash', 'weaken_strike', 'poison_blade',
+  'prepared', 'vigilance', 'preemptive_strike',
   'barrier',
   'slash_and_guard', 'counter', 'shield_bash',
   'rage', 'desperation', 'last_stand', 'second_wind',
@@ -541,6 +574,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   adrenaline: 'common', hyper: 'common', gobble_up: 'common', flex: 'common',
   armor_break: 'uncommon', flurry: 'uncommon', execute: 'uncommon',
   bash: 'uncommon', weaken_strike: 'uncommon', poison_blade: 'uncommon',
+  prepared: 'uncommon', vigilance: 'uncommon', preemptive_strike: 'uncommon',
   barrier: 'uncommon', slash_and_guard: 'uncommon', counter: 'uncommon',
   shield_bash: 'uncommon', rage: 'uncommon', desperation: 'uncommon',
   last_stand: 'uncommon', second_wind: 'uncommon', inflame: 'uncommon',

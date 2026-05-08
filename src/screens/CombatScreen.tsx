@@ -28,7 +28,8 @@ export default function CombatScreen() {
   const [pendingEnemyAction, setPendingEnemyAction] = useState<'attack' | 'defend'>('attack');
   const [showSettings, setShowSettings] = useState(false);
   const [showDeckViewer, setShowDeckViewer] = useState(false);
-  const [deckViewTab, setDeckViewTab] = useState<'deck' | 'discard'>('deck');
+  const [deckViewTab, setDeckViewTab] = useState<'deck' | 'discard' | 'exhaust'>('deck');
+  const [deckFilter, setDeckFilter] = useState<string>('all');
   const [tooltipDef, setTooltipDef] = useState<CardDefinition | null>(null);
   const [stageFlash, setStageFlash] = useState(true);
   const isMounted = useRef(true);
@@ -128,7 +129,10 @@ export default function CombatScreen() {
 
   if (!currentEnemy) return null;
 
-  const viewCards = deckViewTab === 'deck' ? deck : discard;
+  const rawViewCards = deckViewTab === 'deck' ? deck : deckViewTab === 'discard' ? discard : exhaustPile;
+  const viewCards = deckFilter === 'all'
+    ? rawViewCards
+    : rawViewCards.filter((c) => masterCardPool[c.definitionId]?.category === deckFilter);
 
   const combatCtx = {
     playerHP, playerMaxHP, playerBlock, playerEnergy,
@@ -352,24 +356,38 @@ export default function CombatScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Tabs */}
+              {/* Pile Tabs */}
               <View style={styles.tabRow}>
-                <TouchableOpacity
-                  style={[styles.tab, deckViewTab === 'deck' && styles.tabActive]}
-                  onPress={() => setDeckViewTab('deck')}
-                >
-                  <Text style={[styles.tabText, deckViewTab === 'deck' && styles.tabTextActive]}>
-                    Deck ({deck.length})
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.tab, deckViewTab === 'discard' && styles.tabActive]}
-                  onPress={() => setDeckViewTab('discard')}
-                >
-                  <Text style={[styles.tabText, deckViewTab === 'discard' && styles.tabTextActive]}>
-                    Discard ({discard.length})
-                  </Text>
-                </TouchableOpacity>
+                {(['deck', 'discard', 'exhaust'] as const).map((tab) => {
+                  const count = tab === 'deck' ? deck.length : tab === 'discard' ? discard.length : exhaustPile.length;
+                  const labels = { deck: `Deck (${count})`, discard: `Discard (${count})`, exhaust: `🔥 (${count})` };
+                  return (
+                    <TouchableOpacity
+                      key={tab}
+                      style={[styles.tab, deckViewTab === tab && styles.tabActive]}
+                      onPress={() => setDeckViewTab(tab)}
+                    >
+                      <Text style={[styles.tabText, deckViewTab === tab && styles.tabTextActive]}>
+                        {labels[tab]}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Category Filter */}
+              <View style={styles.filterRow}>
+                {(['all', 'attack', 'defense', 'combo', 'power', 'status'] as const).map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[styles.filterBtn, deckFilter === cat && styles.filterBtnActive]}
+                    onPress={() => setDeckFilter(cat)}
+                  >
+                    <Text style={[styles.filterText, deckFilter === cat && styles.filterTextActive]}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
               {/* Card grid */}
@@ -692,6 +710,24 @@ const styles = StyleSheet.create({
   },
   tabText: { color: COLORS.textSecondary, fontSize: 14, fontWeight: 'bold' },
   tabTextActive: { color: COLORS.accentGold },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  filterBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  filterBtnActive: { backgroundColor: COLORS.accentGold },
+  filterText: { color: COLORS.textSecondary, fontSize: 11 },
+  filterTextActive: { color: '#000', fontWeight: 'bold' },
   deckScroll: { flexGrow: 0 },
   deckGrid: {
     flexDirection: 'row',

@@ -243,6 +243,7 @@ export default function CombatScreen() {
               stage={currentStage}
               enemyStatuses={enemyStatuses}
               bossEnraged={bossEnraged}
+              turnNumber={turnNumber}
             />
           </Animated.View>
         </View>

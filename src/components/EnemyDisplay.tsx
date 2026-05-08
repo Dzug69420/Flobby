@@ -5,6 +5,7 @@ import { COLORS } from '../constants/theme';
 import HPBar from './HPBar';
 import SlimeSprite from './SlimeSprite';
 import StatusBadges from './StatusBadges';
+import { previewNextTurns } from '../store/gameStore';
 
 interface Props {
   enemy: EnemyDefinition;
@@ -14,9 +15,10 @@ interface Props {
   stage: number;
   enemyStatuses: StatusEffect[];
   bossEnraged?: boolean;
+  turnNumber?: number;
 }
 
-export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses, bossEnraged }: Props) {
+export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses, bossEnraged, turnNumber }: Props) {
   const wobble = useRef(new Animated.Value(1)).current;
   const intentBounce = useRef(new Animated.Value(0)).current;
 
@@ -45,6 +47,9 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
 
   const isBoss = enemy.isBoss;
   const isElite = enemy.isElite;
+  const nextTurns = turnNumber !== undefined && enemy.attackPattern.type !== 'random'
+    ? previewNextTurns(enemy.attackPattern, turnNumber, 3)
+    : null;
   const isAttacking = enemyTurnAction === 'attack';
   const enemyStrength = enemyStatuses.find((s) => s.type === 'strength')?.stacks ?? 0;
   const intentValue = isAttacking
@@ -99,6 +104,17 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
           <Text style={styles.intentStatusIcons}>{intentStatusIcons}</Text>
         )}
       </Animated.View>
+
+      {/* Next turns preview */}
+      {nextTurns && (
+        <View style={styles.nextTurnsRow}>
+          {nextTurns.map((action, i) => (
+            <Text key={i} style={[styles.nextTurnIcon, { opacity: 0.5 - i * 0.12 }]}>
+              {action === 'attack' ? '🗡️' : '🛡️'}
+            </Text>
+          ))}
+        </View>
+      )}
 
       {/* Enemy name + elite/boss labels */}
       {isBoss && enemy.specialMechanic?.type === 'block_reduction' && (
@@ -185,6 +201,12 @@ const styles = StyleSheet.create({
   intentIcon: { fontSize: 15 },
   intentValue: { fontSize: 17, fontWeight: 'bold' },
   intentStatusIcons: { fontSize: 12 },
+  nextTurnsRow: {
+    flexDirection: 'row',
+    gap: 2,
+    marginBottom: 3,
+  },
+  nextTurnIcon: { fontSize: 11 },
   intentAttackColor: { color: '#ff8080' },
   intentDefendColor: { color: COLORS.accentBlue },
 

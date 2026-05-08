@@ -31,11 +31,25 @@ function computeEnemyAction(
     return (pattern.pattern[turnNumber % pattern.pattern.length] ?? 'attack') as 'attack' | 'defend';
   }
   if (pattern.type === 'random') {
-    return Math.random() < (pattern.attackChance ?? 0.7) ? 'attack' : 'defend';
+    // Use seeded random based on turnNumber for predictability
+    const seed = (turnNumber * 9301 + 49297) % 233280;
+    return (seed / 233280) < (pattern.attackChance ?? 0.7) ? 'attack' : 'defend';
   }
   const isEven = turnNumber % 2 === 0;
   const attackOnEven = pattern.firstTurn === 'attack';
   return isEven === attackOnEven ? 'attack' : 'defend';
+}
+
+export function previewNextTurns(
+  pattern: { type: string; firstTurn?: string; pattern?: string[]; attackChance?: number },
+  currentTurnNumber: number,
+  count: number
+): Array<'attack' | 'defend'> {
+  const results: Array<'attack' | 'defend'> = [];
+  for (let i = 1; i <= count; i++) {
+    results.push(computeEnemyAction(pattern, currentTurnNumber + i));
+  }
+  return results;
 }
 
 function getStatusStacks(statuses: StatusEffect[], type: StatusEffectType): number {

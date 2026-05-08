@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
-import { EnemyDefinition } from '../types';
+import { EnemyDefinition, StatusEffect } from '../types';
 import { COLORS } from '../constants/theme';
 import HPBar from './HPBar';
 import SlimeSprite from './SlimeSprite';
+import StatusBadges from './StatusBadges';
 
 interface Props {
   enemy: EnemyDefinition;
@@ -11,9 +12,10 @@ interface Props {
   enemyBlock: number;
   enemyTurnAction: 'attack' | 'defend' | null;
   stage: number;
+  enemyStatuses: StatusEffect[];
 }
 
-export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage }: Props) {
+export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses }: Props) {
   const wobble = useRef(new Animated.Value(1)).current;
   const intentBounce = useRef(new Animated.Value(0)).current;
 
@@ -43,6 +45,12 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
   const isBoss = enemy.isBoss;
   const isAttacking = enemyTurnAction === 'attack';
   const intentValue = isAttacking ? enemy.baseAttack : Math.floor(enemy.baseAttack * 0.8);
+  const intentStatusIcons = isAttacking && enemy.attackStatuses && enemy.attackStatuses.length > 0
+    ? enemy.attackStatuses.map((s) => {
+        const icons: Record<string, string> = { vulnerable: '💢', weak: '🌀', frail: '💨', poison: '☠️' };
+        return icons[s.type] ?? '';
+      }).join('')
+    : '';
 
   const blob = (
     <Animated.View
@@ -82,6 +90,9 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
         <Text style={[styles.intentValue, isAttacking ? styles.intentAttackColor : styles.intentDefendColor]}>
           {intentValue}
         </Text>
+        {intentStatusIcons !== '' && (
+          <Text style={styles.intentStatusIcons}>{intentStatusIcons}</Text>
+        )}
       </Animated.View>
 
       {/* Enemy name */}
@@ -112,6 +123,9 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
         <Text style={styles.hpLabel}>{enemyHP}/{enemy.maxHP}</Text>
         <HPBar current={enemyHP} max={enemy.maxHP} height={14} showText={false} />
       </View>
+
+      {/* Status effects */}
+      <StatusBadges statuses={enemyStatuses} />
 
     </View>
   );
@@ -151,6 +165,7 @@ const styles = StyleSheet.create({
   },
   intentIcon: { fontSize: 15 },
   intentValue: { fontSize: 17, fontWeight: 'bold' },
+  intentStatusIcons: { fontSize: 12 },
   intentAttackColor: { color: '#ff8080' },
   intentDefendColor: { color: COLORS.accentBlue },
 

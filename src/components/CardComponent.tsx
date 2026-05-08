@@ -18,6 +18,7 @@ const CATEGORY_BANNER: Record<string, string> = {
   defense: '#0d2b55',
   combo: '#5a3a00',
   status: '#30105a',
+  power: '#1a2a0a',
 };
 
 const CATEGORY_BORDER: Record<string, string> = {
@@ -25,6 +26,7 @@ const CATEGORY_BORDER: Record<string, string> = {
   defense: '#4fc3f7',
   combo: '#f5a623',
   status: '#9b59b6',
+  power: '#66bb6a',
 };
 
 const CATEGORY_TYPE_LABEL: Record<string, string> = {
@@ -32,6 +34,7 @@ const CATEGORY_TYPE_LABEL: Record<string, string> = {
   defense: 'SKILL',
   combo: 'COMBO',
   status: 'STATUS',
+  power: 'POWER',
 };
 
 const CATEGORY_ART: Record<string, string> = {
@@ -39,6 +42,13 @@ const CATEGORY_ART: Record<string, string> = {
   defense: '🛡️',
   combo: '⚡',
   status: '✨',
+  power: '🔋',
+};
+
+const RARITY_COLORS: Record<string, string> = {
+  common: '#9e9e9e',
+  uncommon: '#5c6bc0',
+  rare: '#f9a825',
 };
 
 export default function CardComponent({
@@ -124,12 +134,15 @@ export default function CardComponent({
           },
         ]}
       >
-        {/* Top banner: cost + name */}
+        {/* Top banner: cost + name + rarity dot */}
         <View style={[styles.banner, { backgroundColor: bannerColor }]}>
           <View style={[styles.costBadge, { backgroundColor: borderColor }]}>
             <Text style={styles.costText}>{definition.cost}</Text>
           </View>
           <Text style={styles.cardName} numberOfLines={1}>{definition.name}</Text>
+          {definition.rarity && (
+            <View style={[styles.rarityDot, { backgroundColor: RARITY_COLORS[definition.rarity] }]} />
+          )}
         </View>
 
         {/* Art area */}
@@ -187,6 +200,15 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   costText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  rarityDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    flexShrink: 0,
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   cardName: {
     color: '#fff',
     fontSize: 17,

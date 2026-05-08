@@ -1,4 +1,19 @@
-export type CardCategory = 'attack' | 'defense' | 'combo' | 'status';
+export type CardCategory = 'attack' | 'defense' | 'combo' | 'status' | 'power';
+
+export type StatusEffectType =
+  | 'vulnerable'
+  | 'weak'
+  | 'frail'
+  | 'poison'
+  | 'strength'
+  | 'dexterity'
+  | 'metallicize'
+  | 'ritual';
+
+export interface StatusEffect {
+  type: StatusEffectType;
+  stacks: number;
+}
 
 export interface CombatContext {
   playerHP: number;
@@ -12,6 +27,8 @@ export interface CombatContext {
   cardsInDeck: CardInstance[];
   turnNumber: number;
   cardsPlayedThisTurn: number;
+  playerStatuses: StatusEffect[];
+  enemyStatuses: StatusEffect[];
 }
 
 export interface CombatDelta {
@@ -21,6 +38,8 @@ export interface CombatDelta {
   enemyBlockChange?: number;
   drawCards?: number;
   energyChange?: number;
+  applyEnemyStatuses?: StatusEffect[];
+  applyPlayerStatuses?: StatusEffect[];
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
@@ -32,6 +51,10 @@ export interface CardDefinition {
   description: string;
   cost: number;
   effect: CardEffectFn;
+  exhaust?: boolean;
+  rarity?: 'common' | 'uncommon' | 'rare';
+  upgraded?: boolean;
+  upgradeId?: string;
 }
 
 export interface CardInstance {
@@ -57,6 +80,7 @@ export interface EnemyDefinition {
   color: string;
   bodySize: number;
   faceEmoji: string;
+  attackStatuses?: StatusEffect[];
 }
 
 export type GamePhase = 'start' | 'combat' | 'reward' | 'gameover' | 'victory';
@@ -80,4 +104,6 @@ export interface GameState {
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];
   masterCardPool: Record<string, CardDefinition>;
+  playerStatuses: StatusEffect[];
+  enemyStatuses: StatusEffect[];
 }

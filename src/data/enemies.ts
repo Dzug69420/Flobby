@@ -33,6 +33,7 @@ export const ENEMIES: EnemyDefinition[] = [
     color: '#9b59b6',
     bodySize: 105,
     faceEmoji: '😠',
+    attackStatuses: [{ type: 'vulnerable', stacks: 1 }],
   },
   {
     id: 'dribbles',
@@ -66,6 +67,7 @@ export const ENEMIES: EnemyDefinition[] = [
     color: '#ff69b4',
     bodySize: 100,
     faceEmoji: '😵',
+    attackStatuses: [{ type: 'weak', stacks: 1 }],
   },
   {
     id: 'sludginator',
@@ -99,6 +101,7 @@ export const ENEMIES: EnemyDefinition[] = [
     color: '#6c3483',
     bodySize: 95,
     faceEmoji: '😈',
+    attackStatuses: [{ type: 'poison', stacks: 2 }],
   },
   {
     id: 'lord_sludge',

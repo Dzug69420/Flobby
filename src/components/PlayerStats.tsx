@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { COLORS } from '../constants/theme';
 import HPBar from './HPBar';
+import StatusBadges from './StatusBadges';
+import { StatusEffect } from '../types';
 
 interface Props {
   hp: number;
@@ -9,9 +11,10 @@ interface Props {
   block: number;
   energy: number;
   maxEnergy: number;
+  playerStatuses: StatusEffect[];
 }
 
-export default function PlayerStats({ hp, maxHP, block }: Props) {
+export default function PlayerStats({ hp, maxHP, block, playerStatuses }: Props) {
   const prevHp = useRef(hp);
   const prevBlock = useRef(block);
   const [damageText, setDamageText] = useState<string | null>(null);
@@ -113,6 +116,8 @@ export default function PlayerStats({ hp, maxHP, block }: Props) {
           </View>
         )}
       </View>
+    {/* Player status effects */}
+    <StatusBadges statuses={playerStatuses} />
     </View>
   );
 }

@@ -83,11 +83,27 @@ export interface EnemyDefinition {
   attackStatuses?: StatusEffect[];
 }
 
-export type GamePhase = 'start' | 'combat' | 'reward' | 'gameover' | 'victory';
+export type RoomType = 'monster' | 'elite' | 'rest' | 'shop' | 'treasure' | 'event' | 'boss';
+
+export interface MapNode {
+  id: string;
+  floor: number;
+  col: number;
+  roomType: RoomType;
+  connections: string[];
+  visited: boolean;
+  available: boolean;
+  enemyIndex?: number;
+}
+
+export type GamePhase = 'start' | 'map' | 'combat' | 'reward' | 'rest' | 'gameover' | 'victory';
 
 export interface GameState {
   phase: GamePhase;
   currentStage: number;
+  map: MapNode[];
+  currentFloor: number;
+  currentAct: number;
   playerHP: number;
   playerMaxHP: number;
   playerBlock: number;

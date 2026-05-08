@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType } from '../types';
+import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES } from '../data/enemies';
+import { generateMap, markNodeVisited } from '../data/map';
 import { shuffle, pickRewardCards, clamp, generateId } from '../utils/gameLogic';
 
 const PLAYER_MAX_HP = 80;
@@ -62,6 +63,9 @@ interface GameActions {
   endTurn: () => void;
   stageWon: () => void;
   selectRewardCard: (cardId: string | null) => void;
+  upgradeCard: (instanceId: string) => void;
+  travelToNode: (nodeId: string) => void;
+  leaveRestSite: () => void;
   restartGame: () => void;
   goToMenu: () => void;
 }
@@ -71,6 +75,9 @@ type GameStore = GameState & GameActions;
 const initialState: GameState = {
   phase: 'start' as GamePhase,
   currentStage: 1,
+  map: [],
+  currentFloor: 0,
+  currentAct: 1,
   playerHP: PLAYER_MAX_HP,
   playerMaxHP: PLAYER_MAX_HP,
   playerBlock: 0,
@@ -95,29 +102,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   startGame: () => {
-    const enemy = ENEMIES[0];
+    const map = generateMap();
     const deck = shuffle(buildStartingDeck());
-    const hand = deck.slice(0, HAND_SIZE);
-    const remaining = deck.slice(HAND_SIZE);
     set({
-      phase: 'combat',
+      phase: 'map',
       currentStage: 1,
+      currentFloor: 0,
+      currentAct: 1,
       playerHP: PLAYER_MAX_HP,
       playerMaxHP: PLAYER_MAX_HP,
       playerBlock: 0,
       playerEnergy: PLAYER_MAX_ENERGY,
-      deck: remaining,
-      hand,
+      deck,
+      hand: [],
       discard: [],
-      currentEnemy: enemy,
-      enemyHP: enemy.maxHP,
+      currentEnemy: null,
+      enemyHP: 0,
       enemyBlock: 0,
-      enemyTurnAction: computeEnemyAction(enemy.attackPattern, 0),
+      enemyTurnAction: 'attack',
       turnNumber: 0,
       cardsPlayedThisTurn: 0,
       rewardChoices: [],
       playerStatuses: [],
       enemyStatuses: [],
+      map,
     });
   },
 
@@ -342,7 +350,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   stageWon: () => {
     const state = get();
-    if (state.currentStage === 11) {
+    if (state.currentEnemy?.isBoss) {
       set({ phase: 'victory' });
       return;
     }
@@ -353,38 +361,101 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectRewardCard: (cardId: string | null) => {
     const state = get();
-    const nextStage = state.currentStage + 1;
-    const nextEnemy = ENEMIES[nextStage - 1];
-
     let allCards = [...state.deck, ...state.hand, ...state.discard];
     if (cardId) {
       allCards.push({ instanceId: generateId(), definitionId: cardId });
     }
     const shuffledDeck = shuffle(allCards);
-    const newHand = shuffledDeck.slice(0, HAND_SIZE);
-    const remaining = shuffledDeck.slice(HAND_SIZE);
-
-    const restBonus = cardId === null ? 25 : 0;
-    const restoredHP = Math.min(state.playerHP + restBonus, state.playerMaxHP);
 
     set({
-      phase: 'combat',
-      currentStage: nextStage,
-      currentEnemy: nextEnemy,
-      enemyHP: nextEnemy.maxHP,
-      enemyBlock: 0,
-      playerBlock: 0,
-      playerEnergy: PLAYER_MAX_ENERGY,
-      deck: remaining,
-      hand: newHand,
+      deck: shuffledDeck,
+      hand: [],
       discard: [],
-      turnNumber: 0,
-      cardsPlayedThisTurn: 0,
-      enemyTurnAction: computeEnemyAction(nextEnemy.attackPattern, 0),
+      phase: 'map',
       rewardChoices: [],
-      playerHP: restoredHP,
-      playerStatuses: [],
-      enemyStatuses: [],
+    });
+  },
+
+  travelToNode: (nodeId: string) => {
+    const state = get();
+    const node = state.map.find((n) => n.id === nodeId);
+    if (!node || !node.available) return;
+
+    const updatedMap = markNodeVisited(state.map, nodeId);
+    const enemyPool = ENEMIES.filter((e) => !e.isBoss);
+    const bossEnemy = ENEMIES.find((e) => e.isBoss)!;
+
+    if (node.roomType === 'monster' || node.roomType === 'elite' || node.roomType === 'boss') {
+      // Pick enemy based on floor progression
+      let enemy;
+      if (node.roomType === 'boss') {
+        enemy = bossEnemy;
+      } else if (node.roomType === 'elite') {
+        // Elite: pick from upper half of enemy pool
+        const elitePool = enemyPool.slice(Math.floor(enemyPool.length / 2));
+        enemy = elitePool[Math.floor(Math.random() * elitePool.length)];
+      } else {
+        // Regular monster: scale difficulty by floor
+        const floorRatio = node.floor / 14;
+        const maxIdx = Math.min(Math.floor(floorRatio * enemyPool.length) + 2, enemyPool.length - 1);
+        const minIdx = Math.max(0, maxIdx - 3);
+        const idx = minIdx + Math.floor(Math.random() * (maxIdx - minIdx + 1));
+        enemy = enemyPool[Math.min(idx, enemyPool.length - 1)];
+      }
+
+      const shuffledDeck = shuffle([...state.deck]);
+      const newHand = shuffledDeck.slice(0, HAND_SIZE);
+      const remaining = shuffledDeck.slice(HAND_SIZE);
+
+      set({
+        phase: 'combat',
+        currentFloor: node.floor,
+        currentStage: node.floor + 1,
+        map: updatedMap,
+        currentEnemy: enemy,
+        enemyHP: enemy.maxHP,
+        enemyBlock: 0,
+        playerBlock: 0,
+        playerEnergy: PLAYER_MAX_ENERGY,
+        deck: remaining,
+        hand: newHand,
+        discard: [],
+        turnNumber: 0,
+        cardsPlayedThisTurn: 0,
+        enemyTurnAction: computeEnemyAction(enemy.attackPattern, 0),
+        playerStatuses: [],
+        enemyStatuses: [],
+      });
+    } else if (node.roomType === 'rest') {
+      set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });
+    } else if (node.roomType === 'treasure') {
+      // Treasure: pick 1 of 3 rare-weighted cards, no HP heal
+      const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
+      set({ phase: 'reward', currentFloor: node.floor, map: updatedMap, rewardChoices: choices });
+    } else {
+      // shop, event — stub: advance floor, return to map
+      set({ currentFloor: node.floor, map: updatedMap, phase: 'map' });
+    }
+  },
+
+  leaveRestSite: () => {
+    set({ phase: 'map' });
+  },
+
+  upgradeCard: (instanceId: string) => {
+    set((state) => {
+      const upgradeInPile = (pile: CardInstance[]) =>
+        pile.map((c) => {
+          if (c.instanceId !== instanceId) return c;
+          const def = state.masterCardPool[c.definitionId];
+          if (!def?.upgradeId) return c;
+          return { ...c, definitionId: def.upgradeId };
+        });
+      return {
+        deck: upgradeInPile(state.deck),
+        hand: upgradeInPile(state.hand),
+        discard: upgradeInPile(state.discard),
+      };
     });
   },
 

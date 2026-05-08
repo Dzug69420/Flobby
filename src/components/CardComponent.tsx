@@ -113,7 +113,9 @@ export default function CardComponent({
   });
 
   const combinedY = Animated.add(slideAnim, hoverLift);
-  const borderColor = CATEGORY_BORDER[definition.category] ?? COLORS.cardBorder;
+  const borderColor = definition.upgraded
+    ? '#ffd700'
+    : (CATEGORY_BORDER[definition.category] ?? COLORS.cardBorder);
   const bannerColor = CATEGORY_BANNER[definition.category] ?? '#222';
 
   return (

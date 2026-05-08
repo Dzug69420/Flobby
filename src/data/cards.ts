@@ -9,6 +9,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 6 damage.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'strike_plus',
     effect: () => ({ enemyHPChange: -6 }),
   },
   defend: {
@@ -18,6 +19,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Gain 5 block.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'defend_plus',
     effect: () => ({ playerBlockChange: 5 }),
   },
 
@@ -29,6 +31,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 15 damage.',
     cost: 2,
     rarity: 'common',
+    upgradeId: 'heavy_blow_plus',
     effect: () => ({ enemyHPChange: -15 }),
   },
   twin_strike: {
@@ -38,6 +41,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 4 damage twice.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'twin_strike_plus',
     effect: () => ({ enemyHPChange: -9 }),
   },
   cleave: {
@@ -47,6 +51,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 8 damage.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'cleave_plus',
     effect: () => ({ enemyHPChange: -8 }),
   },
   mob_rule: {
@@ -94,6 +99,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 8 dmg. Apply 2 Vulnerable.',
     cost: 2,
     rarity: 'uncommon',
+    upgradeId: 'bash_plus',
     effect: () => ({
       enemyHPChange: -8,
       applyEnemyStatuses: [{ type: 'vulnerable', stacks: 2 }],
@@ -152,6 +158,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Gain 10 block.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'iron_wave_plus',
     effect: () => ({ playerBlockChange: 10 }),
   },
   fortify: {
@@ -161,6 +168,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Gain 8 block. Draw 1 card.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'fortify_plus',
     effect: () => ({ playerBlockChange: 8, drawCards: 1 }),
   },
   double_up: {
@@ -336,6 +344,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Gain 2 Strength for the rest of combat.',
     cost: 1,
     rarity: 'uncommon',
+    upgradeId: 'inflame_plus',
     effect: () => ({
       applyPlayerStatuses: [{ type: 'strength', stacks: 2 }],
     }),
@@ -384,6 +393,79 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({
       applyEnemyStatuses: [{ type: 'poison', stacks: 5 }],
     }),
+  },
+
+  // ── UPGRADED CARDS (+ variants) ──────────────────────────────────────────────
+  strike_plus: {
+    id: 'strike_plus', name: 'Bonk+', category: 'attack',
+    description: 'Deal 9 damage.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -9 }),
+  },
+  defend_plus: {
+    id: 'defend_plus', name: 'Blogg+', category: 'defense',
+    description: 'Gain 8 block.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ playerBlockChange: 8 }),
+  },
+  heavy_blow_plus: {
+    id: 'heavy_blow_plus', name: 'The Big Bonk+', category: 'attack',
+    description: 'Deal 20 damage.', cost: 2, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -20 }),
+  },
+  twin_strike_plus: {
+    id: 'twin_strike_plus', name: 'Double Bop+', category: 'attack',
+    description: 'Deal 6 damage twice.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -13 }),
+  },
+  cleave_plus: {
+    id: 'cleave_plus', name: 'Swoosh+', category: 'attack',
+    description: 'Deal 11 damage.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -11 }),
+  },
+  iron_wave_plus: {
+    id: 'iron_wave_plus', name: "Big Ol' Shield+", category: 'defense',
+    description: 'Gain 14 block.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ playerBlockChange: 14 }),
+  },
+  fortify_plus: {
+    id: 'fortify_plus', name: 'Bunker Down+', category: 'defense',
+    description: 'Gain 11 block. Draw 1 card.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ playerBlockChange: 11, drawCards: 1 }),
+  },
+  bash_plus: {
+    id: 'bash_plus', name: 'Bash+', category: 'attack',
+    description: 'Deal 10 dmg. Apply 3 Vulnerable.', cost: 2, rarity: 'uncommon', upgraded: true,
+    effect: () => ({
+      enemyHPChange: -10,
+      applyEnemyStatuses: [{ type: 'vulnerable', stacks: 3 }],
+    }),
+  },
+  inflame_plus: {
+    id: 'inflame_plus', name: 'Inflame+', category: 'power',
+    description: 'Gain 3 Strength for the rest of combat.', cost: 1, rarity: 'uncommon', upgraded: true,
+    effect: () => ({ applyPlayerStatuses: [{ type: 'strength', stacks: 3 }] }),
+  },
+  poison_blade_plus: {
+    id: 'poison_blade_plus', name: 'Gooey Stab+', category: 'attack',
+    description: 'Deal 8 dmg. Apply 5 Poison.', cost: 1, rarity: 'uncommon', upgraded: true,
+    effect: () => ({
+      enemyHPChange: -8,
+      applyEnemyStatuses: [{ type: 'poison', stacks: 5 }],
+    }),
+  },
+  retaliate_plus: {
+    id: 'retaliate_plus', name: "Ow, That's Mine+", category: 'combo',
+    description: 'Deal 8 dmg. Gain 8 block.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -8, playerBlockChange: 8 }),
+  },
+  war_cry_plus: {
+    id: 'war_cry_plus', name: 'Grrrrr+', category: 'combo',
+    description: 'Deal 6 dmg. Gain 8 block.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -6, playerBlockChange: 8 }),
+  },
+  slash_and_guard_plus: {
+    id: 'slash_and_guard_plus', name: "Bonk 'n' Block+", category: 'combo',
+    description: 'Deal 13 dmg. Gain 8 block.', cost: 2, rarity: 'uncommon', upgraded: true,
+    effect: () => ({ enemyHPChange: -13, playerBlockChange: 8 }),
   },
 };
 

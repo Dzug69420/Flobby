@@ -7,13 +7,17 @@ import CombatScreen from './src/screens/CombatScreen';
 import RewardScreen from './src/screens/RewardScreen';
 import GameOverScreen from './src/screens/GameOverScreen';
 import VictoryScreen from './src/screens/VictoryScreen';
+import MapScreen from './src/screens/MapScreen';
+import RestScreen from './src/screens/RestScreen';
 
 function Navigator() {
   const phase = useGameStore((s) => s.phase);
   switch (phase) {
     case 'start':    return <StartScreen />;
+    case 'map':      return <MapScreen />;
     case 'combat':   return <CombatScreen />;
     case 'reward':   return <RewardScreen />;
+    case 'rest':     return <RestScreen />;
     case 'gameover': return <GameOverScreen />;
     case 'victory':  return <VictoryScreen />;
     default:         return <StartScreen />;

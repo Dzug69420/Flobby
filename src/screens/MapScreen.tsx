@@ -1,0 +1,245 @@
+import React, { useRef } from 'react';
+import {
+  View, Text, TouchableOpacity, StyleSheet, SafeAreaView,
+  ScrollView, Animated, Pressable,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useGameStore } from '../store/gameStore';
+import { MapNode, RoomType } from '../types';
+import { roomEmoji } from '../data/map';
+import { COLORS } from '../constants/theme';
+
+const ROOM_COLORS: Record<RoomType, string> = {
+  monster:  '#c0392b',
+  elite:    '#6c3483',
+  rest:     '#e67e22',
+  shop:     '#f1c40f',
+  treasure: '#1abc9c',
+  event:    '#2980b9',
+  boss:     '#c0392b',
+};
+
+const ROOM_LABEL: Record<RoomType, string> = {
+  monster:  'Fight',
+  elite:    'Elite',
+  rest:     'Rest',
+  shop:     'Shop',
+  treasure: 'Chest',
+  event:    'Event',
+  boss:     'BOSS',
+};
+
+const NODE_SIZE = 48;
+const COL_WIDTH = 62;
+const ROW_HEIGHT = 54;
+
+export default function MapScreen() {
+  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode } = useGameStore();
+
+  const allCards = deck.length + hand.length + discard.length;
+  const floors = [...new Set(map.map((n) => n.floor))].sort((a, b) => b - a); // top to bottom (boss at top)
+
+  const renderConnections = (node: MapNode) => {
+    return node.connections.map((targetId) => {
+      const target = map.find((n) => n.id === targetId);
+      if (!target) return null;
+      const x1 = node.col * COL_WIDTH + NODE_SIZE / 2;
+      const y1 = 0;
+      const x2 = target.col * COL_WIDTH + NODE_SIZE / 2;
+      const y2 = ROW_HEIGHT;
+      return null; // Lines rendered per floor row separately
+    });
+  };
+
+  return (
+    <LinearGradient colors={['#0a0a1a', '#0d1b2a', '#0a1a0a']} style={styles.root}>
+      <SafeAreaView style={styles.safe}>
+
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.actLabel}>Act {currentAct}</Text>
+            <Text style={styles.floorLabel}>Floor {currentFloor + 1} / 15</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <Text style={styles.statBadge}>♥ {playerHP}/{playerMaxHP}</Text>
+            <Text style={styles.statBadge}>🃏 {allCards}</Text>
+          </View>
+        </View>
+
+        {/* Legend */}
+        <View style={styles.legend}>
+          {(['monster', 'elite', 'rest', 'shop', 'treasure', 'event', 'boss'] as RoomType[]).map((t) => (
+            <View key={t} style={styles.legendItem}>
+              <Text style={styles.legendEmoji}>{roomEmoji(t)}</Text>
+              <Text style={[styles.legendLabel, { color: ROOM_COLORS[t] }]}>{ROOM_LABEL[t]}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Map scroll (top = boss floor, bottom = first floor) */}
+        <ScrollView
+          style={styles.mapScroll}
+          contentContainerStyle={styles.mapContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {floors.map((floor) => {
+            const floorNodes = map.filter((n) => n.floor === floor);
+            return (
+              <View key={floor} style={styles.floorRow}>
+                <Text style={styles.floorNum}>{floor + 1}</Text>
+                <View style={styles.nodesRow}>
+                  {/* Render connection lines to next floor */}
+                  {floorNodes.map((node) =>
+                    node.connections.map((targetId) => {
+                      const target = map.find((n) => n.id === targetId);
+                      if (!target) return null;
+                      const dx = (target.col - node.col) * COL_WIDTH;
+                      return (
+                        <View
+                          key={`${node.id}-${targetId}`}
+                          pointerEvents="none"
+                          style={[
+                            styles.connectionLine,
+                            {
+                              left: node.col * COL_WIDTH + NODE_SIZE / 2 - 1,
+                              width: dx === 0 ? 2 : Math.abs(dx) + 2,
+                              transform: dx < 0 ? [{ translateX: dx }] : [],
+                            },
+                          ]}
+                        />
+                      );
+                    })
+                  )}
+
+                  {/* Render nodes */}
+                  {floorNodes.map((node) => {
+                    const color = ROOM_COLORS[node.roomType];
+                    const isAvailable = node.available;
+                    const isVisited = node.visited;
+                    const isBoss = node.roomType === 'boss';
+
+                    return (
+                      <Pressable
+                        key={node.id}
+                        onPress={() => isAvailable && travelToNode(node.id)}
+                        style={[
+                          styles.node,
+                          {
+                            left: node.col * COL_WIDTH,
+                            backgroundColor: isVisited ? '#222' : isAvailable ? color : '#1a1a1a',
+                            borderColor: isVisited ? '#555' : isAvailable ? color : '#333',
+                            borderWidth: isAvailable ? 2.5 : 1.5,
+                            opacity: isVisited ? 0.45 : isAvailable ? 1 : 0.5,
+                            shadowColor: isAvailable ? color : 'transparent',
+                            shadowRadius: isAvailable ? 8 : 0,
+                            shadowOpacity: isAvailable ? 0.9 : 0,
+                            elevation: isAvailable ? 6 : 0,
+                            width: isBoss ? NODE_SIZE + 12 : NODE_SIZE,
+                            height: isBoss ? NODE_SIZE + 12 : NODE_SIZE,
+                            borderRadius: isBoss ? 8 : NODE_SIZE / 2,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.nodeEmoji, isBoss && { fontSize: 22 }]}>
+                          {isVisited ? '✓' : roomEmoji(node.roomType)}
+                        </Text>
+                        {isAvailable && (
+                          <View style={[styles.availablePulse, { borderColor: color }]} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
+        </ScrollView>
+
+        <Text style={styles.hint}>Tap a glowing room to travel there</Text>
+      </SafeAreaView>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+  safe: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+  },
+  headerLeft: {},
+  headerRight: { flexDirection: 'row', gap: 12 },
+  actLabel: { color: COLORS.accentGold, fontSize: 18, fontWeight: 'bold' },
+  floorLabel: { color: COLORS.textSecondary, fontSize: 13 },
+  statBadge: { color: '#fff', fontSize: 15, fontWeight: 'bold' },
+
+  legend: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  legendEmoji: { fontSize: 11 },
+  legendLabel: { fontSize: 10, fontWeight: '600' },
+
+  mapScroll: { flex: 1 },
+  mapContent: { paddingHorizontal: 16, paddingVertical: 12 },
+
+  floorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: ROW_HEIGHT,
+    marginBottom: 4,
+  },
+  floorNum: {
+    color: 'rgba(255,255,255,0.25)',
+    fontSize: 10,
+    width: 22,
+    textAlign: 'right',
+    marginRight: 6,
+  },
+  nodesRow: {
+    flex: 1,
+    height: ROW_HEIGHT,
+    position: 'relative',
+  },
+  connectionLine: {
+    position: 'absolute',
+    top: -4,
+    height: ROW_HEIGHT + 4,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 1,
+  },
+  node: {
+    position: 'absolute',
+    top: (ROW_HEIGHT - NODE_SIZE) / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nodeEmoji: { fontSize: 18 },
+  availablePulse: {
+    position: 'absolute',
+    top: -4, left: -4, right: -4, bottom: -4,
+    borderRadius: NODE_SIZE,
+    borderWidth: 1.5,
+    opacity: 0.5,
+  },
+
+  hint: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 12,
+    textAlign: 'center',
+    paddingVertical: 10,
+  },
+});

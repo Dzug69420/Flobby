@@ -50,6 +50,7 @@ export default function CombatScreen() {
   const deckHoverAnim = useRef(new Animated.Value(1)).current;
   const settingsHoverAnim = useRef(new Animated.Value(1)).current;
   const screenShakeAnim = useRef(new Animated.Value(0)).current;
+  const damageFlashAnim = useRef(new Animated.Value(0)).current;
 
   const shakeScreen = () => {
     screenShakeAnim.setValue(0);
@@ -61,6 +62,9 @@ export default function CombatScreen() {
       Animated.timing(screenShakeAnim, { toValue: 2, duration: 40, useNativeDriver: true }),
       Animated.timing(screenShakeAnim, { toValue: 0, duration: 40, useNativeDriver: true }),
     ]).start();
+    // Red flash overlay
+    damageFlashAnim.setValue(1);
+    Animated.timing(damageFlashAnim, { toValue: 0, duration: 400, useNativeDriver: true }).start();
   };
 
   const animateOverlay = (visible: boolean) => {
@@ -423,6 +427,14 @@ export default function CombatScreen() {
 
       </SafeAreaView>
       </Animated.View>
+      {/* Red damage flash overlay */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.damageFlash,
+          { opacity: damageFlashAnim },
+        ]}
+      />
       <CardTooltip definition={tooltipDef} onClose={() => setTooltipDef(null)} />
     </View>
   );
@@ -483,6 +495,13 @@ const styles = StyleSheet.create({
   },
   goldHudText: { color: '#f9a825', fontSize: 13, fontWeight: 'bold' },
 
+  damageFlash: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(200,0,0,0.35)',
+    pointerEvents: 'none',
+    zIndex: 50,
+  },
   combatLog: {
     position: 'absolute',
     left: 8,

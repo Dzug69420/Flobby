@@ -40,27 +40,35 @@ export default function RewardScreen() {
         <Text style={styles.prompt}>Choose a card — or rest to heal more:</Text>
 
         <View style={styles.cardsRow}>
-          {rewardChoices.map((def, i) => (
-            <TouchableOpacity
-              key={def.id}
-              onPress={() => handlePick(def.id)}
-              activeOpacity={0.8}
-              style={styles.cardWrapper}
-            >
-              <CardComponent
-                card={fakeInst(def.id)}
-                definition={def}
-                onPlay={handlePick}
-                disabled={chosen !== null}
-                affordable={true}
-                index={i}
-                faceDown={false}
-              />
-              {chosen === def.id && (
-                <Text style={styles.chosenBadge}>✅ ADDED!</Text>
-              )}
-            </TouchableOpacity>
-          ))}
+          {rewardChoices.map((def, i) => {
+            const rarityColor = def.rarity === 'rare' ? '#f9a825' : def.rarity === 'uncommon' ? '#5c6bc0' : '#9e9e9e';
+            const rarityLabel = def.rarity ? def.rarity.toUpperCase() : 'COMMON';
+            return (
+              <TouchableOpacity
+                key={def.id}
+                onPress={() => handlePick(def.id)}
+                activeOpacity={0.8}
+                style={styles.cardWrapper}
+              >
+                {/* Rarity banner above card */}
+                <View style={[styles.rarityBanner, { backgroundColor: rarityColor + '33', borderColor: rarityColor }]}>
+                  <Text style={[styles.rarityText, { color: rarityColor }]}>{rarityLabel}</Text>
+                </View>
+                <CardComponent
+                  card={fakeInst(def.id)}
+                  definition={def}
+                  onPlay={handlePick}
+                  disabled={chosen !== null}
+                  affordable={true}
+                  index={i}
+                  faceDown={false}
+                />
+                {chosen === def.id && (
+                  <Text style={styles.chosenBadge}>✅ ADDED!</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <TouchableOpacity onPress={handleSkip} style={styles.restButton} disabled={chosen !== null}>
@@ -96,7 +104,16 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
     marginBottom: SPACING.lg,
   },
-  cardWrapper: { alignItems: 'center' },
+  cardWrapper: { alignItems: 'center', gap: 4 },
+  rarityBanner: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  rarityText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
   chosenBadge: {
     color: COLORS.hpGreen,
     fontWeight: 'bold',

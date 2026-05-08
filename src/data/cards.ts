@@ -521,6 +521,66 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -8, hits: 4 }),
   },
 
+  // ── SCRY / UTILITY CARDS ─────────────────────────────────────────────────────
+  battle_trance: {
+    id: 'battle_trance',
+    name: 'Battle Trance',
+    category: 'status',
+    description: 'Draw 3 cards. Cannot draw more cards this turn.',
+    cost: 0,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ drawCards: 3 }),
+  },
+  warcry: {
+    id: 'warcry',
+    name: 'War Cry',
+    category: 'status',
+    description: 'Draw 1 card. Put a card from your hand on top of your draw pile. Exhaust.',
+    cost: 0,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ drawCards: 1 }),
+  },
+  seeing_red: {
+    id: 'seeing_red',
+    name: 'Seeing Red',
+    category: 'status',
+    description: 'Gain 2 Energy. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ energyChange: 2 }),
+  },
+  bloodletting: {
+    id: 'bloodletting',
+    name: 'Bloodletting',
+    category: 'status',
+    description: 'Lose 3 HP. Gain 2 Energy.',
+    cost: 0,
+    rarity: 'uncommon',
+    effect: () => ({ playerHPChange: -3, energyChange: 2 }),
+  },
+  fiend_fire: {
+    id: 'fiend_fire',
+    name: 'Fiend Fire',
+    category: 'attack',
+    description: 'Exhaust your hand. Deal 7 dmg per card exhausted. Exhaust.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: (ctx) => ({ enemyHPChange: -(7 * ctx.cardsInHand.length), exhaustHand: true }),
+  },
+  twin_strike_heavy: {
+    id: 'twin_strike_heavy',
+    name: 'Heavy Strike',
+    category: 'attack',
+    description: 'Deal 6 dmg twice.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -13, hits: 2 }),
+  },
+
   // ── INNATE / RETAIN CARDS ────────────────────────────────────────────────────
   prepared: {
     id: 'prepared',
@@ -686,7 +746,12 @@ export const REWARD_CARD_IDS = [
   'slash_and_guard', 'counter', 'shield_bash',
   'rage', 'desperation', 'last_stand', 'second_wind',
   'inflame', 'entrench', 'metallicize',
+  // Common (new)
+  'twin_strike_heavy',
+  // Uncommon (scry/utility batch)
+  'battle_trance', 'seeing_red', 'bloodletting', 'warcry',
   // Rare
+  'fiend_fire',
   'power_surge', 'combo_strike',
   'turtle_up',
   'toxic_cloud',
@@ -716,4 +781,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   dark_embrace: 'uncommon', feel_no_pain: 'uncommon',
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
+  twin_strike_heavy: 'common',
+  battle_trance: 'uncommon', seeing_red: 'uncommon', bloodletting: 'uncommon', warcry: 'uncommon',
+  fiend_fire: 'rare',
 };

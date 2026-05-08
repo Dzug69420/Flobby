@@ -107,6 +107,7 @@ interface GameActions {
   selectCharacter: (characterId: string) => void;
   goToCharacterSelect: () => void;
   transformCard: (instanceId: string) => void;
+  discardFromHand: (instanceId: string) => void;
   selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
   goToMenu: () => void;
@@ -370,9 +371,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         modifiedDelta.energyChange = (modifiedDelta.energyChange ?? 0) + def.cost;
       }
 
-      const newHand = s.hand.filter((c) => c.instanceId !== instanceId);
+      // Fiend Fire: exhaust entire remaining hand
+      const handAfterPlay = s.hand.filter((c) => c.instanceId !== instanceId);
+      const fiendFireExhaust = modifiedDelta.exhaustHand ? handAfterPlay : [];
+      const newHand = modifiedDelta.exhaustHand ? [] : handAfterPlay;
       const newDiscard = finalExhaust ? s.discard : [...s.discard, cardInst];
-      const newExhaustPile = finalExhaust ? [...s.exhaustPile, cardInst] : s.exhaustPile;
+      const newExhaustPile = finalExhaust
+        ? [...s.exhaustPile, cardInst, ...fiendFireExhaust]
+        : [...s.exhaustPile, ...fiendFireExhaust];
 
       // Feel No Pain: gain 3 block when a card is exhausted
       if (finalExhaust && s.activePowers.includes('feel_no_pain')) {
@@ -1096,6 +1102,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectCharacter: (characterId: string) => {
     set({ selectedCharacter: characterId });
+  },
+
+  discardFromHand: (instanceId: string) => {
+    set((state) => {
+      const card = state.hand.find((c) => c.instanceId === instanceId);
+      if (!card) return {};
+      const def = state.masterCardPool[card.definitionId];
+      const newHand = state.hand.filter((c) => c.instanceId !== instanceId);
+      // If Dark Embrace is active and card has exhaust: draw 1
+      const newDiscard = def?.exhaust
+        ? state.discard
+        : [...state.discard, card];
+      const newExhaust = def?.exhaust
+        ? [...state.exhaustPile, card]
+        : state.exhaustPile;
+      return { hand: newHand, discard: newDiscard, exhaustPile: newExhaust };
+    });
   },
 
   transformCard: (instanceId: string) => {

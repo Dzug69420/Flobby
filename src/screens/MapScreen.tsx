@@ -38,6 +38,7 @@ const ROW_HEIGHT = 54;
 export default function MapScreen() {
   const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold, potions, selectedCharacter, ascensionLevel, currentRunScore, masterCardPool, activePowers } = useGameStore();
   const [showStats, setShowStats] = useState(false);
+  const [showDeck, setShowDeck] = useState(false);
 
   const allCards = deck.length + hand.length + discard.length;
   const floors = [...new Set(map.map((n) => n.floor))].sort((a, b) => b - a); // top to bottom (boss at top)
@@ -68,6 +69,9 @@ export default function MapScreen() {
             <Text style={styles.statBadge}>♥ {playerHP}/{playerMaxHP}</Text>
             <Text style={styles.statBadge}>🪙 {gold}</Text>
             <Text style={styles.statBadge}>🃏 {allCards}</Text>
+            <TouchableOpacity onPress={() => setShowDeck(true)}>
+              <Text style={styles.statBadge}>🃏</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowStats(true)}>
               <Text style={styles.statBadge}>📊</Text>
             </TouchableOpacity>
@@ -166,6 +170,45 @@ export default function MapScreen() {
         <Text style={styles.hint}>Tap a glowing room to travel there</Text>
       </SafeAreaView>
 
+      {/* Deck Viewer Modal */}
+      <Modal visible={showDeck} transparent animationType="slide" onRequestClose={() => setShowDeck(false)}>
+        <Pressable style={statsStyles.backdrop} onPress={() => setShowDeck(false)}>
+          <Pressable style={[statsStyles.panel, { maxHeight: '85%' }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={statsStyles.title}>🃏 Your Deck ({allCards})</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {[...deck].sort((a, b) => {
+                const dA = masterCardPool[a.definitionId];
+                const dB = masterCardPool[b.definitionId];
+                return (dA?.category ?? '').localeCompare(dB?.category ?? '');
+              }).map((c) => {
+                const def = masterCardPool[c.definitionId];
+                if (!def) return null;
+                const catColors: Record<string, string> = {
+                  attack: '#e74c3c', defense: '#4fc3f7', combo: '#f5a623',
+                  power: '#66bb6a', status: '#9b59b6',
+                };
+                const color = catColors[def.category] ?? '#fff';
+                return (
+                  <View key={c.instanceId} style={deckViewStyles.row}>
+                    <View style={[deckViewStyles.costCircle, { backgroundColor: color }]}>
+                      <Text style={deckViewStyles.cost}>{def.cost === -1 ? 'X' : def.cost}</Text>
+                    </View>
+                    <View style={deckViewStyles.info}>
+                      <Text style={[deckViewStyles.name, { color }]}>{def.name}</Text>
+                      <Text style={deckViewStyles.desc} numberOfLines={1}>{def.description}</Text>
+                    </View>
+                    {def.upgraded && <Text style={deckViewStyles.plus}>+</Text>}
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <TouchableOpacity style={statsStyles.closeBtn} onPress={() => setShowDeck(false)}>
+              <Text style={statsStyles.closeBtnText}>Close</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {/* Run Stats Modal */}
       <Modal visible={showStats} transparent animationType="slide" onRequestClose={() => setShowStats(false)}>
         <Pressable style={statsStyles.backdrop} onPress={() => setShowStats(false)}>
@@ -255,6 +298,30 @@ const statsStyles = StyleSheet.create({
     alignItems: 'center',
   },
   closeBtnText: { color: COLORS.textSecondary, fontSize: 14 },
+});
+
+const deckViewStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  costCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  cost: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
+  info: { flex: 1 },
+  name: { fontSize: 14, fontWeight: 'bold' },
+  desc: { color: COLORS.textSecondary, fontSize: 11 },
+  plus: { color: '#ffd700', fontSize: 14, fontWeight: 'bold' },
 });
 
 const styles = StyleSheet.create({

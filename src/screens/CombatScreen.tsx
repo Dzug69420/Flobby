@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -299,6 +299,7 @@ export default function CombatScreen() {
               disabled={isAnimating}
               playerEnergy={playerEnergy}
               combatCtx={combatCtx}
+              sneckoCosts={sneckoCosts}
             />
           </View>
 

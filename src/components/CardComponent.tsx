@@ -13,6 +13,7 @@ interface Props {
   index: number;
   faceDown?: boolean;
   preview?: CardPreview;
+  overrideCost?: number;
 }
 
 const CATEGORY_BANNER: Record<string, string> = {
@@ -54,7 +55,7 @@ const RARITY_COLORS: Record<string, string> = {
 };
 
 export default function CardComponent({
-  card, definition, onPlay, disabled, affordable, index, faceDown = false, preview,
+  card, definition, onPlay, disabled, affordable, index, faceDown = false, preview, overrideCost,
 }: Props) {
   const slideAnim = useRef(new Animated.Value(120)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -143,8 +144,13 @@ export default function CardComponent({
       >
         {/* Top banner: cost + name + rarity dot */}
         <View style={[styles.banner, { backgroundColor: bannerColor }]}>
-          <View style={[styles.costBadge, { backgroundColor: borderColor }]}>
-            <Text style={styles.costText}>{definition.cost === -1 ? 'X' : definition.cost}</Text>
+          <View style={[
+            styles.costBadge,
+            { backgroundColor: overrideCost !== undefined ? '#8e44ad' : borderColor },
+          ]}>
+            <Text style={styles.costText}>
+              {overrideCost !== undefined ? overrideCost : definition.cost === -1 ? 'X' : definition.cost}
+            </Text>
           </View>
           <Text style={styles.cardName} numberOfLines={1}>{definition.name}</Text>
           {definition.rarity && (

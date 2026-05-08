@@ -11,13 +11,14 @@ interface Props {
   disabled: boolean;
   playerEnergy: number;
   combatCtx?: CombatContext;
+  sneckoCosts?: Record<string, number>;
 }
 
 const MAX_ROTATION = 12;
 const MAX_DROP_PX = 16;
 const CARD_OVERLAP = -18;
 
-export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy, combatCtx }: Props) {
+export default function HandArea({ hand, masterPool, onPlay, disabled, playerEnergy, combatCtx, sneckoCosts }: Props) {
   const count = hand.length;
 
   return (
@@ -26,6 +27,8 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
         {hand.map((card, index) => {
           const def = masterPool[card.definitionId];
           if (!def) return null;
+          const sneckoCost = sneckoCosts?.[card.instanceId];
+          const effectiveCost = sneckoCost !== undefined ? sneckoCost : def.cost;
 
           const midIndex = (count - 1) / 2;
           const offset = index - midIndex;
@@ -52,9 +55,10 @@ export default function HandArea({ hand, masterPool, onPlay, disabled, playerEne
                 definition={def}
                 onPlay={onPlay}
                 disabled={disabled}
-                affordable={!def.isUnplayable && playerEnergy >= def.cost}
+                affordable={!def.isUnplayable && playerEnergy >= effectiveCost}
                 index={index}
                 preview={combatCtx ? computeCardPreview(def, combatCtx) : undefined}
+                overrideCost={sneckoCost}
               />
             </View>
           );

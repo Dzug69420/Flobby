@@ -164,6 +164,7 @@ const initialState: GameState = {
   activePowers: [],
   combatLog: [],
   attackCardsPlayedTotal: 0,
+  sneckoCosts: {},
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -222,6 +223,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let deck = [...state.deck];
       let discard = [...state.discard];
       const hand = [...state.hand];
+      const sneckoCosts = { ...state.sneckoCosts };
 
       for (let i = 0; i < n; i++) {
         if (deck.length === 0) {
@@ -229,10 +231,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
           deck = shuffle(discard);
           discard = [];
         }
-        hand.push(deck.shift()!);
+        const drawn = deck.shift()!;
+        hand.push(drawn);
+        // Snecko Eye: randomize cost of drawn card (0, 1, 2, or 3)
+        if (state.relics.includes('snecko_eye')) {
+          sneckoCosts[drawn.instanceId] = Math.floor(Math.random() * 4);
+        }
       }
 
-      return { deck, discard, hand };
+      return { deck, discard, hand, sneckoCosts };
     });
   },
 
@@ -246,7 +253,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (def.isUnplayable) return;
     const isXCost = def.cost === -1;
     const isSkillCard = def.category === 'defense' || def.category === 'status';
-    const effectiveCost = (state.activePowers.includes('corruption') && isSkillCard) ? 0 : def.cost;
+    const sneckoCost = state.sneckoCosts[instanceId];
+    const baseCost = sneckoCost !== undefined ? sneckoCost : def.cost;
+    const effectiveCost = (state.activePowers.includes('corruption') && isSkillCard) ? 0 : baseCost;
     if (!isXCost && state.playerEnergy < effectiveCost) return;
     if (isXCost && state.playerEnergy < 1) return;
 
@@ -310,10 +319,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let enemyHP = s.enemyHP;
       let enemyBlock = s.enemyBlock;
       const isSkillForCorruption = def.category === 'defense' || def.category === 'status';
+      const sneckoCostVal = s.sneckoCosts[instanceId];
+      const resolvedBaseCost = sneckoCostVal !== undefined ? sneckoCostVal : def.cost;
       const actualCost = (s.activePowers.includes('corruption') && isSkillForCorruption)
         ? 0
-        : def.cost === -1 ? s.playerEnergy : def.cost;
+        : resolvedBaseCost === -1 ? s.playerEnergy : resolvedBaseCost;
       let playerEnergy = s.playerEnergy - actualCost;
+
+      // Clean up snecko cost after playing
+      const newSneckoCosts = { ...s.sneckoCosts };
+      delete newSneckoCosts[instanceId];
       let playerStatuses = [...s.playerStatuses];
       let enemyStatuses = [...s.enemyStatuses];
 
@@ -425,6 +440,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         activePowers,
         combatLog: newLog,
         attackCardsPlayedTotal: newAttackTotal,
+        sneckoCosts: newSneckoCosts,
       };
     });
 
@@ -801,6 +817,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         activePowers: [],
         combatLog: [],
         attackCardsPlayedTotal: 0,
+        sneckoCosts: {},
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

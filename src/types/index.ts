@@ -159,6 +159,7 @@ export interface GameState {
   activePowers: string[];
   combatLog: string[];
   attackCardsPlayedTotal: number;
+  sneckoCosts: Record<string, number>;
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

@@ -161,6 +161,7 @@ const initialState: GameState = {
   bossEnraged: false,
   activePowers: [],
   combatLog: [],
+  attackCardsPlayedTotal: 0,
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -267,12 +268,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Apply status modifiers to the delta
     let modifiedDelta = { ...rawDelta };
+    const isAttackCard = def.category === 'attack';
+    const newAttackTotal = isAttackCard ? state.attackCardsPlayedTotal + 1 : state.attackCardsPlayedTotal;
+    const isPenNibTurn = isAttackCard && hasRelic(state.relics, 'pen_nib') && newAttackTotal % 10 === 0;
 
     if (modifiedDelta.enemyHPChange && modifiedDelta.enemyHPChange < 0) {
       let dmg = Math.abs(modifiedDelta.enemyHPChange);
       // Strength: flat damage bonus
       const strength = getStatusStacks(state.playerStatuses, 'strength');
       dmg += strength;
+      // Pen Nib: every 10th attack deals double damage
+      if (isPenNibTurn) dmg *= 2;
       // Vulnerable: enemy takes 50% more damage
       if (getStatusStacks(state.enemyStatuses, 'vulnerable') > 0) {
         dmg = Math.floor(dmg * 1.5);
@@ -411,6 +417,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         exhaustPile: newExhaustPile,
         activePowers,
         combatLog: newLog,
+        attackCardsPlayedTotal: newAttackTotal,
       };
     });
 
@@ -442,6 +449,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (get().enemyHP <= 0) {
+      // Feed: gain 3 max HP on fatal blow
+      if (def.id === 'feed' || def.id === 'feed_plus') {
+        set((s) => ({ playerMaxHP: s.playerMaxHP + 3, playerHP: Math.min(s.playerHP + 3, s.playerMaxHP + 3) }));
+      }
       get().stageWon();
     }
   },
@@ -540,6 +551,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (state.activePowers.includes('demon_form')) {
         playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: 2 }]);
       }
+
+      // (Art of War handled via artOfWarActive flag below)
 
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
@@ -780,6 +793,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         bossEnraged: false,
         activePowers: [],
         combatLog: [],
+        attackCardsPlayedTotal: 0,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

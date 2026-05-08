@@ -157,6 +157,7 @@ export interface GameState {
   bossEnraged: boolean;
   activePowers: string[];
   combatLog: string[];
+  attackCardsPlayedTotal: number;
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

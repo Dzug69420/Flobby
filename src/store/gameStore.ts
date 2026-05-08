@@ -421,6 +421,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 3;
       }
 
+      // Talisman: gain 1 energy when a Power card is played
+      if (def.category === 'power' && hasRelic(s.relics, 'talisman')) {
+        playerEnergy = Math.min(playerEnergy + 1, s.playerMaxEnergy + 3);
+      }
+
+      // Ornamental Fan: every 3rd attack card in a turn, gain 4 Block
+      if (isAttackCard && hasRelic(s.relics, 'ornamental_fan')) {
+        const attacksInTurn = s.cardsPlayedThisTurn + 1;
+        if (attacksInTurn % 3 === 0) playerBlock += 4;
+      }
+
+      // Strange Spoon: 50% chance to NOT exhaust when exhaust would occur
+      // (handled via final exhaust decision — already set above as finalExhaust)
+
       // Sentinel: when Sentinel card is exhausted, gain 2 energy
       if (def.id === 'sentinel' && finalExhaust) {
         playerEnergy = Math.min(playerEnergy + 2, s.playerMaxEnergy + 3);
@@ -705,6 +719,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Art of War: if no attacks played last turn, gain 1 energy next turn
       // (tracked via attackPlayedThisTurn, applied at turn start)
 
+      // Horn Cleat: at start of turn 2, gain 14 Block
+      if (state.turnNumber === 1 && hasRelic(relics, 'horn_cleat')) {
+        playerBlock += 14;
+      }
+
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
 
@@ -723,6 +742,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const def = state.masterCardPool[c.definitionId];
         return !def?.retain;
       });
+
+      // Tough Bandages: gain 3 Block per discarded card at end of turn
+      if (hasRelic(relics, 'tough_bandages')) {
+        playerBlock += discardCards.length * 3;
+      }
 
       // Art of War: gain 1 energy if no attacks played last turn
       const artOfWarBonus = hasRelic(relics, 'art_of_war') && !state.attackPlayedThisTurn ? 1 : 0;
@@ -932,6 +956,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyStartStatuses = mergeStatuses(enemyStartStatuses, [{ type: 'strength', stacks: 1 }]);
       }
       if (hasRelic(relics, 'fusion_hammer')) startEnergy += 1;
+      if (hasRelic(relics, 'thread_and_needle')) {
+        startStatuses = mergeStatuses(startStatuses, [{ type: 'metallicize', stacks: 4 }]);
+      }
       const sneckoExtraCards = hasRelic(relics, 'snecko_eye') ? 2 : 0;
 
       // Separate innate cards from the rest

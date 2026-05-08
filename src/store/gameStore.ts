@@ -165,6 +165,7 @@ const initialState: GameState = {
   combatLog: [],
   attackCardsPlayedTotal: 0,
   sneckoCosts: {},
+  bottledCardId: null,
   turnNumber: 0,
   cardsPlayedThisTurn: 0,
   rewardChoices: [],
@@ -400,6 +401,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 3;
       }
 
+      // Centennial Puzzle: first time player takes damage this combat, draw 3
+      const justTookDamage2 = modifiedDelta.playerHPChange && modifiedDelta.playerHPChange < 0;
+      if (justTookDamage2 && !s.tookDamageThisCombat && hasRelic(s.relics, 'centennial_puzzle')) {
+        // Will draw 3 after set
+      }
+
       // Combat log entry
       let logMsg = `Played ${def.name}`;
       if (modifiedDelta.enemyHPChange && modifiedDelta.enemyHPChange < 0) {
@@ -446,6 +453,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (modifiedDelta.drawCards) {
       get().drawCards(modifiedDelta.drawCards);
+    }
+
+    // Centennial Puzzle: draw 3 cards first time taking damage in combat
+    const afterCentennial = get();
+    if (
+      modifiedDelta.playerHPChange && modifiedDelta.playerHPChange < 0 &&
+      !state.tookDamageThisCombat &&
+      afterCentennial.relics.includes('centennial_puzzle')
+    ) {
+      get().drawCards(3);
     }
 
     // Dark Embrace: draw 1 card when a card is exhausted
@@ -619,6 +636,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
+    // Centennial Puzzle: trigger on first hit from enemy
+    const afterEnemy = get();
+    if (
+      !afterEnemy.tookDamageThisCombat &&
+      afterEnemy.enemyTurnAction === 'attack' &&
+      afterEnemy.relics.includes('centennial_puzzle')
+    ) {
+      get().drawCards(3);
+      set((s) => ({ tookDamageThisCombat: true }));
+    }
+
     if (get().playerHP <= 0) {
       const s = get();
       const score = Math.floor(
@@ -781,13 +809,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       // Separate innate cards from the rest
       const allDeckCards = [...state.deck];
+      const bottledCard = state.bottledCardId
+        ? allDeckCards.find((c) => c.definitionId === state.bottledCardId)
+        : null;
       const innateDefs = allDeckCards.filter((c) => state.masterCardPool[c.definitionId]?.innate);
-      const normalDefs = allDeckCards.filter((c) => !state.masterCardPool[c.definitionId]?.innate);
+      const normalDefs = allDeckCards.filter((c) =>
+        !state.masterCardPool[c.definitionId]?.innate &&
+        c.instanceId !== bottledCard?.instanceId
+      );
       const shuffledNormal = shuffle(normalDefs);
 
       const drawCount = HAND_SIZE + startExtraCards + sneckoExtraCards;
-      const fromNormal = Math.max(0, drawCount - innateDefs.length);
-      const newHand = [...innateDefs, ...shuffledNormal.slice(0, fromNormal)];
+      const guaranteedCards = [
+        ...(bottledCard ? [bottledCard] : []),
+        ...innateDefs,
+      ];
+      const fromNormal = Math.max(0, drawCount - guaranteedCards.length);
+      const newHand = [...guaranteedCards, ...shuffledNormal.slice(0, fromNormal)];
       const remaining = shuffledNormal.slice(fromNormal);
 
       const ascHP = Math.floor(enemy.maxHP * ascensionEnemyHPMultiplier(state.ascensionLevel));

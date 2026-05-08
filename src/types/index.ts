@@ -160,6 +160,7 @@ export interface GameState {
   combatLog: string[];
   attackCardsPlayedTotal: number;
   sneckoCosts: Record<string, number>;
+  bottledCardId: string | null;
   turnNumber: number;
   cardsPlayedThisTurn: number;
   rewardChoices: CardDefinition[];

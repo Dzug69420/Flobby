@@ -139,6 +139,22 @@ export const ALL_RELICS: Record<string, RelicDefinition> = {
     trigger: 'passive',
     emoji: '🌿',
   },
+  bottled_flame: {
+    id: 'bottled_flame',
+    name: 'Bottled Flame',
+    description: 'Upon pickup, choose an Attack card. It starts in your hand each combat.',
+    rarity: 'uncommon',
+    trigger: 'combat_start',
+    emoji: '🔥',
+  },
+  bottled_tornado: {
+    id: 'bottled_tornado',
+    name: 'Bottled Tornado',
+    description: 'Upon pickup, choose a Skill card. It starts in your hand each combat.',
+    rarity: 'uncommon',
+    trigger: 'combat_start',
+    emoji: '🌪️',
+  },
   philosophers_stone: {
     id: 'philosophers_stone',
     name: "Philosopher's Stone",

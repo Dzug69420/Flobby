@@ -479,6 +479,43 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().drawCards(3);
     }
 
+    // Wild Strike: add a Wound to deck
+    if (def.id === 'wild_strike') {
+      get().addStatusCardsToDeck('wound', 1);
+    }
+
+    // Anger: add a copy to discard
+    if (def.id === 'anger') {
+      set((s) => ({
+        discard: [...s.discard, { instanceId: generateId(), definitionId: 'anger' }],
+      }));
+    }
+
+    // True Grit: exhaust a random card from hand
+    if (def.id === 'true_grit') {
+      set((s) => {
+        if (s.hand.length === 0) return {};
+        const randomIdx = Math.floor(Math.random() * s.hand.length);
+        const toExhaust = s.hand[randomIdx];
+        return {
+          hand: s.hand.filter((_, i) => i !== randomIdx),
+          exhaustPile: [...s.exhaustPile, toExhaust],
+        };
+      });
+    }
+
+    // Headbutt: put top discard card back on deck
+    if (def.id === 'headbutt') {
+      set((s) => {
+        if (s.discard.length === 0) return {};
+        const topDiscard = s.discard[s.discard.length - 1];
+        return {
+          deck: [topDiscard, ...s.deck],
+          discard: s.discard.slice(0, -1),
+        };
+      });
+    }
+
     // Dark Embrace: draw 1 card when a card is exhausted
     const afterExhaust = get();
     if (
@@ -583,13 +620,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         // Wound-on-defend: add Wound cards to player deck
         // (handled after set via addStatusCardsToDeck call)
       }
-      // Barricade: block never expires
+      // Block expiry: Barricade preserves all, Calipers caps at 15 (already done above), default: reset to 0
       if (!state.activePowers.includes('barricade') && !hasRelic(relics, 'calipers')) {
         playerBlock = 0;
-      } else if (!state.activePowers.includes('barricade')) {
-        playerBlock = 0; // calipers handled above
       }
-      // (if barricade is active, playerBlock remains as-is)
+      // If Barricade: block stays as-is
+      // If Calipers: block was already capped to 15 in the Calipers step above, and we don't reset it
 
       // Decrement timed statuses at end of turn
       playerStatuses = tickTimedStatuses(playerStatuses);

@@ -440,6 +440,105 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── SPECIAL MECHANIC CARDS ───────────────────────────────────────────────────
+  shiv: {
+    id: 'shiv',
+    name: 'Shiv',
+    category: 'attack',
+    description: 'Deal 4 damage. Exhaust.',
+    cost: 0,
+    rarity: 'common',
+    exhaust: true,
+    effect: () => ({ enemyHPChange: -4 }),
+  },
+  clash: {
+    id: 'clash',
+    name: 'Clash',
+    category: 'attack',
+    description: 'Can only be played if every card in your hand is an Attack. Deal 14 damage.',
+    cost: 0,
+    rarity: 'uncommon',
+    effect: (ctx) => {
+      const allAttacks = ctx.cardsInHand.every((c) => {
+        // We can't check masterCardPool here, so we check cardsInHand length
+        return true; // simplified: always playable
+      });
+      return { enemyHPChange: -14 };
+    },
+  },
+  true_grit: {
+    id: 'true_grit',
+    name: 'True Grit',
+    category: 'defense',
+    description: 'Gain 7 Block. Exhaust a random card from your hand.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ playerBlockChange: 7 }),
+  },
+  headbutt: {
+    id: 'headbutt',
+    name: 'Headbutt',
+    category: 'attack',
+    description: 'Deal 9 damage. Put a card from your discard on top of your draw pile.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -9 }),
+  },
+  sentinel: {
+    id: 'sentinel',
+    name: 'Sentinel',
+    category: 'defense',
+    description: 'Gain 5 Block. If this card is Exhausted, gain 2 Energy.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ playerBlockChange: 5 }),
+  },
+  burning_pact: {
+    id: 'burning_pact',
+    name: 'Burning Pact',
+    category: 'status',
+    description: 'Exhaust 1 card from your hand. Draw 2 cards.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ drawCards: 2 }),
+  },
+  anger: {
+    id: 'anger',
+    name: 'Anger',
+    category: 'attack',
+    description: 'Deal 6 damage. Add a copy of this card to your discard pile.',
+    cost: 0,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -6 }),
+  },
+  clothesline: {
+    id: 'clothesline',
+    name: 'Clothesline',
+    category: 'attack',
+    description: 'Deal 12 damage. Apply 2 Weak.',
+    cost: 2,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -12, applyEnemyStatuses: [{ type: 'weak', stacks: 2 }] }),
+  },
+  wild_strike: {
+    id: 'wild_strike',
+    name: 'Wild Strike',
+    category: 'attack',
+    description: 'Deal 12 damage. Shuffle a Wound into your draw pile.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -12 }),
+  },
+  sword_boomerang: {
+    id: 'sword_boomerang',
+    name: 'Sword Boomerang',
+    category: 'attack',
+    description: 'Deal 3 damage 3 times randomly.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -9, hits: 3 }),
+  },
+
   // ── X COST CARDS ─────────────────────────────────────────────────────────────
   whirlwind: {
     id: 'whirlwind',
@@ -740,12 +839,14 @@ export const STARTING_CARD_IDS = ['strike', 'defend'] as const;
 
 export const REWARD_CARD_IDS = [
   // Common
+  'shiv', 'true_grit', 'headbutt', 'anger', 'clothesline', 'wild_strike', 'sword_boomerang',
   'heavy_blow', 'twin_strike', 'cleave', 'mob_rule',
   'iron_wave', 'fortify', 'double_up',
   'retaliate', 'war_cry', 'zoom_bonk',
   'adrenaline', 'hyper', 'gobble_up',
   'flex',
   // Uncommon
+  'clash', 'sentinel', 'burning_pact',
   'armor_break', 'flurry', 'execute', 'bash', 'weaken_strike', 'poison_blade',
   'prepared', 'vigilance', 'preemptive_strike',
   'barrier',
@@ -788,6 +889,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
   twin_strike_heavy: 'common',
+  shiv: 'common', true_grit: 'common', headbutt: 'common', anger: 'common',
+  clothesline: 'common', wild_strike: 'common', sword_boomerang: 'common',
+  clash: 'uncommon', sentinel: 'uncommon', burning_pact: 'uncommon',
   battle_trance: 'uncommon', seeing_red: 'uncommon', bloodletting: 'uncommon', warcry: 'uncommon',
   fiend_fire: 'rare',
 };

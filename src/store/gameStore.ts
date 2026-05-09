@@ -1069,6 +1069,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: 2 }]);
       }
 
+      // Ritual status effect: gain Strength each turn equal to stacks
+      const ritualStacks = getStatusStacks(playerStatuses, 'ritual');
+      if (ritualStacks > 0) {
+        playerStatuses = mergeStatuses(playerStatuses, [{ type: 'strength', stacks: ritualStacks }]);
+      }
+
       // Art of War: if no attacks played last turn, gain 1 energy next turn
       // (tracked via attackPlayedThisTurn, applied at turn start)
 

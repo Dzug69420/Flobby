@@ -639,6 +639,38 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -9, hits: 3 }),
   },
 
+  // ── CHARGE MECHANIC CARDS ────────────────────────────────────────────────────
+  charge_up: {
+    id: 'charge_up',
+    name: 'Charge Up',
+    category: 'status',
+    description: 'Gain 2 Charges. Draw 1 card.',
+    cost: 0,
+    rarity: 'uncommon',
+    effect: () => ({ chargeChange: 2, drawCards: 1 }),
+  },
+  discharge: {
+    id: 'discharge',
+    name: 'Discharge',
+    category: 'attack',
+    description: 'Deal damage equal to your Charges × 5. Reset Charges to 0.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({
+      enemyHPChange: -((ctx.cardsPlayedThisTurn * 0 + 1) * 5), // placeholder: will use charges from store
+      chargeChange: -99,
+    }),
+  },
+  lightning_strike: {
+    id: 'lightning_strike',
+    name: 'Lightning Strike',
+    category: 'attack',
+    description: 'Deal 8 dmg. If you have 3+ Charges, deal 20 dmg instead.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -8 }),
+  },
+
   // ── POWER CARDS (additional) ─────────────────────────────────────────────────
   mayhem: {
     id: 'mayhem',
@@ -1167,7 +1199,7 @@ export const REWARD_CARD_IDS = [
   // Common (new)
   'twin_strike_heavy', 'swift_strike', 'heavy_slash',
   // Uncommon (new)
-  'carnage', 'evolve', 'burst', 'double_tap',
+  'carnage', 'evolve', 'burst', 'double_tap', 'charge_up', 'discharge', 'lightning_strike',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Uncommon (deck manipulation)
@@ -1211,6 +1243,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   spot_weakness: 'uncommon', pummel: 'uncommon',
   twin_strike_heavy: 'common', swift_strike: 'common', heavy_slash: 'common',
   carnage: 'uncommon', evolve: 'uncommon', burst: 'uncommon', double_tap: 'uncommon',
+  charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',

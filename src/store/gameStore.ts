@@ -183,6 +183,7 @@ const initialState: GameState = {
   ritualDaggerBonus: 0,
   burstActive: false,
   doubleTapActive: false,
+  charges: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -301,8 +302,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const rawDelta = def.effect(ctx);
 
+    // Apply charge-based effects before other modifications
+    let chargesForCard = state.charges;
+
     // Apply status modifiers to the delta
     let modifiedDelta = { ...rawDelta };
+
+    // Discharge: damage = charges × 5
+    if (def.id === 'discharge') {
+      modifiedDelta.enemyHPChange = -(chargesForCard * 5);
+    }
+
+    // Lightning Strike: 20 dmg if 3+ charges, else 8
+    if (def.id === 'lightning_strike') {
+      modifiedDelta.enemyHPChange = chargesForCard >= 3 ? -20 : -8;
+    }
     const isAttackCard = def.category === 'attack';
     const newAttackTotal = isAttackCard ? state.attackCardsPlayedTotal + 1 : state.attackCardsPlayedTotal;
     const isPenNibTurn = isAttackCard && hasRelic(state.relics, 'pen_nib') && newAttackTotal % 10 === 0;
@@ -527,6 +541,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         sneckoCosts: newSneckoCosts,
         burstActive,
         doubleTapActive,
+        charges: Math.max(0, s.charges + (modifiedDelta.chargeChange ?? 0)),
       };
     });
 
@@ -1128,6 +1143,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         sneckoCosts: {},
         burstActive: false,
         doubleTapActive: false,
+        charges: 0,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

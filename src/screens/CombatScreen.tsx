@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive, charges,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -305,6 +305,11 @@ export default function CombatScreen() {
             {cardsPlayedThisTurn > 0 && (
               <Text style={styles.playedLabel}>▶ {cardsPlayedThisTurn}</Text>
             )}
+            {charges > 0 && (
+              <View style={styles.chargeBadge}>
+                <Text style={styles.chargeText}>⚡{charges}</Text>
+              </View>
+            )}
             <PotionSlots
               potions={potions}
               onUse={usePotion}
@@ -577,6 +582,15 @@ const styles = StyleSheet.create({
   },
   powerEmoji: { fontSize: 10 },
   powerName: { color: '#66bb6a', fontSize: 10, fontWeight: 'bold' },
+  chargeBadge: {
+    backgroundColor: 'rgba(255,193,7,0.15)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ffc107',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  chargeText: { color: '#ffc107', fontSize: 13, fontWeight: 'bold' },
 
   // BATTLE
   battleArea: {

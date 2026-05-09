@@ -45,6 +45,7 @@ export interface CombatDelta {
   applyPlayerStatuses?: StatusEffect[];
   hits?: number;
   exhaustHand?: boolean;
+  chargeChange?: number;
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
@@ -179,6 +180,7 @@ export interface GameState {
   ritualDaggerBonus: number;
   burstActive: boolean;
   doubleTapActive: boolean;
+  charges: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

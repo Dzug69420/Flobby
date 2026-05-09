@@ -47,6 +47,7 @@ export interface CombatDelta {
   exhaustHand?: boolean;
   chargeChange?: number;
   setStance?: 'neutral' | 'calm' | 'wrath';
+  channelOrb?: 'lightning' | 'frost' | 'dark';
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
@@ -185,6 +186,8 @@ export interface GameState {
   stance: 'neutral' | 'calm' | 'wrath';
   scryCards: CardInstance[];
   scryAmount: number;
+  orbs: Array<'lightning' | 'frost' | 'dark'>;
+  maxOrbs: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

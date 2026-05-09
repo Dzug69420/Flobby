@@ -440,6 +440,55 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── ORB CARDS (Defectblob exclusive) ─────────────────────────────────────────
+  zap: {
+    id: 'zap',
+    name: 'Zap',
+    category: 'attack',
+    description: 'Channel a Lightning Orb.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ channelOrb: 'lightning' }),
+  },
+  chill: {
+    id: 'chill',
+    name: 'Chill',
+    category: 'defense',
+    description: 'Channel a Frost Orb.',
+    cost: 0,
+    rarity: 'common',
+    exhaust: true,
+    effect: () => ({ channelOrb: 'frost' }),
+  },
+  void_orb: {
+    id: 'void_orb',
+    name: 'Void',
+    category: 'power',
+    description: 'Channel a Dark Orb. Gain 1 Energy when evoked.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ channelOrb: 'dark' }),
+  },
+  dualcast: {
+    id: 'dualcast',
+    name: 'Dualcast',
+    category: 'status',
+    description: 'Evoke your leftmost orb twice.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ chargeChange: 0 }),
+  },
+  consume: {
+    id: 'consume',
+    name: 'Consume',
+    category: 'status',
+    description: 'Evoke your leftmost orb. Gain 2 Energy.',
+    cost: 2,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ energyChange: 2 }),
+  },
+
   // ── SCRY CARDS ───────────────────────────────────────────────────────────────
   scry_3: {
     id: 'scry_3',
@@ -1351,7 +1400,10 @@ export const REWARD_CARD_IDS = [
   'eruption', 'inner_peace', 'conclude',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
-  // Uncommon (deck manipulation)
+  // Common (orbs)
+  'zap', 'chill',
+  // Uncommon (orbs + deck manipulation)
+  'void_orb', 'dualcast', 'consume',
   'scry_3', 'calm_scry',
   'recycle', 'masterful_stab', 'glacier', 'dropkick', 'thorns_card', 'plated_armor_card',
   // Rare (new)
@@ -1399,6 +1451,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  zap: 'common', chill: 'common',
+  void_orb: 'uncommon', dualcast: 'uncommon', consume: 'uncommon',
   scry_3: 'uncommon', calm_scry: 'uncommon',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',

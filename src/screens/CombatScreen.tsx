@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive, charges, stance,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive, charges, stance, orbs, maxOrbs,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -310,6 +310,18 @@ export default function CombatScreen() {
             {charges > 0 && (
               <View style={styles.chargeBadge}>
                 <Text style={styles.chargeText}>⚡{charges}</Text>
+              </View>
+            )}
+            {orbs.length > 0 && (
+              <View style={styles.orbRow}>
+                {orbs.map((orb, i) => (
+                  <Text key={i} style={styles.orbIcon}>
+                    {orb === 'lightning' ? '⚡' : orb === 'frost' ? '❄️' : '🌑'}
+                  </Text>
+                ))}
+                {Array.from({ length: maxOrbs - orbs.length }).map((_, i) => (
+                  <Text key={`e${i}`} style={[styles.orbIcon, { opacity: 0.2 }]}>○</Text>
+                ))}
               </View>
             )}
             {stance !== 'neutral' && (
@@ -607,6 +619,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   chargeText: { color: '#ffc107', fontSize: 13, fontWeight: 'bold' },
+  orbRow: {
+    flexDirection: 'row',
+    gap: 3,
+    alignItems: 'center',
+  },
+  orbIcon: { fontSize: 14 },
 
   // BATTLE
   battleArea: {

@@ -190,6 +190,8 @@ const initialState: GameState = {
   stance: 'neutral' as const,
   scryCards: [],
   scryAmount: 0,
+  orbs: [],
+  maxOrbs: 3,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -464,6 +466,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (modifiedDelta.drawCards) modifiedDelta.drawCards *= 2;
       }
 
+      // Orb mechanic: channel new orb, evoke leftmost if at max
+      let orbs = [...s.orbs];
+      if (modifiedDelta.channelOrb) {
+        orbs.push(modifiedDelta.channelOrb);
+        // Evoke leftmost if over max
+        while (orbs.length > s.maxOrbs) {
+          const evoked = orbs.shift()!;
+          if (evoked === 'lightning') {
+            // Lightning: deal 8 damage
+            const lDmg = Math.max(0, 8 - enemyBlock);
+            enemyBlock = Math.max(0, enemyBlock - 8);
+            enemyHP = Math.max(0, enemyHP - lDmg);
+          } else if (evoked === 'frost') {
+            // Frost: gain 5 block
+            playerBlock += 5;
+          } else if (evoked === 'dark') {
+            // Dark: deal 6 damage + heal 3
+            const dDmg = Math.max(0, 6 - enemyBlock);
+            enemyBlock = Math.max(0, enemyBlock - 6);
+            enemyHP = Math.max(0, enemyHP - dDmg);
+            playerHP = Math.min(playerHP + 3, s.playerMaxHP);
+          }
+        }
+      }
+
       // Corruption: skills cost 0 and exhaust
       const isSkill = def.category === 'defense' || def.category === 'status';
       const isCorrupted = s.activePowers.includes('corruption');
@@ -560,6 +587,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         doubleTapActive,
         charges: Math.max(0, s.charges + (modifiedDelta.chargeChange ?? 0)),
         stance: (modifiedDelta.setStance ?? s.stance) as 'neutral' | 'calm' | 'wrath',
+        orbs,
       };
     });
 
@@ -806,6 +834,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const platedArmor = getStatusStacks(playerStatuses, 'plated_armor');
       if (platedArmor > 0) {
         playerBlock += platedArmor;
+      }
+
+      // Orb passive effects each turn
+      for (const orb of state.orbs) {
+        if (orb === 'lightning') {
+          // Lightning passive: deal 3 damage each turn
+          const passiveDmg = Math.max(0, 3 - enemyBlock);
+          enemyBlock = Math.max(0, enemyBlock - 3);
+          enemyHP = Math.max(0, enemyHP - passiveDmg);
+        } else if (orb === 'frost') {
+          // Frost passive: gain 2 block each turn
+          playerBlock += 2;
+        }
+        // Dark orb: passive is handled on evoke only
       }
       // If Barricade: block stays as-is
       // If Calipers: block was already capped to 15 in the Calipers step above, and we don't reset it
@@ -1176,6 +1218,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         doubleTapActive: false,
         charges: 0,
         stance: 'neutral' as const,
+        orbs: [],
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

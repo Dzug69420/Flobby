@@ -59,6 +59,22 @@ export const ALL_CHARACTERS: Record<string, CharacterDefinition> = {
     ],
     specialty: 'Power cards & Ethereal',
   },
+  defectblob: {
+    id: 'defectblob',
+    name: 'Defectblob',
+    emoji: '🤖',
+    description: 'A malfunctioning blob drone. Commands lightning, frost, and dark orbs.',
+    color: '#4fc3f7',
+    maxHP: 75,
+    startingRelic: 'lantern',
+    startingDeck: [
+      { cardId: 'strike', count: 4 },
+      { cardId: 'defend', count: 4 },
+      { cardId: 'charge_up', count: 1 },
+      { cardId: 'zap', count: 1 },
+    ],
+    specialty: 'Orbs & Energy scaling',
+  },
 };
 
 export const CHARACTER_IDS = Object.keys(ALL_CHARACTERS);

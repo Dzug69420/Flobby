@@ -202,6 +202,25 @@ export default function CombatScreen() {
           </View>
         </View>
 
+        {/* ── TURN END FORECAST ── */}
+        {(() => {
+          const forecasts: string[] = [];
+          const poisonStacks = enemyStatuses.find((s) => s.type === 'poison')?.stacks ?? 0;
+          if (poisonStacks > 0) forecasts.push(`☠️ Poison: -${poisonStacks} HP to enemy`);
+          const burnCount = [...discard, ...hand, ...deck].filter((c) => masterCardPool[c.definitionId]?.id === 'burn').length;
+          if (burnCount > 0) forecasts.push(`🔥 Burn: -${burnCount * 2} HP to you`);
+          const metallicize = playerStatuses.find((s) => s.type === 'metallicize')?.stacks ?? 0;
+          if (metallicize > 0) forecasts.push(`⚙️ Metallicize: +${metallicize} block`);
+          if (forecasts.length === 0) return null;
+          return (
+            <View style={styles.forecastRow} pointerEvents="none">
+              {forecasts.map((f, i) => (
+                <Text key={i} style={styles.forecastText}>{f}</Text>
+              ))}
+            </View>
+          );
+        })()}
+
         {/* ── RELIC + POWERS ROW ── */}
         {(relics.length > 0 || activePowers.length > 0) && (
           <View style={styles.relicRow}>
@@ -625,6 +644,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   orbIcon: { fontSize: 14 },
+  forecastRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  forecastText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 10,
+    fontStyle: 'italic',
+  },
 
   // BATTLE
   battleArea: {

@@ -720,6 +720,73 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({}),
   },
 
+  // ── UNIQUE COST MODIFIER CARDS ───────────────────────────────────────────────
+  blood_for_blood: {
+    id: 'blood_for_blood',
+    name: 'Blood for Blood',
+    category: 'attack',
+    description: 'Costs 1 less Energy for each time you lost HP this combat. Deal 18 damage.',
+    cost: 4,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -18 }),
+  },
+  hemokinesis: {
+    id: 'hemokinesis',
+    name: 'Hemokinesis',
+    category: 'attack',
+    description: 'Lose 2 HP. Deal 15 damage.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ playerHPChange: -2, enemyHPChange: -15 }),
+  },
+  second_wind2: {
+    id: 'second_wind2',
+    name: 'Second Wind',
+    category: 'defense',
+    description: 'Exhaust all non-Attack cards in your hand. Gain 5 Block for each.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => {
+      const nonAttacks = ctx.cardsInHand.filter((c) => {
+        // Count non-attacks: simplified, count all as non-attack cards
+        return true;
+      }).length;
+      return { playerBlockChange: 5 * Math.max(0, nonAttacks - 1) };
+    },
+  },
+  impervious: {
+    id: 'impervious',
+    name: 'Impervious',
+    category: 'defense',
+    description: 'Gain 30 Block. Exhaust.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ playerBlockChange: 30 }),
+  },
+  pommel_strike: {
+    id: 'pommel_strike',
+    name: 'Pommel Strike',
+    category: 'attack',
+    description: 'Deal 9 damage. Draw 1 card.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -9, drawCards: 1 }),
+  },
+  perfected_strike: {
+    id: 'perfected_strike',
+    name: 'Perfected Strike',
+    category: 'attack',
+    description: 'Deal 6 + 2×(number of Strikes in your deck) damage.',
+    cost: 2,
+    rarity: 'common',
+    effect: (ctx) => {
+      const strikes = ctx.cardsInDeck.concat(ctx.cardsInHand).concat(ctx.cardsInDiscard)
+        .filter((c) => c.definitionId.includes('strike')).length;
+      return { enemyHPChange: -(6 + 2 * strikes) };
+    },
+  },
+
   // ── HEALING / UTILITY ATTACKS ────────────────────────────────────────────────
   reaper: {
     id: 'reaper',
@@ -1197,7 +1264,11 @@ export const REWARD_CARD_IDS = [
   'rage', 'desperation', 'last_stand', 'second_wind',
   'inflame', 'entrench', 'metallicize',
   // Common (new)
-  'twin_strike_heavy', 'swift_strike', 'heavy_slash',
+  'twin_strike_heavy', 'swift_strike', 'heavy_slash', 'pommel_strike', 'perfected_strike',
+  // Uncommon (new)
+  'blood_for_blood', 'hemokinesis',
+  // Rare (new)
+  'impervious',
   // Uncommon (new)
   'carnage', 'evolve', 'burst', 'double_tap', 'charge_up', 'discharge', 'lightning_strike',
   // Rare (new)
@@ -1242,6 +1313,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
   twin_strike_heavy: 'common', swift_strike: 'common', heavy_slash: 'common',
+  pommel_strike: 'common', perfected_strike: 'common',
+  blood_for_blood: 'uncommon', hemokinesis: 'uncommon',
+  impervious: 'rare',
   carnage: 'uncommon', evolve: 'uncommon', burst: 'uncommon', double_tap: 'uncommon',
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',

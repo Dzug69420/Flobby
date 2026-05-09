@@ -279,7 +279,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isSkillCard = def.category === 'defense' || def.category === 'status';
     // Masterful Stab: costs 0 if player has no block
     const isMasterfulFree = def.id === 'masterful_stab' && state.playerBlock === 0;
-    const sneckoCost = isMasterfulFree ? 0 : state.sneckoCosts[instanceId];
+    // Blood for Blood: costs 1 less per HP lost this combat
+    const bloodForBloodDiscount = def.id === 'blood_for_blood'
+      ? Math.min(def.cost, state.playerMaxHP - state.playerHP)
+      : 0;
+    const sneckoCost = isMasterfulFree ? 0 :
+      bloodForBloodDiscount > 0 ? Math.max(0, def.cost - bloodForBloodDiscount) :
+      state.sneckoCosts[instanceId];
     const baseCost = sneckoCost !== undefined ? sneckoCost : def.cost;
     const effectiveCost = (state.activePowers.includes('corruption') && isSkillCard) ? 0 : baseCost;
     if (!isXCost && state.playerEnergy < effectiveCost) return;

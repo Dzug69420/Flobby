@@ -167,6 +167,14 @@ export default function MapScreen() {
           })}
         </ScrollView>
 
+        {/* Progress bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${((currentFloor) / 14) * 100}%` as unknown as number }]} />
+          </View>
+          <Text style={styles.progressText}>{Math.round((currentFloor / 14) * 100)}% complete</Text>
+        </View>
+
         <Text style={styles.hint}>Tap a glowing room to travel there</Text>
       </SafeAreaView>
 
@@ -398,10 +406,31 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
 
+  progressContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    gap: 4,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.accentGold,
+    borderRadius: 2,
+  },
+  progressText: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 10,
+    textAlign: 'center',
+  },
   hint: {
     color: 'rgba(255,255,255,0.3)',
     fontSize: 12,
     textAlign: 'center',
-    paddingVertical: 10,
+    paddingVertical: 6,
   },
 });

@@ -961,6 +961,41 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── WATCHER-STYLE CARDS ──────────────────────────────────────────────────────
+  pray: {
+    id: 'pray',
+    name: 'Pray',
+    category: 'status',
+    description: 'Draw 1 card. Gain 1 Strength.',
+    cost: 0,
+    rarity: 'common',
+    effect: () => ({ drawCards: 1, applyPlayerStatuses: [{ type: 'strength', stacks: 1 }] }),
+  },
+  fasting: {
+    id: 'fasting',
+    name: 'Fasting',
+    category: 'power',
+    description: 'Gain 3 Strength. Gain 3 Dexterity.',
+    cost: 2,
+    rarity: 'rare',
+    effect: () => ({
+      applyPlayerStatuses: [
+        { type: 'strength', stacks: 3 },
+        { type: 'dexterity', stacks: 3 },
+      ],
+    }),
+  },
+  battle_trance2: {
+    id: 'battle_trance2',
+    name: 'War Preparation',
+    category: 'status',
+    description: 'Draw 2 cards. Gain 1 Energy.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ drawCards: 2, energyChange: 1 }),
+  },
+
   // ── CONDITIONAL / SCALING CARDS ──────────────────────────────────────────────
   crush_joints: {
     id: 'crush_joints',
@@ -1723,8 +1758,12 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
-  // Common (conditional)
-  'meditate',
+  // Common (Watcher)
+  'pray', 'meditate',
+  // Uncommon (Watcher)
+  'battle_trance2',
+  // Rare (Watcher)
+  'fasting',
   // Uncommon (conditional)
   'crush_joints', 'spirit_shield', 'sanctity', 'cleanse',
   // Rare (new)
@@ -1793,6 +1832,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  pray: 'common', battle_trance2: 'uncommon', fasting: 'rare',
   crush_joints: 'uncommon', spirit_shield: 'uncommon', sanctity: 'uncommon',
   meditate: 'common',
   cleanse: 'uncommon', talk_to_the_hand: 'rare',

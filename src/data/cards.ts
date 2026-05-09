@@ -961,6 +961,54 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── SCALING MECHANICS CARDS ──────────────────────────────────────────────────
+  sunder: {
+    id: 'sunder',
+    name: 'Sunder',
+    category: 'attack',
+    description: 'Deal 24 damage. If this kills an enemy, gain 3 Energy.',
+    cost: 3,
+    rarity: 'rare',
+    effect: () => ({ enemyHPChange: -24 }),
+  },
+  entrails: {
+    id: 'entrails',
+    name: 'Entrails',
+    category: 'attack',
+    description: 'Deal 10 damage.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -10 }),
+  },
+  flying_sleeves: {
+    id: 'flying_sleeves',
+    name: 'Flying Sleeves',
+    category: 'attack',
+    description: 'Retain. Deal 4 damage twice.',
+    cost: 1,
+    rarity: 'common',
+    retain: true,
+    effect: () => ({ enemyHPChange: -9, hits: 2 }),
+  },
+  empty_fist: {
+    id: 'empty_fist',
+    name: 'Empty Fist',
+    category: 'attack',
+    description: 'Deal 14 damage. Exit your stance.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -14, setStance: 'neutral' }),
+  },
+  battle_hymn: {
+    id: 'battle_hymn',
+    name: 'Battle Hymn',
+    category: 'power',
+    description: 'At the start of each turn, add a free Expunger to your hand.',
+    cost: 1,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+
   // ── DECK BUILDING META-CARDS ─────────────────────────────────────────────────
   master_of_strategy: {
     id: 'master_of_strategy',
@@ -1596,7 +1644,11 @@ export const REWARD_CARD_IDS = [
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Common (new)
-  'bite', 'beam_cell', 'frost_blast', 'master_of_strategy',
+  'bite', 'beam_cell', 'frost_blast', 'master_of_strategy', 'flying_sleeves', 'empty_fist',
+  // Uncommon (new)
+  'entrails',
+  // Rare (new)
+  'sunder', 'battle_hymn',
   // Uncommon (new)
   'blood_pact', 'dark_shackles', 'flechettes', 'blur', 'bouncing_flask',
   'thinking_ahead', 'turbo', 'recursion',
@@ -1656,7 +1708,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   bite: 'common', beam_cell: 'common', frost_blast: 'common',
-  master_of_strategy: 'common',
+  master_of_strategy: 'common', flying_sleeves: 'common', empty_fist: 'common',
+  entrails: 'uncommon',
+  sunder: 'rare', battle_hymn: 'rare',
   thinking_ahead: 'uncommon', turbo: 'uncommon', recursion: 'uncommon',
   blood_pact: 'uncommon', dark_shackles: 'uncommon', flechettes: 'uncommon',
   blur: 'uncommon', bouncing_flask: 'uncommon',

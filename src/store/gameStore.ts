@@ -868,6 +868,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (def.id === 'ritual_dagger') {
         set((s) => ({ ritualDaggerBonus: s.ritualDaggerBonus + 3 }));
       }
+      // Sunder: gain 3 energy on kill
+      if (def.id === 'sunder') {
+        set((s) => ({ playerEnergy: Math.min(s.playerEnergy + 3, s.playerMaxEnergy + 3) }));
+      }
       get().stageWon();
     }
   },
@@ -1025,6 +1029,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 14;
       }
 
+      // Battle Hymn: add a free 0-cost attack card to hand at turn start
+      // (added after draw)
+
       const nextTurn = state.turnNumber + 1;
       const nextAction = computeEnemyAction(enemy.attackPattern, nextTurn);
 
@@ -1155,6 +1162,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: s.hand.filter((c) => c.definitionId !== 'dazed'),
       };
     });
+
+    // Battle Hymn: add free Shiv (0-cost attack) to hand at turn start
+    const battleHymnState = get();
+    if (battleHymnState.activePowers.includes('battle_hymn')) {
+      set((s) => ({
+        hand: [...s.hand, { instanceId: generateId(), definitionId: 'shiv' }],
+      }));
+    }
 
     // Mayhem: auto-play top card of deck
     const mayhemState = get();

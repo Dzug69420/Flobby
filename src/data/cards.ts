@@ -1428,6 +1428,18 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({}),
   },
 
+  // ── VOID CURSE ───────────────────────────────────────────────────────────────
+  void_curse: {
+    id: 'void_curse',
+    name: 'Void',
+    category: 'status',
+    description: 'Unplayable. At the start of your turn, lose 1 Energy.',
+    cost: 0,
+    isStatusCard: true,
+    isUnplayable: true,
+    effect: () => ({}),
+  },
+
   // ── CURSE CARDS (persistent negative cards) ──────────────────────────────────
   regret: {
     id: 'regret',

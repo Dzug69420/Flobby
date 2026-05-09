@@ -748,6 +748,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    // Turbo: add a Void curse to discard
+    if (def.id === 'turbo') {
+      set((s) => ({
+        discard: [...s.discard, { instanceId: generateId(), definitionId: 'void_curse' }],
+      }));
+    }
+
     // Scry cards trigger scry mode
     if (def.id === 'scry_3' || def.id === 'calm_scry') {
       get().scry(3);
@@ -990,6 +997,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += platedArmor;
       }
 
+      // Void curse: lose 1 energy at turn start
+      // (applied via endTurn energy reduction)
+      const voidCurseCount = [...state.deck, ...state.hand, ...state.discard]
+        .filter((c) => c.definitionId === 'void_curse').length;
+
       // Orb passive effects each turn
       for (const orb of state.orbs) {
         if (orb === 'lightning') {
@@ -1090,7 +1102,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
         exhaustPile: [...state.exhaustPile, ...etherealCards],
-        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus + calmBonus + defragmentBonus,
+        playerEnergy: Math.max(0, PLAYER_MAX_ENERGY + artOfWarBonus + calmBonus + defragmentBonus - voidCurseCount),
         cardsPlayedThisTurn: 0,
         attackPlayedThisTurn: false,
         combatLog: newCombatLog,

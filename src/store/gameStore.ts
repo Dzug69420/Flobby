@@ -259,7 +259,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   drawCards: (n: number) => {
+    const safeN = Math.min(n, 20); // Prevent infinite loops
     set((state) => {
+      const n = safeN;
       let deck = [...state.deck];
       let discard = [...state.discard];
       const hand = [...state.hand];

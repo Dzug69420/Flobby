@@ -961,6 +961,67 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── VAMPIRE / LIFESTEAL CARDS ────────────────────────────────────────────────
+  bite: {
+    id: 'bite',
+    name: 'Bite',
+    category: 'attack',
+    description: 'Deal 7 damage. Heal 2 HP.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ enemyHPChange: -7, playerHPChange: 2 }),
+  },
+  blood_pact: {
+    id: 'blood_pact',
+    name: 'Blood Pact',
+    category: 'attack',
+    description: 'Deal 18 damage. Heal 6 HP. Exhaust.',
+    cost: 2,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ enemyHPChange: -18, playerHPChange: 6 }),
+  },
+  dark_shackles: {
+    id: 'dark_shackles',
+    name: 'Dark Shackles',
+    category: 'attack',
+    description: 'Enemy loses 9 Strength until end of turn. Deal 9 damage.',
+    cost: 0,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ enemyHPChange: -9, applyEnemyStatuses: [{ type: 'weak', stacks: 3 }] }),
+  },
+  flechettes: {
+    id: 'flechettes',
+    name: 'Flechettes',
+    category: 'attack',
+    description: 'Deal 4 damage for each Skill in your hand.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({
+      enemyHPChange: -(4 * ctx.cardsInHand.filter(() => true).length),
+    }),
+  },
+  blur: {
+    id: 'blur',
+    name: 'Blur',
+    category: 'defense',
+    description: 'Gain 5 Block. Block is not removed at end of turn.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ playerBlockChange: 5, applyPlayerStatuses: [{ type: 'plated_armor', stacks: 5 }] }),
+  },
+  bouncing_flask: {
+    id: 'bouncing_flask',
+    name: 'Bouncing Flask',
+    category: 'status',
+    description: 'Apply 3 Poison 3 times.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({ applyEnemyStatuses: [{ type: 'poison', stacks: 9 }] }),
+  },
+
   // ── MORE UTILITY CARDS ───────────────────────────────────────────────────────
   madness: {
     id: 'madness',
@@ -1495,7 +1556,9 @@ export const REWARD_CARD_IDS = [
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Common (new)
-  'beam_cell', 'frost_blast',
+  'bite', 'beam_cell', 'frost_blast',
+  // Uncommon (new)
+  'blood_pact', 'dark_shackles', 'flechettes', 'blur', 'bouncing_flask',
   // Uncommon (new)
   'madness', 'swift_slice', 'finisher',
   // Rare (new)
@@ -1551,7 +1614,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
-  beam_cell: 'common', frost_blast: 'common',
+  bite: 'common', beam_cell: 'common', frost_blast: 'common',
+  blood_pact: 'uncommon', dark_shackles: 'uncommon', flechettes: 'uncommon',
+  blur: 'uncommon', bouncing_flask: 'uncommon',
   madness: 'uncommon', swift_slice: 'uncommon', finisher: 'uncommon',
   tempest: 'rare',
   zap: 'common', chill: 'common',

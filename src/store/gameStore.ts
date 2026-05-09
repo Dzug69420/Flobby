@@ -208,6 +208,7 @@ const initialState: GameState = {
   firstBlockThisTurn: true,
   lastTriggeredRelic: null,
   rampageDamageBonus: 0,
+  geneticAlgorithmBonus: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -346,6 +347,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Rampage: add accumulated bonus damage
     if (def.id === 'rampage' || def.id === 'rampage_plus') {
       modifiedDelta.enemyHPChange = (modifiedDelta.enemyHPChange ?? 0) - state.rampageDamageBonus;
+    }
+
+    // Genetic Algorithm: add accumulated bonus block
+    if (def.id === 'genetic_algorithm') {
+      modifiedDelta.playerBlockChange = (modifiedDelta.playerBlockChange ?? 0) + state.geneticAlgorithmBonus;
     }
 
     // Thunder Strike: scales with Lightning orbs
@@ -940,6 +946,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set((s) => ({ enemyStatuses: mergeStatuses(s.enemyStatuses, bossStrength) }));
     }
 
+    // Genetic Algorithm: permanently gain +1 block per play
+    if (def.id === 'genetic_algorithm') {
+      set((s) => ({ geneticAlgorithmBonus: s.geneticAlgorithmBonus + 1 }));
+    }
+
     // Rampage: increase damage bonus after each play
     if (def.id === 'rampage' || def.id === 'rampage_plus') {
       const bonusGain = def.id === 'rampage_plus' ? 8 : 5;
@@ -1047,6 +1058,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (isIntangible && dmg > 0) dmg = 1;
         if (dmg > 0) {
           playerHP = Math.max(0, playerHP - dmg);
+          // Static Discharge: channel Lightning when taking damage
+          if (state.activePowers.includes('static_discharge')) {
+            const newOrbs2 = [...state.orbs, 'lightning' as const];
+            if (newOrbs2.length > state.maxOrbs) {
+              newOrbs2.shift();
+              const scd = Math.max(0, 8 - enemyBlock);
+              enemyBlock = Math.max(0, enemyBlock - 8);
+              enemyHP = Math.max(0, enemyHP - scd);
+            }
+            state = { ...state, orbs: newOrbs2 };
+          }
+
           // Bronze Scales: deal 3 thorns damage back when hit
           if (hasRelic(relics, 'bronze_scales')) {
             enemyHP = Math.max(0, enemyHP - 3);

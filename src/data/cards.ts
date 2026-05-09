@@ -961,6 +961,33 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── SPECIAL INTERACTION CARDS ────────────────────────────────────────────────
+  terror: {
+    id: 'terror', name: 'Terror', category: 'attack',
+    description: 'Apply 99 Vulnerable. Exhaust.', cost: 0, rarity: 'uncommon', exhaust: true,
+    effect: () => ({ applyEnemyStatuses: [{ type: 'vulnerable', stacks: 99 }] }),
+  },
+  skewer: {
+    id: 'skewer', name: 'Skewer', category: 'attack',
+    description: 'Deal X × 7 damage.', cost: -1, rarity: 'uncommon',
+    effect: (ctx) => ({ enemyHPChange: -(ctx.playerEnergy * 7) }),
+  },
+  reinforced_body: {
+    id: 'reinforced_body', name: 'Reinforced Body', category: 'defense',
+    description: 'Gain 7 Block X times.', cost: -1, rarity: 'uncommon',
+    effect: (ctx) => ({ playerBlockChange: 7 * ctx.playerEnergy }),
+  },
+  genetic_algorithm: {
+    id: 'genetic_algorithm', name: 'Genetic Algorithm', category: 'defense',
+    description: 'Gain 1 Block. Block gained increases permanently each use.', cost: 1, rarity: 'rare',
+    effect: () => ({ playerBlockChange: 1 }),
+  },
+  static_discharge: {
+    id: 'static_discharge', name: 'Static Discharge', category: 'power',
+    description: 'Whenever you take damage, channel 1 Lightning Orb.', cost: 1, rarity: 'uncommon',
+    effect: () => ({}),
+  },
+
   // ── DEFECT-STYLE CARDS ───────────────────────────────────────────────────────
   skim: {
     id: 'skim', name: 'Skim', category: 'status',
@@ -1898,6 +1925,10 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Uncommon (special)
+  'terror', 'skewer', 'reinforced_body', 'static_discharge',
+  // Rare (special)
+  'genetic_algorithm',
   // Common (Defect)
   'skim', 'cold_snap', 'ball_lightning',
   // Uncommon (Defect)
@@ -1990,6 +2021,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  terror: 'uncommon', skewer: 'uncommon', reinforced_body: 'uncommon', static_discharge: 'uncommon',
+  genetic_algorithm: 'rare',
   skim: 'common', cold_snap: 'common', ball_lightning: 'common',
   darkness: 'uncommon', aggregate: 'uncommon', hologram: 'uncommon',
   multicast: 'rare', thunder_strike: 'rare',

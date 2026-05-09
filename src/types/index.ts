@@ -198,6 +198,7 @@ export interface GameState {
   firstBlockThisTurn: boolean;
   lastTriggeredRelic: string | null;
   rampageDamageBonus: number;
+  geneticAlgorithmBonus: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

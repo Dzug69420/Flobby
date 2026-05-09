@@ -195,6 +195,7 @@ const initialState: GameState = {
   totalDamageDealt: 0,
   totalDamageTaken: 0,
   totalBlockGained: 0,
+  enemiesDefeated: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -1082,6 +1083,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get();
     // Burning Blood: heal 6 HP after every combat
     const burningBloodHeal = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
+
+    // Track enemy defeat
+    set((s) => ({ enemiesDefeated: s.enemiesDefeated + 1 }));
 
     // Gremlin Horn: gain 1 energy and draw 1 card when an enemy dies
     if (hasRelic(state.relics, 'gremlin_horn') && !state.currentEnemy?.isBoss) {

@@ -36,7 +36,7 @@ const COL_WIDTH = 62;
 const ROW_HEIGHT = 54;
 
 export default function MapScreen() {
-  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold, potions, selectedCharacter, ascensionLevel, currentRunScore, masterCardPool, activePowers } = useGameStore();
+  const { map, playerHP, playerMaxHP, deck, discard, hand, currentFloor, currentAct, travelToNode, relics, gold, potions, selectedCharacter, ascensionLevel, currentRunScore, masterCardPool, activePowers, enemiesDefeated } = useGameStore();
   const [showStats, setShowStats] = useState(false);
   const [showDeck, setShowDeck] = useState(false);
 
@@ -263,6 +263,10 @@ export default function MapScreen() {
                 <Text style={statsStyles.value}>{activePowers.join(', ')}</Text>
               </View>
             )}
+            <View style={statsStyles.row}>
+              <Text style={statsStyles.label}>Enemies Defeated</Text>
+              <Text style={statsStyles.value}>💀 {enemiesDefeated}</Text>
+            </View>
             <View style={statsStyles.row}>
               <Text style={statsStyles.label}>Score So Far</Text>
               <Text style={[statsStyles.value, { color: COLORS.accentGold }]}>⭐ {currentRunScore}</Text>

@@ -15,6 +15,7 @@ export default function StartScreen() {
   const { ascensionLevel, runsCompleted, setAscensionLevel, bestScore, runHistory } = useGameStore();
   const wins = runHistory.filter((r) => r.won).length;
   const winRate = runHistory.length > 0 ? Math.round((wins / runHistory.length) * 100) : 0;
+  const { resumeSavedRun } = useGameStore();
   const [panel, setPanel] = useState<Panel>('menu');
   const [showHelp, setShowHelp] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
@@ -62,6 +63,7 @@ export default function StartScreen() {
           {panel === 'menu' && (
             <MenuPanel
               onStart={goToCharacterSelect}
+              onContinue={resumeSavedRun}
               onOptions={() => setPanel('options')}
               onControls={() => setPanel('controls')}
               onHelp={() => setShowHelp(true)}
@@ -98,16 +100,17 @@ const ASC_LABELS = [
 ];
 
 function MenuPanel({
-  onStart, onOptions, onControls, onHelp, onGallery, onRelicGallery,
+  onStart, onContinue, onOptions, onControls, onHelp, onGallery, onRelicGallery,
   ascensionLevel, runsCompleted, onAscensionChange,
 }: {
-  onStart: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void; onRelicGallery: () => void;
+  onStart: () => void; onContinue: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void; onRelicGallery: () => void;
   ascensionLevel: number; runsCompleted: number;
   onAscensionChange: (l: number) => void;
 }) {
   return (
     <View style={styles.menuButtons}>
       <MenuButton label="⚔️  START GAME" onPress={onStart} primary />
+      <MenuButton label="▶  CONTINUE" onPress={onContinue} />
 
       {/* Ascension selector */}
       <View style={styles.ascRow}>

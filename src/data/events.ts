@@ -181,6 +181,46 @@ export const ALL_EVENTS: EventDefinition[] = [
     ],
   },
   {
+    id: 'winding_halls',
+    title: 'Winding Halls',
+    description: 'The halls wind endlessly. Your mind begins to slip.',
+    emoji: '🌀',
+    choices: [
+      { label: 'Press on', description: 'Take 12 damage. Add a Madness to your deck.', hpCost: 12, effect: 'nothing', emoji: '🧠' },
+      { label: 'Turn back', description: 'You lose 3 max HP from the confusion.', effect: 'max_hp_up', effectValue: -3, emoji: '↩️' },
+    ],
+  },
+  {
+    id: 'the_mausoleum',
+    title: 'The Mausoleum',
+    description: 'A crypt filled with ancient power. Disturb the dead?',
+    emoji: '⚰️',
+    choices: [
+      { label: 'Open a coffin', description: '50%: gain a Rare relic. 50%: gain a Curse.', effect: 'relic', emoji: '🎲' },
+      { label: 'Leave', description: 'Respect the dead.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'upgrade_shrine',
+    title: 'Upgrade Shrine',
+    description: 'A glowing shrine offers to enhance one of your cards.',
+    emoji: '⬆️',
+    choices: [
+      { label: 'Upgrade', description: 'Upgrade a random card in your deck.', effect: 'upgrade_card', effectValue: 1, emoji: '⚒️' },
+      { label: 'Ignore', description: 'Leave the shrine untouched.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'gold_shrine',
+    title: 'Gold Shrine',
+    description: 'A pile of gold glitters before you, seemingly free for the taking.',
+    emoji: '💰',
+    choices: [
+      { label: 'Take it!', description: 'Gain 80 gold.', effect: 'gold', effectValue: 80, emoji: '🪙' },
+      { label: 'Leave it', description: 'Something feels off about this.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
     id: 'golden_wing',
     title: 'Golden Wing',
     description: 'A golden feather floats before you. Taking it seems too easy.',

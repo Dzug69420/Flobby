@@ -1840,6 +1840,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase };
     });
 
+    // Winding Halls: add Madness card
+    if (event.id === 'winding_halls' && choice.label === 'Press on') {
+      set((s) => ({
+        playerHP: Math.max(1, s.playerHP - 12),
+        deck: [...s.deck, { instanceId: generateId(), definitionId: 'madness' }],
+        currentEvent: null, phase: 'map' as GamePhase,
+      }));
+      return;
+    }
+    if (event.id === 'winding_halls' && choice.label === 'Turn back') {
+      set((s) => ({
+        playerMaxHP: Math.max(20, s.playerMaxHP - 3),
+        playerHP: Math.min(s.playerHP, Math.max(20, s.playerMaxHP - 3)),
+        currentEvent: null, phase: 'map' as GamePhase,
+      }));
+      return;
+    }
+
     // Knowing Skull: gain strength
     if (event.id === 'knowing_skull' && choice.label === 'Ask about strength') {
       set((s) => ({

@@ -1,6 +1,29 @@
 import { EnemyDefinition } from '../types';
 
 export const ENEMIES: EnemyDefinition[] = [
+  // Early floors (1-3)
+  {
+    id: 'baby_blob',
+    name: 'Baby Blob',
+    maxHP: 18,
+    baseAttack: 4,
+    attackPattern: { type: 'consistent' },
+    isBoss: false,
+    color: '#a8e6a3',
+    bodySize: 65,
+    faceEmoji: '😇',
+  },
+  {
+    id: 'slimeling',
+    name: 'Slimeling',
+    maxHP: 22,
+    baseAttack: 5,
+    attackPattern: { type: 'alternating', firstTurn: 'attack' },
+    isBoss: false,
+    color: '#98fb98',
+    bodySize: 70,
+    faceEmoji: '🌱',
+  },
   {
     id: 'glurp',
     name: 'Glurp',
@@ -116,6 +139,45 @@ export const ENEMIES: EnemyDefinition[] = [
     bodySize: 115,
     faceEmoji: '💀',
   },
+  // Late-game enemies (floors 10-12)
+  {
+    id: 'crimson_beast',
+    name: 'Crimson Beast',
+    maxHP: 90,
+    baseAttack: 15,
+    attackPattern: { type: 'cycle', pattern: ['attack', 'attack', 'attack', 'defend'] },
+    isBoss: false,
+    color: '#c0392b',
+    bodySize: 120,
+    faceEmoji: '😤',
+    startingStatuses: [{ type: 'strength', stacks: 2 }],
+  },
+  {
+    id: 'void_titan',
+    name: 'Void Titan',
+    maxHP: 85,
+    baseAttack: 14,
+    attackPattern: { type: 'alternating', firstTurn: 'defend' },
+    isBoss: false,
+    color: '#2c3e50',
+    bodySize: 135,
+    faceEmoji: '🌑',
+    startingBlock: 15,
+    attackStatuses: [{ type: 'weak', stacks: 2 }, { type: 'vulnerable', stacks: 1 }],
+  },
+  {
+    id: 'shadow_creep',
+    name: 'Shadow Creep',
+    maxHP: 70,
+    baseAttack: 12,
+    attackPattern: { type: 'random', attackChance: 0.75 },
+    isBoss: false,
+    color: '#1a1a2e',
+    bodySize: 100,
+    faceEmoji: '👤',
+    attackStatuses: [{ type: 'poison', stacks: 3 }],
+  },
+
   {
     id: 'flobby',
     name: 'Flobby',

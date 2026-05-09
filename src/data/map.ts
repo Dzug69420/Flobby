@@ -13,17 +13,19 @@ function roomTypeForFloor(floor: number, col: number): RoomType {
   if (floor === FLOORS - 1) return 'boss';
   if (floor === FLOORS - 2) return 'rest';
   if (floor === 8) return 'treasure';
+  if (floor === 11) return 'elite'; // Mini-boss floor
+  if (floor === 4) return 'rest'; // Mid-act rest site
   if (floor <= 1) return 'monster';
-  // Elite rooms: rare (about 1 per 3 floors in mid-late game)
+  // Elite rooms: about 2 per act
   if (floor >= 5) {
     const hash = (floor * 17 + col * 7) % 100;
-    if (hash < 15) return 'elite';
-    if (hash < 28) return 'event';
-    if (hash < 36) return 'shop';
+    if (hash < 18) return 'elite';
+    if (hash < 30) return 'event';
+    if (hash < 40) return 'shop';
   }
   const hash = (floor * 13 + col * 11) % 100;
-  if (hash < 20) return 'event';
-  if (hash < 30) return 'shop';
+  if (hash < 18) return 'event';
+  if (hash < 28) return 'shop';
   return 'monster';
 }
 

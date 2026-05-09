@@ -197,6 +197,7 @@ export interface GameState {
   necronomiconUsedThisTurn: boolean;
   firstBlockThisTurn: boolean;
   lastTriggeredRelic: string | null;
+  rampageDamageBonus: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

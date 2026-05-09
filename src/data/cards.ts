@@ -961,6 +961,59 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── IRONCLAD-STYLE CARDS ─────────────────────────────────────────────────────
+  brutality: {
+    id: 'brutality',
+    name: 'Brutality',
+    category: 'power',
+    description: 'At the start of each turn, lose 1 HP and draw 1 card.',
+    cost: 0,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  the_bomb: {
+    id: 'the_bomb',
+    name: 'The Bomb',
+    category: 'attack',
+    description: 'At the end of 3 turns, deal 40 damage to enemy.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ applyEnemyStatuses: [{ type: 'poison', stacks: 12 }] }),
+  },
+  thick_skin: {
+    id: 'thick_skin',
+    name: 'Thick Skin',
+    category: 'defense',
+    description: 'Gain 4 Block. Gain 1 Plated Armor.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({
+      playerBlockChange: 4,
+      applyPlayerStatuses: [{ type: 'plated_armor', stacks: 1 }],
+    }),
+  },
+  rampage: {
+    id: 'rampage',
+    name: 'Rampage',
+    category: 'attack',
+    description: 'Deal 8 damage. Each time this card is played, permanently increase its damage by 5.',
+    cost: 1,
+    rarity: 'uncommon',
+    upgradeId: 'rampage_plus',
+    effect: () => ({ enemyHPChange: -8 }),
+  },
+  rampage_plus: {
+    id: 'rampage_plus',
+    name: 'Rampage+',
+    category: 'attack',
+    description: 'Deal 8 damage. Each time played, increase damage by 8.',
+    cost: 1,
+    rarity: 'uncommon',
+    upgraded: true,
+    effect: () => ({ enemyHPChange: -8 }),
+  },
+
   // ── WATCHER-STYLE CARDS ──────────────────────────────────────────────────────
   pray: {
     id: 'pray',
@@ -1758,6 +1811,12 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Common (Ironclad)
+  'thick_skin',
+  // Uncommon (Ironclad)
+  'rampage',
+  // Rare (Ironclad)
+  'brutality', 'the_bomb',
   // Common (Watcher)
   'pray', 'meditate',
   // Uncommon (Watcher)
@@ -1832,6 +1891,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  thick_skin: 'common', rampage: 'uncommon', rampage_plus: 'uncommon',
+  brutality: 'rare', the_bomb: 'rare',
   pray: 'common', battle_trance2: 'uncommon', fasting: 'rare',
   crush_joints: 'uncommon', spirit_shield: 'uncommon', sanctity: 'uncommon',
   meditate: 'common',

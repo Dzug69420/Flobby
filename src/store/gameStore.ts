@@ -203,6 +203,7 @@ const initialState: GameState = {
   necronomiconUsedThisTurn: false,
   firstBlockThisTurn: true,
   lastTriggeredRelic: null,
+  rampageDamageBonus: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -337,6 +338,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Apply status modifiers to the delta
     let modifiedDelta = { ...rawDelta };
+
+    // Rampage: add accumulated bonus damage
+    if (def.id === 'rampage' || def.id === 'rampage_plus') {
+      modifiedDelta.enemyHPChange = (modifiedDelta.enemyHPChange ?? 0) - state.rampageDamageBonus;
+    }
 
     // Discharge: damage = charges × 5
     if (def.id === 'discharge') {
@@ -887,6 +893,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set((s) => ({ enemyStatuses: mergeStatuses(s.enemyStatuses, bossStrength) }));
     }
 
+    // Rampage: increase damage bonus after each play
+    if (def.id === 'rampage' || def.id === 'rampage_plus') {
+      const bonusGain = def.id === 'rampage_plus' ? 8 : 5;
+      set((s) => ({ rampageDamageBonus: s.rampageDamageBonus + bonusGain }));
+    }
+
     if (get().enemyHP <= 0) {
       // Feed: gain 3 max HP on fatal blow
       if (def.id === 'feed' || def.id === 'feed_plus') {
@@ -1021,8 +1033,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += platedArmor;
       }
 
-      // Void curse: lose 1 energy at turn start
-      // (applied via endTurn energy reduction)
+      // Brutality: at turn start, lose 1 HP and draw 1 card
+      // (applied after draw)
       const voidCurseCount = [...state.deck, ...state.hand, ...state.discard]
         .filter((c) => c.definitionId === 'void_curse').length;
 
@@ -1198,6 +1210,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: s.hand.filter((c) => c.definitionId !== 'dazed'),
       };
     });
+
+    // Brutality: lose 1 HP, draw 1 card at turn start
+    if (get().activePowers.includes('brutality')) {
+      set((s) => ({ playerHP: Math.max(1, s.playerHP - 1) }));
+      get().drawCards(1);
+    }
 
     // Battle Hymn: add free Shiv (0-cost attack) to hand at turn start
     const battleHymnState = get();

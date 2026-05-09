@@ -488,6 +488,33 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     exhaust: true,
     effect: () => ({ energyChange: 2 }),
   },
+  capacitor: {
+    id: 'capacitor',
+    name: 'Capacitor',
+    category: 'power',
+    description: 'Gain 2 additional Orb slots.',
+    cost: 1,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  defragment: {
+    id: 'defragment',
+    name: 'Defragment',
+    category: 'power',
+    description: 'Gain 1 Energy at the start of each turn.',
+    cost: 1,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  storm: {
+    id: 'storm',
+    name: 'Storm',
+    category: 'power',
+    description: 'Whenever you channel a Lightning orb, deal 4 damage.',
+    cost: 1,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
 
   // ── SCRY CARDS ───────────────────────────────────────────────────────────────
   scry_3: {
@@ -1398,6 +1425,8 @@ export const REWARD_CARD_IDS = [
   // Uncommon (new)
   'carnage', 'evolve', 'burst', 'double_tap', 'charge_up', 'discharge', 'lightning_strike',
   'eruption', 'inner_peace', 'conclude',
+  // Rare (orbs)
+  'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Common (orbs)
@@ -1453,6 +1482,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   zap: 'common', chill: 'common',
   void_orb: 'uncommon', dualcast: 'uncommon', consume: 'uncommon',
+  capacitor: 'rare', defragment: 'rare', storm: 'rare',
   scry_3: 'uncommon', calm_scry: 'uncommon',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',

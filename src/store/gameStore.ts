@@ -446,6 +446,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         activePowers.push(def.id);
       }
 
+      // Capacitor: expand orb slots by 2
+      let maxOrbs = s.maxOrbs;
+      if (def.id === 'capacitor') maxOrbs += 2;
+
       // Burst: activate for next skill
       let burstActive = s.burstActive;
       let doubleTapActive = s.doubleTapActive;
@@ -470,6 +474,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let orbs = [...s.orbs];
       if (modifiedDelta.channelOrb) {
         orbs.push(modifiedDelta.channelOrb);
+        // Storm: deal 4 extra damage when channeling Lightning
+        if (modifiedDelta.channelOrb === 'lightning' && s.activePowers.includes('storm')) {
+          const stormDmg = Math.max(0, 4 - enemyBlock);
+          enemyBlock = Math.max(0, enemyBlock - 4);
+          enemyHP = Math.max(0, enemyHP - stormDmg);
+        }
         // Evoke leftmost if over max
         while (orbs.length > s.maxOrbs) {
           const evoked = orbs.shift()!;
@@ -588,6 +598,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         charges: Math.max(0, s.charges + (modifiedDelta.chargeChange ?? 0)),
         stance: (modifiedDelta.setStance ?? s.stance) as 'neutral' | 'calm' | 'wrath',
         orbs,
+        maxOrbs,
       };
     });
 
@@ -909,6 +920,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const calmBonus = state.stance === 'calm' ? 1 : 0;
       const nextStance = state.stance === 'calm' ? 'neutral' : state.stance;
 
+      // Defragment: gain 1 energy per turn
+      const defragmentBonus = state.activePowers.includes('defragment') ? 1 : 0;
+
       // Art of War: gain 1 energy if no attacks played last turn
       const artOfWarBonus = hasRelic(relics, 'art_of_war') && !state.attackPlayedThisTurn ? 1 : 0;
 
@@ -925,7 +939,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
         exhaustPile: [...state.exhaustPile, ...etherealCards],
-        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus + calmBonus,
+        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus + calmBonus + defragmentBonus,
         cardsPlayedThisTurn: 0,
         attackPlayedThisTurn: false,
         combatLog: newCombatLog,
@@ -1029,6 +1043,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (hasRelic(state.relics, 'gremlin_horn') && !state.currentEnemy?.isBoss) {
       set((s) => ({ playerEnergy: Math.min(s.playerEnergy + 1, s.playerMaxEnergy + 3) }));
       get().drawCards(1);
+    }
+
+    // Potion drop: 35% chance to drop a potion on non-boss enemy death
+    if (Math.random() < 0.35 && !state.currentEnemy?.isBoss) {
+      const newPotion = pickRandomPotion(state.potions);
+      if (state.potions.length < state.maxOrbs) { // reuse maxOrbs (3) as max potions
+        set((s) => s.potions.length < 3 ? { potions: [...s.potions, newPotion] } : {});
+      }
     }
 
     if (state.currentEnemy?.isBoss) {

@@ -185,6 +185,7 @@ const initialState: GameState = {
   burstActive: false,
   doubleTapActive: false,
   charges: 0,
+  stance: 'neutral' as const,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -309,6 +310,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const rawDelta = def.effect(ctx);
 
+    // Apply stance-based damage modifiers
+    const currentStance = state.stance;
+
     // Apply charge-based effects before other modifications
     let chargesForCard = state.charges;
 
@@ -333,6 +337,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Strength: flat damage bonus
       const strength = getStatusStacks(state.playerStatuses, 'strength');
       dmg += strength;
+      // Wrath stance: double all damage dealt (and double damage taken)
+      if (currentStance === 'wrath') dmg = Math.floor(dmg * 2);
       // Ritual Dagger: add accumulated bonus
       if (def.id === 'ritual_dagger') {
         dmg += state.ritualDaggerBonus;
@@ -549,6 +555,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         burstActive,
         doubleTapActive,
         charges: Math.max(0, s.charges + (modifiedDelta.chargeChange ?? 0)),
+        stance: (modifiedDelta.setStance ?? s.stance) as 'neutral' | 'calm' | 'wrath',
       };
     });
 
@@ -755,6 +762,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         enemyBlock = 0;
         const rawAttack = enemy.baseAttack + enemyStrength;
         let dmg = Math.max(0, rawAttack - playerBlock);
+        // Wrath: take double damage in Wrath stance
+        if (state.stance === 'wrath' && dmg > 0) dmg = Math.floor(dmg * 2);
         // Intangible: reduce all damage to 1
         if (isIntangible && dmg > 0) dmg = 1;
         if (dmg > 0) {
@@ -844,6 +853,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += discardCards.length * 3;
       }
 
+      // Calm stance: gain 1 extra energy, exit calm stance
+      const calmBonus = state.stance === 'calm' ? 1 : 0;
+      const nextStance = state.stance === 'calm' ? 'neutral' : state.stance;
+
       // Art of War: gain 1 energy if no attacks played last turn
       const artOfWarBonus = hasRelic(relics, 'art_of_war') && !state.attackPlayedThisTurn ? 1 : 0;
 
@@ -860,10 +873,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
         exhaustPile: [...state.exhaustPile, ...etherealCards],
-        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus,
+        playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus + calmBonus,
         cardsPlayedThisTurn: 0,
         attackPlayedThisTurn: false,
         combatLog: newCombatLog,
+        stance: nextStance as 'neutral' | 'calm' | 'wrath',
       };
     });
 
@@ -1151,6 +1165,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         burstActive: false,
         doubleTapActive: false,
         charges: 0,
+        stance: 'neutral' as const,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

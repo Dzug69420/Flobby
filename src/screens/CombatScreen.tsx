@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive, charges,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive, charges, stance,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -310,6 +310,16 @@ export default function CombatScreen() {
             {charges > 0 && (
               <View style={styles.chargeBadge}>
                 <Text style={styles.chargeText}>⚡{charges}</Text>
+              </View>
+            )}
+            {stance !== 'neutral' && (
+              <View style={[styles.chargeBadge, {
+                borderColor: stance === 'wrath' ? '#e74c3c' : '#4fc3f7',
+                backgroundColor: stance === 'wrath' ? 'rgba(231,76,60,0.15)' : 'rgba(79,195,247,0.15)',
+              }]}>
+                <Text style={[styles.chargeText, { color: stance === 'wrath' ? '#e74c3c' : '#4fc3f7' }]}>
+                  {stance === 'wrath' ? '🔥WRATH' : '💎CALM'}
+                </Text>
               </View>
             )}
             <PotionSlots

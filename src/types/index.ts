@@ -46,6 +46,7 @@ export interface CombatDelta {
   hits?: number;
   exhaustHand?: boolean;
   chargeChange?: number;
+  setStance?: 'neutral' | 'calm' | 'wrath';
 }
 
 export type CardEffectFn = (ctx: CombatContext) => CombatDelta;
@@ -181,6 +182,7 @@ export interface GameState {
   burstActive: boolean;
   doubleTapActive: boolean;
   charges: number;
+  stance: 'neutral' | 'calm' | 'wrath';
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

@@ -639,6 +639,35 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -9, hits: 3 }),
   },
 
+  // ── STANCE CARDS ─────────────────────────────────────────────────────────────
+  eruption: {
+    id: 'eruption',
+    name: 'Eruption',
+    category: 'attack',
+    description: 'Deal 9 damage. Enter Wrath.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -9, setStance: 'wrath' }),
+  },
+  inner_peace: {
+    id: 'inner_peace',
+    name: 'Inner Peace',
+    category: 'defense',
+    description: 'Gain 8 Block. Enter Calm. Draw 2 cards.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({ playerBlockChange: 8, setStance: 'calm', drawCards: 2 }),
+  },
+  conclude: {
+    id: 'conclude',
+    name: 'Conclude',
+    category: 'attack',
+    description: 'Deal 12 damage to ALL enemies. Exit your stance.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -12, setStance: 'neutral' }),
+  },
+
   // ── CHARGE MECHANIC CARDS ────────────────────────────────────────────────────
   charge_up: {
     id: 'charge_up',
@@ -1271,6 +1300,7 @@ export const REWARD_CARD_IDS = [
   'impervious',
   // Uncommon (new)
   'carnage', 'evolve', 'burst', 'double_tap', 'charge_up', 'discharge', 'lightning_strike',
+  'eruption', 'inner_peace', 'conclude',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Uncommon (deck manipulation)
@@ -1318,6 +1348,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   impervious: 'rare',
   carnage: 'uncommon', evolve: 'uncommon', burst: 'uncommon', double_tap: 'uncommon',
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
+  eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',

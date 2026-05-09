@@ -639,6 +639,52 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -9, hits: 3 }),
   },
 
+  // ── HEALING / UTILITY ATTACKS ────────────────────────────────────────────────
+  reaper: {
+    id: 'reaper',
+    name: 'Reaper',
+    category: 'attack',
+    description: 'Deal 4 damage to ALL enemies (counts as 1). Heal HP equal to damage dealt.',
+    cost: 2,
+    rarity: 'rare',
+    exhaust: true,
+    effect: (ctx) => {
+      const heal = Math.max(0, 4 - ctx.enemyBlock);
+      return { enemyHPChange: -4, playerHPChange: heal };
+    },
+  },
+  bludgeon: {
+    id: 'bludgeon',
+    name: 'Bludgeon',
+    category: 'attack',
+    description: 'Deal 32 damage.',
+    cost: 3,
+    rarity: 'rare',
+    effect: () => ({ enemyHPChange: -32 }),
+  },
+  carnage: {
+    id: 'carnage',
+    name: 'Carnage',
+    category: 'attack',
+    description: 'Ethereal. Deal 20 damage.',
+    cost: 2,
+    rarity: 'uncommon',
+    ethereal: true,
+    effect: () => ({ enemyHPChange: -20 }),
+  },
+  heavy_slash: {
+    id: 'heavy_slash',
+    name: 'Heavy Slash',
+    category: 'attack',
+    description: 'Deal 14 damage. Apply 1 Weak.',
+    cost: 2,
+    rarity: 'common',
+    effect: () => ({
+      enemyHPChange: -14,
+      applyEnemyStatuses: [{ type: 'weak', stacks: 1 }],
+    }),
+  },
+
   // ── X COST CARDS ─────────────────────────────────────────────────────────────
   whirlwind: {
     id: 'whirlwind',
@@ -1070,7 +1116,11 @@ export const REWARD_CARD_IDS = [
   'rage', 'desperation', 'last_stand', 'second_wind',
   'inflame', 'entrench', 'metallicize',
   // Common (new)
-  'twin_strike_heavy', 'swift_strike',
+  'twin_strike_heavy', 'swift_strike', 'heavy_slash',
+  // Uncommon (new)
+  'carnage',
+  // Rare (new)
+  'reaper', 'bludgeon',
   // Uncommon (deck manipulation)
   'recycle', 'masterful_stab', 'glacier', 'dropkick', 'thorns_card', 'plated_armor_card',
   // Rare (new)
@@ -1110,7 +1160,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   dark_embrace: 'uncommon', feel_no_pain: 'uncommon',
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
-  twin_strike_heavy: 'common', swift_strike: 'common',
+  twin_strike_heavy: 'common', swift_strike: 'common', heavy_slash: 'common',
+  carnage: 'uncommon',
+  reaper: 'rare', bludgeon: 'rare',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',
   intangible_card: 'rare',

@@ -131,11 +131,11 @@ interface GameActions {
 type GameStore = GameState & GameActions;
 
 function generateShopInventory(weights: Record<string, 'common' | 'uncommon' | 'rare'>): ShopItem[] {
-  const PRICES: Record<string, number> = { common: 50, uncommon: 85, rare: 130 };
-  const picked = pickRewardCards(REWARD_CARD_IDS, 4, weights);
+  const PRICES: Record<string, number> = { common: 45, uncommon: 80, rare: 125 };
+  const picked = pickRewardCards(REWARD_CARD_IDS, 6, weights); // 6 cards instead of 4
   return picked.map((id) => ({
     cardId: id,
-    price: PRICES[weights[id] ?? 'common'] + Math.floor(Math.random() * 20) - 10,
+    price: PRICES[weights[id] ?? 'common'] + Math.floor(Math.random() * 15) - 7,
     sold: false,
   }));
 }
@@ -654,8 +654,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock = Math.min(playerBlock, 15);
       }
 
-      // Boss block reduction
-      if (enemy.isBoss && enemy.specialMechanic?.type === 'block_reduction') {
+      // Boss block reduction (Barricade blocks this)
+      if (enemy.isBoss && enemy.specialMechanic?.type === 'block_reduction' && !state.activePowers.includes('barricade')) {
         playerBlock = Math.floor(playerBlock * (1 - enemy.specialMechanic.fraction));
       }
 

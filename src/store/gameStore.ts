@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { loadPersisted, savePersisted } from '../utils/persistence';
+import { loadPersisted, savePersisted, saveActiveRun, loadActiveRun, clearActiveRun } from '../utils/persistence';
 import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem, RunRecord } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
@@ -133,6 +133,8 @@ interface GameActions {
   selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
   loadSavedData: () => void;
+  saveCurrentRun: () => void;
+  resumeSavedRun: () => void;
   goToMenu: () => void;
 }
 
@@ -2103,6 +2105,45 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setAscensionLevel: (level: number) => {
     set({ ascensionLevel: Math.max(0, Math.min(10, level)) });
     savePersisted({ ascensionLevel: Math.max(0, Math.min(10, level)) });
+  },
+
+  saveCurrentRun: () => {
+    const state = get();
+    if (state.phase !== 'map' && state.phase !== 'combat' && state.phase !== 'reward') return;
+    // Save a minimal snapshot of the run state
+    const snapshot = {
+      phase: state.phase,
+      currentStage: state.currentStage,
+      currentFloor: state.currentFloor,
+      currentAct: state.currentAct,
+      playerHP: state.playerHP,
+      playerMaxHP: state.playerMaxHP,
+      gold: state.gold,
+      relics: state.relics,
+      potions: state.potions,
+      ascensionLevel: state.ascensionLevel,
+      selectedCharacter: state.selectedCharacter,
+    };
+    saveActiveRun(snapshot);
+  },
+
+  resumeSavedRun: () => {
+    loadActiveRun().then((data) => {
+      if (!data || typeof data !== 'object') return;
+      const snap = data as Record<string, unknown>;
+      // Generate a fresh map and apply the snapshot
+      const map = generateMap();
+      const deck = shuffle(buildStartingDeck());
+      set({
+        ...(snap as Partial<typeof initialState>),
+        phase: 'map',
+        map,
+        deck,
+        hand: [],
+        discard: [],
+      });
+      clearActiveRun();
+    });
   },
 
   loadSavedData: () => {

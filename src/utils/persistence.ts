@@ -38,6 +38,27 @@ export async function loadPersisted(): Promise<PersistedData> {
   }
 }
 
+const RUN_SAVE_KEY = 'flobby_activeRun';
+
+export async function saveActiveRun(runData: unknown): Promise<void> {
+  try {
+    await AsyncStorage.setItem(RUN_SAVE_KEY, JSON.stringify(runData));
+  } catch { /* silent */ }
+}
+
+export async function loadActiveRun(): Promise<unknown | null> {
+  try {
+    const data = await AsyncStorage.getItem(RUN_SAVE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch { return null; }
+}
+
+export async function clearActiveRun(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(RUN_SAVE_KEY);
+  } catch { /* silent */ }
+}
+
 export async function savePersisted(data: {
   bestScore?: number;
   runsCompleted?: number;

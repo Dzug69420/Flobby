@@ -19,6 +19,7 @@ const ROOM_COLORS: Record<RoomType, string> = {
   treasure: '#1abc9c',
   event:    '#2980b9',
   boss:     '#c0392b',
+  unknown:  '#5d6d7e',
 };
 
 const ROOM_LABEL: Record<RoomType, string> = {
@@ -29,6 +30,7 @@ const ROOM_LABEL: Record<RoomType, string> = {
   treasure: 'Chest',
   event:    'Event',
   boss:     'BOSS',
+  unknown:  'Mystery',
 };
 
 const NODE_SIZE = 48;

@@ -109,7 +109,7 @@ export interface EnemyDefinition {
   startingStatuses?: StatusEffect[];
 }
 
-export type RoomType = 'monster' | 'elite' | 'rest' | 'shop' | 'treasure' | 'event' | 'boss';
+export type RoomType = 'monster' | 'elite' | 'rest' | 'shop' | 'treasure' | 'event' | 'boss' | 'unknown';
 
 export interface MapNode {
   id: string;

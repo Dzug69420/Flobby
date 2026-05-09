@@ -24,8 +24,9 @@ function roomTypeForFloor(floor: number, col: number): RoomType {
     if (hash < 40) return 'shop';
   }
   const hash = (floor * 13 + col * 11) % 100;
-  if (hash < 18) return 'event';
-  if (hash < 28) return 'shop';
+  if (hash < 15) return 'event';
+  if (hash < 23) return 'shop';
+  if (hash < 27) return 'unknown'; // Mystery rooms
   return 'monster';
 }
 
@@ -38,6 +39,7 @@ function roomEmoji(type: RoomType): string {
     case 'treasure': return '📦';
     case 'event':    return '❓';
     case 'boss':     return '👑';
+    case 'unknown':  return '🌀';
   }
 }
 

@@ -1412,6 +1412,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } else if (node.roomType === 'event') {
       const event = pickRandomEvent();
       set({ phase: 'event', currentFloor: node.floor, map: updatedMap, currentEvent: event });
+    } else if (node.roomType === 'unknown') {
+      // Mystery room: random outcome (monster, event, or treasure)
+      const roll = Math.random();
+      if (roll < 0.4) {
+        // 40%: event
+        const event = pickRandomEvent();
+        set({ phase: 'event', currentFloor: node.floor, map: updatedMap, currentEvent: event });
+      } else if (roll < 0.7) {
+        // 30%: treasure (card + potion)
+        const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
+        const treasurePotion = pickRandomPotion(state.potions);
+        const newPotions = state.potions.length < 3 ? [...state.potions, treasurePotion] : state.potions;
+        set({ phase: 'reward', currentFloor: node.floor, map: updatedMap, rewardChoices: choices, potions: newPotions });
+      } else {
+        // 30%: gold windfall
+        const bonusGold = 30 + Math.floor(Math.random() * 30);
+        set({ currentFloor: node.floor, map: updatedMap, phase: 'map', gold: state.gold + bonusGold });
+      }
     } else {
       set({ currentFloor: node.floor, map: updatedMap, phase: 'map' });
     }

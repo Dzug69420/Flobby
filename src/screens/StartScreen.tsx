@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 
 import HelpScreen from './HelpScreen';
+import CardGalleryScreen from './CardGalleryScreen';
 
 type Panel = 'menu' | 'options' | 'controls';
 
@@ -15,8 +16,10 @@ export default function StartScreen() {
   const winRate = runHistory.length > 0 ? Math.round((wins / runHistory.length) * 100) : 0;
   const [panel, setPanel] = useState<Panel>('menu');
   const [showHelp, setShowHelp] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
 
   if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
+  if (showGallery) return <CardGalleryScreen onClose={() => setShowGallery(false)} />;
 
   const titleAnim = useRef(new Animated.Value(0)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
@@ -59,6 +62,7 @@ export default function StartScreen() {
               onOptions={() => setPanel('options')}
               onControls={() => setPanel('controls')}
               onHelp={() => setShowHelp(true)}
+              onGallery={() => setShowGallery(true)}
               ascensionLevel={ascensionLevel}
               runsCompleted={runsCompleted}
               onAscensionChange={setAscensionLevel}
@@ -90,10 +94,10 @@ const ASC_LABELS = [
 ];
 
 function MenuPanel({
-  onStart, onOptions, onControls, onHelp,
+  onStart, onOptions, onControls, onHelp, onGallery,
   ascensionLevel, runsCompleted, onAscensionChange,
 }: {
-  onStart: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void;
+  onStart: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void;
   ascensionLevel: number; runsCompleted: number;
   onAscensionChange: (l: number) => void;
 }) {
@@ -126,6 +130,7 @@ function MenuPanel({
       <MenuButton label="⚙️  OPTIONS" onPress={onOptions} />
       <MenuButton label="🎮  CONTROLS" onPress={onControls} />
       <MenuButton label="📖  HOW TO PLAY" onPress={onHelp} />
+      <MenuButton label="🃏  CARD GALLERY" onPress={onGallery} />
       {runsCompleted > 0 && <Text style={styles.hint}>🏆 {runsCompleted} run{runsCompleted > 1 ? 's' : ''} completed</Text>}
       <Text style={styles.hint}>Defeat the boss to unlock higher ascensions!</Text>
     </View>

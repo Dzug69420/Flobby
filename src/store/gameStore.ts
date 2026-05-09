@@ -344,6 +344,49 @@ export const useGameStore = create<GameStore>((set, get) => ({
       modifiedDelta.enemyHPChange = (modifiedDelta.enemyHPChange ?? 0) - state.rampageDamageBonus;
     }
 
+    // Thunder Strike: scales with Lightning orbs
+    if (def.id === 'thunder_strike') {
+      const lightningCount = state.orbs.filter((o) => o === 'lightning').length;
+      modifiedDelta.enemyHPChange = -(7 * Math.max(1, lightningCount));
+    }
+
+    // Hologram: return top discard card to hand
+    if (def.id === 'hologram') {
+      set((s) => {
+        if (s.discard.length === 0) return {};
+        const topDiscard = s.discard[s.discard.length - 1];
+        return {
+          hand: [...s.hand, topDiscard],
+          discard: s.discard.slice(0, -1),
+        };
+      });
+    }
+
+    // Multicast: evoke leftmost orb X times (X = energy spent)
+    if (def.id === 'multicast' && state.orbs.length > 0) {
+      const times = state.playerEnergy;
+      const orbToEvoke = state.orbs[0];
+      for (let i = 0; i < times; i++) {
+        if (orbToEvoke === 'lightning') {
+          set((s) => {
+            const dmg = Math.max(0, 8 - s.enemyBlock);
+            return { enemyHP: Math.max(0, s.enemyHP - dmg), enemyBlock: Math.max(0, s.enemyBlock - 8) };
+          });
+        } else if (orbToEvoke === 'frost') {
+          set((s) => ({ playerBlock: s.playerBlock + 5 }));
+        } else if (orbToEvoke === 'dark') {
+          set((s) => {
+            const dmg = Math.max(0, 6 - s.enemyBlock);
+            return {
+              enemyHP: Math.max(0, s.enemyHP - dmg),
+              enemyBlock: Math.max(0, s.enemyBlock - 6),
+              playerHP: Math.min(s.playerHP + 3, s.playerMaxHP),
+            };
+          });
+        }
+      }
+    }
+
     // Discharge: damage = charges × 5
     if (def.id === 'discharge') {
       modifiedDelta.enemyHPChange = -(chargesForCard * 5);

@@ -961,6 +961,48 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── DEFECT-STYLE CARDS ───────────────────────────────────────────────────────
+  skim: {
+    id: 'skim', name: 'Skim', category: 'status',
+    description: 'Draw 3 cards.', cost: 1, rarity: 'common',
+    effect: () => ({ drawCards: 3 }),
+  },
+  cold_snap: {
+    id: 'cold_snap', name: 'Cold Snap', category: 'attack',
+    description: 'Deal 6 damage. Channel a Frost Orb.', cost: 1, rarity: 'common',
+    effect: () => ({ enemyHPChange: -6, channelOrb: 'frost' }),
+  },
+  ball_lightning: {
+    id: 'ball_lightning', name: 'Ball Lightning', category: 'attack',
+    description: 'Deal 7 damage. Channel a Lightning Orb.', cost: 1, rarity: 'common',
+    effect: () => ({ enemyHPChange: -7, channelOrb: 'lightning' }),
+  },
+  darkness: {
+    id: 'darkness', name: 'Darkness', category: 'attack',
+    description: 'Channel a Dark Orb.', cost: 1, rarity: 'uncommon',
+    effect: () => ({ channelOrb: 'dark' }),
+  },
+  aggregate: {
+    id: 'aggregate', name: 'Aggregate', category: 'status',
+    description: 'Gain 1 Energy for every 4 cards in your draw pile.', cost: 1, rarity: 'uncommon',
+    effect: (ctx) => ({ energyChange: Math.floor(ctx.cardsInDeck.length / 4) }),
+  },
+  hologram: {
+    id: 'hologram', name: 'Hologram', category: 'defense',
+    description: 'Gain 3 Block. Exhaust to return a discard card to hand.', cost: 1, rarity: 'uncommon', exhaust: true,
+    effect: () => ({ playerBlockChange: 3 }),
+  },
+  multicast: {
+    id: 'multicast', name: 'Multicast', category: 'status',
+    description: 'Evoke your leftmost orb X times. Exhaust.', cost: -1, rarity: 'rare', exhaust: true,
+    effect: (ctx) => ({ energyChange: 0 }),
+  },
+  thunder_strike: {
+    id: 'thunder_strike', name: 'Thunder Strike', category: 'attack',
+    description: 'Deal 7 damage for each Lightning Orb you have.', cost: 3, rarity: 'rare',
+    effect: () => ({ enemyHPChange: -7 }),
+  },
+
   // ── SILENT-STYLE CARDS ───────────────────────────────────────────────────────
   neutralize: {
     id: 'neutralize', name: 'Neutralize', category: 'attack',
@@ -1856,6 +1898,12 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Common (Defect)
+  'skim', 'cold_snap', 'ball_lightning',
+  // Uncommon (Defect)
+  'darkness', 'aggregate', 'hologram',
+  // Rare (Defect)
+  'multicast', 'thunder_strike',
   // Common (Silent)
   'neutralize', 'acrobatics', 'deadly_poison', 'riddling_knife',
   // Uncommon (Silent)
@@ -1942,6 +1990,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  skim: 'common', cold_snap: 'common', ball_lightning: 'common',
+  darkness: 'uncommon', aggregate: 'uncommon', hologram: 'uncommon',
+  multicast: 'rare', thunder_strike: 'rare',
   neutralize: 'common', acrobatics: 'common', deadly_poison: 'common', riddling_knife: 'common',
   catalyst: 'uncommon', noxious_fumes: 'uncommon', die_die_die: 'uncommon',
   infinite_blades: 'rare',

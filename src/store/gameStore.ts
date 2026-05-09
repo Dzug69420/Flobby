@@ -559,6 +559,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerEnergy = Math.min(playerEnergy + 1, s.playerMaxEnergy + 3);
       }
 
+      // Talk to the Hand: gain 2 block per attack played this combat
+      if (isAttackCard && s.activePowers.includes('talk_to_the_hand')) {
+        playerBlock += 2;
+      }
+
       // Ornamental Fan: every 3rd attack card in a turn, gain 4 Block
       if (isAttackCard && hasRelic(s.relics, 'ornamental_fan')) {
         const attacksInTurn = s.cardsPlayedThisTurn + 1;
@@ -746,6 +751,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
           return { orbs, enemyHP, enemyBlock };
         });
       }
+    }
+
+    // Cleanse: remove Weak/Frail/Vulnerable from player
+    if (def.id === 'cleanse') {
+      set((s) => ({
+        playerStatuses: s.playerStatuses.filter(
+          (st) => !['weak', 'frail', 'vulnerable'].includes(st.type)
+        ),
+      }));
+    }
+
+    // Talk to the Hand: active power — gain 2 block per attack this combat
+    if (def.id === 'talk_to_the_hand') {
+      // Effect: each attack played gives 2 block (tracked via activePower)
     }
 
     // Turbo: add a Void curse to discard

@@ -961,6 +961,27 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── DEBUFF REMOVAL CARDS ─────────────────────────────────────────────────────
+  cleanse: {
+    id: 'cleanse',
+    name: 'Cleanse',
+    category: 'status',
+    description: 'Remove all Weak/Frail/Vulnerable debuffs from yourself. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({}),
+  },
+  talk_to_the_hand: {
+    id: 'talk_to_the_hand',
+    name: 'Talk to the Hand',
+    category: 'attack',
+    description: 'Deal 5 damage. Whenever you play an Attack this combat, gain 2 Block.',
+    cost: 1,
+    rarity: 'rare',
+    effect: () => ({ enemyHPChange: -5 }),
+  },
+
   // ── SCALING MECHANICS CARDS ──────────────────────────────────────────────────
   sunder: {
     id: 'sunder',
@@ -1655,6 +1676,10 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Uncommon (purification)
+  'cleanse',
+  // Rare (new)
+  'talk_to_the_hand',
   // Common (new)
   'bite', 'beam_cell', 'frost_blast', 'master_of_strategy', 'flying_sleeves', 'empty_fist',
   // Uncommon (new)
@@ -1719,6 +1744,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  cleanse: 'uncommon', talk_to_the_hand: 'rare',
   bite: 'common', beam_cell: 'common', frost_blast: 'common',
   master_of_strategy: 'common', flying_sleeves: 'common', empty_fist: 'common',
   entrails: 'uncommon',

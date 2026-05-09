@@ -651,6 +651,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().drawCards(3);
     }
 
+    // Recursion: evoke leftmost orb and re-channel it
+    if (def.id === 'recursion' && state.orbs.length > 0) {
+      const leftmostOrb = state.orbs[0];
+      get().playCard; // Just process the orb evoke inline
+      set((s) => {
+        const orbType = s.orbs[0];
+        if (!orbType) return {};
+        const newOrbs = [...s.orbs.slice(1), orbType]; // Move leftmost to rightmost
+        let enemyHP = s.enemyHP;
+        let enemyBlock = s.enemyBlock;
+        let playerHP = s.playerHP;
+        let playerBlock = s.playerBlock;
+        // Evoke effect
+        if (orbType === 'lightning') {
+          const dmg = Math.max(0, 8 - enemyBlock);
+          enemyBlock = Math.max(0, enemyBlock - 8);
+          enemyHP = Math.max(0, enemyHP - dmg);
+        } else if (orbType === 'frost') {
+          playerBlock += 5;
+        } else if (orbType === 'dark') {
+          const dmg = Math.max(0, 6 - enemyBlock);
+          enemyBlock = Math.max(0, enemyBlock - 6);
+          enemyHP = Math.max(0, enemyHP - dmg);
+          playerHP = Math.min(playerHP + 3, s.playerMaxHP);
+        }
+        return { orbs: newOrbs, enemyHP, enemyBlock, playerHP, playerBlock };
+      });
+    }
+
     // Madness: randomize all hand card costs
     if (def.id === 'madness') {
       set((s) => {

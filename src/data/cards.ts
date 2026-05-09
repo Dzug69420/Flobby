@@ -961,6 +961,46 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── DECK BUILDING META-CARDS ─────────────────────────────────────────────────
+  master_of_strategy: {
+    id: 'master_of_strategy',
+    name: 'Master of Strategy',
+    category: 'status',
+    description: 'Draw 3 cards. Exhaust.',
+    cost: 0,
+    rarity: 'common',
+    exhaust: true,
+    effect: () => ({ drawCards: 3 }),
+  },
+  thinking_ahead: {
+    id: 'thinking_ahead',
+    name: 'Thinking Ahead',
+    category: 'status',
+    description: 'Draw 2 cards. Place one on top of your draw pile.',
+    cost: 0,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({ drawCards: 2 }),
+  },
+  turbo: {
+    id: 'turbo',
+    name: 'Turbo',
+    category: 'status',
+    description: 'Gain 2 Energy. Add a Void to your discard pile.',
+    cost: 0,
+    rarity: 'uncommon',
+    effect: () => ({ energyChange: 2 }),
+  },
+  recursion: {
+    id: 'recursion',
+    name: 'Recursion',
+    category: 'status',
+    description: 'Evoke your leftmost orb. Channel a new copy of it.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({}),
+  },
+
   // ── VAMPIRE / LIFESTEAL CARDS ────────────────────────────────────────────────
   bite: {
     id: 'bite',
@@ -1556,9 +1596,10 @@ export const REWARD_CARD_IDS = [
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Common (new)
-  'bite', 'beam_cell', 'frost_blast',
+  'bite', 'beam_cell', 'frost_blast', 'master_of_strategy',
   // Uncommon (new)
   'blood_pact', 'dark_shackles', 'flechettes', 'blur', 'bouncing_flask',
+  'thinking_ahead', 'turbo', 'recursion',
   // Uncommon (new)
   'madness', 'swift_slice', 'finisher',
   // Rare (new)
@@ -1615,6 +1656,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   bite: 'common', beam_cell: 'common', frost_blast: 'common',
+  master_of_strategy: 'common',
+  thinking_ahead: 'uncommon', turbo: 'uncommon', recursion: 'uncommon',
   blood_pact: 'uncommon', dark_shackles: 'uncommon', flechettes: 'uncommon',
   blur: 'uncommon', bouncing_flask: 'uncommon',
   madness: 'uncommon', swift_slice: 'uncommon', finisher: 'uncommon',

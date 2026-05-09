@@ -85,8 +85,10 @@ export default function PlayerStats({ hp, maxHP, block, playerStatuses, characte
   return (
     <View style={styles.container}>
       {/* Character sprite */}
-      <View style={styles.spriteWrap}>
-        <Text style={styles.sprite}>{characterEmoji ?? '🧙'}</Text>
+      <View style={[styles.spriteWrap, hp / maxHP <= 0.25 && styles.spriteWrapLow]}>
+        <Text style={styles.sprite}>
+          {hp <= 0 ? '💀' : hp / maxHP <= 0.25 ? (characterEmoji ? '😰' : '😰') : (characterEmoji ?? '🧙')}
+        </Text>
         {block > 0 && (
           <View style={styles.blockBadge}>
             <Text style={styles.blockIcon}>🛡️</Text>
@@ -135,6 +137,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
     position: 'relative',
+  },
+  spriteWrapLow: {
+    shadowColor: '#e74c3c',
+    shadowRadius: 16,
+    shadowOpacity: 0.9,
+    elevation: 8,
   },
   sprite: {
     fontSize: 72,

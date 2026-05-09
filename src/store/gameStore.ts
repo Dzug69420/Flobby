@@ -761,10 +761,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         const def = state.masterCardPool[c.definitionId];
         return def?.retain;
       });
+      const etherealCards = state.hand.filter((c) => {
+        const def = state.masterCardPool[c.definitionId];
+        return def?.ethereal && !def?.retain;
+      });
       const discardCards = state.hand.filter((c) => {
         const def = state.masterCardPool[c.definitionId];
-        return !def?.retain;
+        return !def?.retain && !def?.ethereal;
       });
+      // Ethereal cards get exhausted instead of discarded
+      // (added to exhaustPile, not discard)
 
       // Tough Bandages: gain 3 Block per discarded card at end of turn
       if (hasRelic(relics, 'tough_bandages')) {
@@ -786,6 +792,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: retainCards,
         retainedCards: retainCards,
         discard: [...state.discard, ...discardCards],
+        exhaustPile: [...state.exhaustPile, ...etherealCards],
         playerEnergy: PLAYER_MAX_ENERGY + artOfWarBonus,
         cardsPlayedThisTurn: 0,
         attackPlayedThisTurn: false,

@@ -61,6 +61,7 @@ export interface CardDefinition {
   isUnplayable?: boolean;
   innate?: boolean;
   retain?: boolean;
+  ethereal?: boolean;
 }
 
 export interface CardInstance {

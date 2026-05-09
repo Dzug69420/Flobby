@@ -209,6 +209,7 @@ export default function CardComponent({
               {definition.innate && <Text style={styles.keywordBadge}>★</Text>}
               {definition.retain && <Text style={styles.keywordBadgeRetain}>↩</Text>}
               {definition.exhaust && <Text style={styles.keywordBadgeExhaust}>✖</Text>}
+              {definition.ethereal && <Text style={styles.keywordBadgeEthereal}>👻</Text>}
             </View>
           )}
         </View>
@@ -330,6 +331,7 @@ const styles = StyleSheet.create({
   keywordBadge: { color: '#f9a825', fontSize: 11, fontWeight: 'bold' },
   keywordBadgeRetain: { color: '#80deea', fontSize: 11, fontWeight: 'bold' },
   keywordBadgeExhaust: { color: '#ff8f8f', fontSize: 11, fontWeight: 'bold' },
+  keywordBadgeEthereal: { fontSize: 11 },
   typeText: {
     fontSize: 13,
     fontWeight: 'bold',

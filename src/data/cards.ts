@@ -818,6 +818,50 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -10 }),
   },
 
+  // ── ETHEREAL CARDS ───────────────────────────────────────────────────────────
+  miracle: {
+    id: 'miracle',
+    name: 'Miracle',
+    category: 'status',
+    description: 'Gain 1 Energy. Ethereal. Retain.',
+    cost: 0,
+    rarity: 'common',
+    ethereal: true,
+    retain: true,
+    effect: () => ({ energyChange: 1 }),
+  },
+  ethereal_slash: {
+    id: 'ethereal_slash',
+    name: 'Ethereal Slash',
+    category: 'attack',
+    description: 'Deal 9 damage. Ethereal.',
+    cost: 1,
+    rarity: 'uncommon',
+    ethereal: true,
+    effect: () => ({ enemyHPChange: -9 }),
+  },
+  ghostly_armor: {
+    id: 'ghostly_armor',
+    name: 'Ghostly Armor',
+    category: 'defense',
+    description: 'Gain 10 Block. Ethereal.',
+    cost: 1,
+    rarity: 'uncommon',
+    ethereal: true,
+    effect: () => ({ playerBlockChange: 10 }),
+  },
+  normality: {
+    id: 'normality',
+    name: 'Normality',
+    category: 'status',
+    description: 'Ethereal. You can play no more than 3 cards this turn.',
+    cost: 0,
+    rarity: 'common',
+    ethereal: true,
+    isStatusCard: true,
+    effect: () => ({}),
+  },
+
   // ── CURSE CARDS (persistent negative cards) ──────────────────────────────────
   regret: {
     id: 'regret',
@@ -1001,6 +1045,7 @@ export const REWARD_CARD_IDS = [
   'recycle', 'masterful_stab', 'glacier', 'dropkick',
   // Uncommon (scry/utility batch)
   'battle_trance', 'seeing_red', 'bloodletting', 'warcry',
+  'ethereal_slash', 'ghostly_armor',
   // Rare
   'exhume', 'apotheosis', 'offering', 'shockwave',
   'fiend_fire',
@@ -1040,5 +1085,6 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   clothesline: 'common', wild_strike: 'common', sword_boomerang: 'common',
   clash: 'uncommon', sentinel: 'uncommon', burning_pact: 'uncommon',
   battle_trance: 'uncommon', seeing_red: 'uncommon', bloodletting: 'uncommon', warcry: 'uncommon',
+  ethereal_slash: 'uncommon', ghostly_armor: 'uncommon',
   fiend_fire: 'rare',
 };

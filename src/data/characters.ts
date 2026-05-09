@@ -54,9 +54,9 @@ export const ALL_CHARACTERS: Record<string, CharacterDefinition> = {
       { cardId: 'defend', count: 3 },
       { cardId: 'inflame', count: 1 },
       { cardId: 'metallicize', count: 1 },
-      { cardId: 'flex', count: 1 },
+      { cardId: 'miracle', count: 1 },
     ],
-    specialty: 'Power cards & Relics',
+    specialty: 'Power cards & Ethereal',
   },
 };
 

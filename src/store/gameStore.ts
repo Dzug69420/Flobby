@@ -717,6 +717,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().drawCards(3);
     }
 
+    // Deep Breath: shuffle discard into deck
+    if (def.id === 'deep_breath') {
+      set((s) => ({
+        deck: shuffle([...s.deck, ...s.discard]),
+        discard: [],
+      }));
+    }
+
+    // Sever Soul: exhaust all non-attack cards from hand
+    if (def.id === 'sever_soul') {
+      set((s) => {
+        const nonAttacks = s.hand.filter((c) => {
+          if (c.instanceId === instanceId) return false;
+          const d = s.masterCardPool[c.definitionId];
+          return d && d.category !== 'attack';
+        });
+        return {
+          hand: s.hand.filter((c) => c.instanceId === instanceId || s.masterCardPool[c.definitionId]?.category === 'attack'),
+          exhaustPile: [...s.exhaustPile, ...nonAttacks],
+        };
+      });
+    }
+
+    // Hook: scale damage with orb count
+    if (def.id === 'hook') {
+      const orbCount = state.orbs.length;
+      modifiedDelta.enemyHPChange = (modifiedDelta.enemyHPChange ?? 0) - (9 * orbCount);
+    }
+
     // Recursion: evoke leftmost orb and re-channel it
     if (def.id === 'recursion' && state.orbs.length > 0) {
       const leftmostOrb = state.orbs[0];
@@ -1068,6 +1097,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
               enemyHP = Math.max(0, enemyHP - scd);
             }
             state = { ...state, orbs: newOrbs2 };
+          }
+
+          // Static Discharge: channel Lightning when player takes damage
+          if (state.activePowers.includes('static_discharge')) {
+            let newOrbs3 = [...state.orbs, 'lightning' as const];
+            if (newOrbs3.length > state.maxOrbs) {
+              newOrbs3.shift();
+              const scd3 = Math.max(0, 8 - enemyBlock);
+              enemyBlock = Math.max(0, enemyBlock - 8);
+              enemyHP = Math.max(0, enemyHP - scd3);
+            }
+            // Orbs will be updated in the return statement
           }
 
           // Bronze Scales: deal 3 thorns damage back when hit

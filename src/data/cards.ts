@@ -961,6 +961,38 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── FINAL BATCH OF CARDS ─────────────────────────────────────────────────────
+  deep_breath: {
+    id: 'deep_breath', name: 'Deep Breath', category: 'status',
+    description: 'Shuffle discard into draw pile. Draw 1 card.', cost: 0, rarity: 'common',
+    effect: () => ({ drawCards: 1 }),
+  },
+  hook: {
+    id: 'hook', name: 'Hook', category: 'attack',
+    description: 'Deal 9 damage. Deal +9 for each Orb you have.', cost: 1, rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -9 }),
+  },
+  melter: {
+    id: 'melter', name: 'Melter', category: 'attack',
+    description: 'Remove all enemy Block. Deal 10 damage.', cost: 2, rarity: 'uncommon',
+    effect: (ctx) => ({ enemyHPChange: -10, enemyBlockChange: -ctx.enemyBlock }),
+  },
+  sever_soul: {
+    id: 'sever_soul', name: 'Sever Soul', category: 'attack',
+    description: 'Exhaust all Non-Attack cards in hand. Deal 16 damage.', cost: 2, rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -16 }),
+  },
+  consecrate: {
+    id: 'consecrate', name: 'Consecrate', category: 'attack',
+    description: 'Deal 5 damage.', cost: 0, rarity: 'common',
+    effect: () => ({ enemyHPChange: -5 }),
+  },
+  protect: {
+    id: 'protect', name: 'Protect', category: 'defense',
+    description: 'Gain 12 Block. Retain.', cost: 2, rarity: 'uncommon', retain: true,
+    effect: () => ({ playerBlockChange: 12 }),
+  },
+
   // ── SPECIAL INTERACTION CARDS ────────────────────────────────────────────────
   terror: {
     id: 'terror', name: 'Terror', category: 'attack',
@@ -1925,6 +1957,10 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Common (final batch)
+  'deep_breath', 'consecrate',
+  // Uncommon (final batch)
+  'hook', 'melter', 'sever_soul', 'protect',
   // Uncommon (special)
   'terror', 'skewer', 'reinforced_body', 'static_discharge',
   // Rare (special)
@@ -2021,6 +2057,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  deep_breath: 'common', consecrate: 'common',
+  hook: 'uncommon', melter: 'uncommon', sever_soul: 'uncommon', protect: 'uncommon',
   terror: 'uncommon', skewer: 'uncommon', reinforced_body: 'uncommon', static_discharge: 'uncommon',
   genetic_algorithm: 'rare',
   skim: 'common', cold_snap: 'common', ball_lightning: 'common',

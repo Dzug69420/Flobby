@@ -149,6 +149,47 @@ export const ALL_EVENTS: EventDefinition[] = [
       { label: 'Take a shield', description: 'Add a random Defense card to your deck.', effect: 'card', emoji: '🛡️' },
     ],
   },
+  {
+    id: 'vampires',
+    title: 'Vampires',
+    description: 'Three vampires offer a pact of blood and power.',
+    emoji: '🧛',
+    choices: [
+      { label: 'Accept pact', description: 'Lose 3 max HP. All your Strikes become Fangs (deal 12 dmg, heal 3 HP).', hpCost: 3, effect: 'nothing', emoji: '🩸' },
+      { label: 'Decline', description: 'You value your health too much.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'knowing_skull',
+    title: 'The Knowing Skull',
+    description: 'A floating skull claims to see your future.',
+    emoji: '💀',
+    choices: [
+      { label: 'Ask about strength', description: 'Pay 6 HP to gain 2 Strength this run.', hpCost: 6, effect: 'nothing', emoji: '💪' },
+      { label: 'Ask about gold', description: 'Pay 6 HP to gain 100 gold.', hpCost: 6, effect: 'gold', effectValue: 100, emoji: '🪙' },
+      { label: 'Leave it', description: 'The skull\'s predictions are too costly.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'ssss',
+    title: 'Scrap Ooze',
+    description: 'A scrap ooze blocks your path, but has a relic stuck inside.',
+    emoji: '🟢',
+    choices: [
+      { label: 'Try (5 HP)', description: 'Pay 5 HP. 50% chance: get relic. Otherwise, retry costs +5 HP.', hpCost: 5, effect: 'relic', emoji: '🎲' },
+      { label: 'Ignore it', description: 'Step around the ooze.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
+  {
+    id: 'golden_wing',
+    title: 'Golden Wing',
+    description: 'A golden feather floats before you. Taking it seems too easy.',
+    emoji: '🪶',
+    choices: [
+      { label: 'Take it', description: 'Gain 150 gold. Your max HP is reduced by 5.', effect: 'gold', effectValue: 150, emoji: '🪙' },
+      { label: 'Leave it', description: 'Some prices are too high.', effect: 'nothing', emoji: '🚪' },
+    ],
+  },
 ];
 
 export function pickRandomEvent(): EventDefinition {

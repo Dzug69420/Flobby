@@ -1339,6 +1339,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return { playerHP, gold, relics, potions, currentEvent: null, phase: 'map' as GamePhase };
     });
 
+    // Knowing Skull: gain strength
+    if (event.id === 'knowing_skull' && choice.label === 'Ask about strength') {
+      set((s) => ({
+        playerHP: Math.max(1, s.playerHP - 6),
+        playerStatuses: mergeStatuses(s.playerStatuses, [{ type: 'strength', stacks: 2 }]),
+        currentEvent: null, phase: 'map' as GamePhase,
+      }));
+      return;
+    }
+
+    // Golden Wing: -5 max HP
+    if (event.id === 'golden_wing' && choice.label === 'Take it') {
+      set((s) => ({
+        gold: s.gold + 150,
+        playerMaxHP: Math.max(20, s.playerMaxHP - 5),
+        playerHP: Math.min(s.playerHP, Math.max(20, s.playerMaxHP - 5)),
+        currentEvent: null, phase: 'map' as GamePhase,
+      }));
+      return;
+    }
+
     // Metamorphosis: transform a random card
     if (event.id === 'metamorphosis' && choice.label !== 'Leave') {
       const state2 = get();

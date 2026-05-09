@@ -181,6 +181,8 @@ const initialState: GameState = {
   attackCardsPlayedTotal: 0,
   attackPlayedThisTurn: false,
   ritualDaggerBonus: 0,
+  burstActive: false,
+  doubleTapActive: false,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -363,6 +365,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
       if (modifiedDelta.playerBlockChange) {
         playerBlock = Math.max(0, playerBlock + modifiedDelta.playerBlockChange);
+        // Juggernaut: deal 5 damage when gaining block
+        if (modifiedDelta.playerBlockChange > 0 && s.activePowers.includes('juggernaut')) {
+          const jugDmg = 5;
+          const jugAbsorbed = Math.min(enemyBlock, jugDmg);
+          enemyBlock = Math.max(0, enemyBlock - jugAbsorbed);
+          enemyHP = Math.max(0, enemyHP - (jugDmg - jugAbsorbed));
+        }
       }
       if (modifiedDelta.enemyHPChange) {
         const totalDmg = Math.abs(modifiedDelta.enemyHPChange);
@@ -402,6 +411,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       let activePowers = [...s.activePowers];
       if (def.category === 'power' && !activePowers.includes(def.id)) {
         activePowers.push(def.id);
+      }
+
+      // Burst: activate for next skill
+      let burstActive = s.burstActive;
+      let doubleTapActive = s.doubleTapActive;
+      if (def.id === 'burst') burstActive = true;
+      if (def.id === 'double_tap') doubleTapActive = true;
+
+      // Apply Burst/DoubleTap: play this card twice (by doubling its effects)
+      let doubleEffects = false;
+      if (def.category === 'defense' || def.category === 'status') {
+        if (s.burstActive && def.id !== 'burst') { doubleEffects = true; burstActive = false; }
+      }
+      if (def.category === 'attack') {
+        if (s.doubleTapActive && def.id !== 'double_tap') { doubleEffects = true; doubleTapActive = false; }
+      }
+      if (doubleEffects) {
+        if (modifiedDelta.enemyHPChange) modifiedDelta.enemyHPChange *= 2;
+        if (modifiedDelta.playerBlockChange) modifiedDelta.playerBlockChange *= 2;
+        if (modifiedDelta.drawCards) modifiedDelta.drawCards *= 2;
       }
 
       // Corruption: skills cost 0 and exhaust
@@ -496,6 +525,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         attackCardsPlayedTotal: newAttackTotal,
         attackPlayedThisTurn: s.attackPlayedThisTurn || isAttackCard,
         sneckoCosts: newSneckoCosts,
+        burstActive,
+        doubleTapActive,
       };
     });
 
@@ -875,6 +906,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         hand: s.hand.filter((c) => c.definitionId !== 'dazed'),
       };
     });
+
+    // Evolve: draw 1 card per Status card drawn this turn
+    const evolveState = get();
+    if (evolveState.activePowers.includes('evolve')) {
+      const statusCards = evolveState.hand.filter((c) => {
+        const def = evolveState.masterCardPool[c.definitionId];
+        return def?.isStatusCard;
+      });
+      if (statusCards.length > 0) {
+        get().drawCards(statusCards.length);
+      }
+    }
   },
 
   stageWon: () => {
@@ -1071,6 +1114,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         attackCardsPlayedTotal: 0,
         attackPlayedThisTurn: false,
         sneckoCosts: {},
+        burstActive: false,
+        doubleTapActive: false,
       });
     } else if (node.roomType === 'rest') {
       set({ phase: 'rest', currentFloor: node.floor, map: updatedMap });

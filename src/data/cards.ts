@@ -639,6 +639,55 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -9, hits: 3 }),
   },
 
+  // ── POWER CARDS (additional) ─────────────────────────────────────────────────
+  mayhem: {
+    id: 'mayhem',
+    name: 'Mayhem',
+    category: 'power',
+    description: 'At the start of your turn, play the top card of your draw pile.',
+    cost: 2,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  juggernaut: {
+    id: 'juggernaut',
+    name: 'Juggernaut',
+    category: 'power',
+    description: 'Whenever you gain Block, deal 5 damage to the enemy.',
+    cost: 2,
+    rarity: 'rare',
+    effect: () => ({}),
+  },
+  evolve: {
+    id: 'evolve',
+    name: 'Evolve',
+    category: 'power',
+    description: 'Whenever you draw a Status card, draw 1 additional card.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({}),
+  },
+  burst: {
+    id: 'burst',
+    name: 'Burst',
+    category: 'power',
+    description: 'The next Skill you play is played twice. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({}),
+  },
+  double_tap: {
+    id: 'double_tap',
+    name: 'Double Tap',
+    category: 'power',
+    description: 'This turn, your next Attack is played twice. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({}),
+  },
+
   // ── HEALING / UTILITY ATTACKS ────────────────────────────────────────────────
   reaper: {
     id: 'reaper',
@@ -1118,9 +1167,9 @@ export const REWARD_CARD_IDS = [
   // Common (new)
   'twin_strike_heavy', 'swift_strike', 'heavy_slash',
   // Uncommon (new)
-  'carnage',
+  'carnage', 'evolve', 'burst', 'double_tap',
   // Rare (new)
-  'reaper', 'bludgeon',
+  'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Uncommon (deck manipulation)
   'recycle', 'masterful_stab', 'glacier', 'dropkick', 'thorns_card', 'plated_armor_card',
   // Rare (new)
@@ -1161,8 +1210,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   all_out_attack: 'uncommon', body_slam: 'uncommon', calculated_gamble: 'uncommon',
   spot_weakness: 'uncommon', pummel: 'uncommon',
   twin_strike_heavy: 'common', swift_strike: 'common', heavy_slash: 'common',
-  carnage: 'uncommon',
-  reaper: 'rare', bludgeon: 'rare',
+  carnage: 'uncommon', evolve: 'uncommon', burst: 'uncommon', double_tap: 'uncommon',
+  reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',
   intangible_card: 'rare',

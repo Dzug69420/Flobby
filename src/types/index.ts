@@ -177,6 +177,8 @@ export interface GameState {
   attackCardsPlayedTotal: number;
   attackPlayedThisTurn: boolean;
   ritualDaggerBonus: number;
+  burstActive: boolean;
+  doubleTapActive: boolean;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

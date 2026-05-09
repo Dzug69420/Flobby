@@ -4,10 +4,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore } from '../store/gameStore';
 import { COLORS, FONTS, SPACING } from '../constants/theme';
 import CardComponent from '../components/CardComponent';
+import CardTooltip from '../components/CardTooltip';
+import { CardDefinition } from '../types';
 
 export default function RewardScreen() {
   const { rewardChoices, selectRewardCard, currentStage, playerHP, playerMaxHP, gold, lastGoldReward } = useGameStore();
   const [chosen, setChosen] = useState<string | null>(null);
+  const [tooltipDef, setTooltipDef] = useState<CardDefinition | null>(null);
 
   const handlePick = (id: string) => {
     if (chosen) return;
@@ -58,6 +61,7 @@ export default function RewardScreen() {
                   card={fakeInst(def.id)}
                   definition={def}
                   onPlay={handlePick}
+                  onLongPress={setTooltipDef}
                   disabled={chosen !== null}
                   affordable={true}
                   index={i}
@@ -76,8 +80,9 @@ export default function RewardScreen() {
           <Text style={styles.restSub}>Skip card — heal +25 HP instead</Text>
         </TouchableOpacity>
 
-        <Text style={styles.tip}>Cards carry over between stages. Choose wisely!</Text>
+        <Text style={styles.tip}>Tap to select · Long-press for details</Text>
       </SafeAreaView>
+      <CardTooltip definition={tooltipDef} onClose={() => setTooltipDef(null)} />
     </LinearGradient>
   );
 }

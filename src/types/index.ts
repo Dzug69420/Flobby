@@ -8,7 +8,10 @@ export type StatusEffectType =
   | 'strength'
   | 'dexterity'
   | 'metallicize'
-  | 'ritual';
+  | 'ritual'
+  | 'thorns'
+  | 'plated_armor'
+  | 'intangible';
 
 export interface StatusEffect {
   type: StatusEffectType;

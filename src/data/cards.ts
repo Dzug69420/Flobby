@@ -818,6 +818,36 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     effect: () => ({ enemyHPChange: -10 }),
   },
 
+  // ── THORNS / ARMOR CARDS ─────────────────────────────────────────────────────
+  thorns_card: {
+    id: 'thorns_card',
+    name: 'Thorns',
+    category: 'power',
+    description: 'Gain 3 Thorns. Whenever you take damage, deal Thorns damage back.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ applyPlayerStatuses: [{ type: 'thorns', stacks: 3 }] }),
+  },
+  plated_armor_card: {
+    id: 'plated_armor_card',
+    name: 'Plated Armor',
+    category: 'power',
+    description: 'Gain 4 Plated Armor. At start of each turn, gain that much Block.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: () => ({ applyPlayerStatuses: [{ type: 'plated_armor', stacks: 4 }] }),
+  },
+  intangible_card: {
+    id: 'intangible_card',
+    name: 'Intangible',
+    category: 'power',
+    description: 'For 1 turn, all damage taken is reduced to 1. Exhaust.',
+    cost: 1,
+    rarity: 'rare',
+    exhaust: true,
+    effect: () => ({ applyPlayerStatuses: [{ type: 'intangible', stacks: 1 }] }),
+  },
+
   // ── ETHEREAL CARDS ───────────────────────────────────────────────────────────
   miracle: {
     id: 'miracle',
@@ -1042,7 +1072,9 @@ export const REWARD_CARD_IDS = [
   // Common (new)
   'twin_strike_heavy', 'swift_strike',
   // Uncommon (deck manipulation)
-  'recycle', 'masterful_stab', 'glacier', 'dropkick',
+  'recycle', 'masterful_stab', 'glacier', 'dropkick', 'thorns_card', 'plated_armor_card',
+  // Rare (new)
+  'intangible_card',
   // Uncommon (scry/utility batch)
   'battle_trance', 'seeing_red', 'bloodletting', 'warcry',
   'ethereal_slash', 'ghostly_armor',
@@ -1080,6 +1112,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   spot_weakness: 'uncommon', pummel: 'uncommon',
   twin_strike_heavy: 'common', swift_strike: 'common',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
+  thorns_card: 'uncommon', plated_armor_card: 'uncommon',
+  intangible_card: 'rare',
   exhume: 'rare', apotheosis: 'rare', offering: 'rare', shockwave: 'rare',
   shiv: 'common', true_grit: 'common', headbutt: 'common', anger: 'common',
   clothesline: 'common', wild_strike: 'common', sword_boomerang: 'common',

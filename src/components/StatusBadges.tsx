@@ -14,14 +14,17 @@ interface StatusMeta {
 }
 
 const STATUS_META: Record<StatusEffectType, StatusMeta> = {
-  vulnerable: { icon: '💢', color: '#ff8f8f', bg: 'rgba(180,30,30,0.75)', label: 'Vuln' },
-  weak:       { icon: '🌀', color: '#ce93d8', bg: 'rgba(120,30,160,0.75)', label: 'Weak' },
-  frail:      { icon: '💨', color: '#b0bec5', bg: 'rgba(60,60,80,0.75)',   label: 'Frail' },
-  poison:     { icon: '☠️',  color: '#a5d6a7', bg: 'rgba(30,100,40,0.75)', label: 'Poison' },
-  strength:   { icon: '💪', color: '#ffb74d', bg: 'rgba(140,70,0,0.75)',   label: 'Str' },
-  dexterity:  { icon: '🦋', color: '#80deea', bg: 'rgba(0,100,120,0.75)', label: 'Dex' },
-  metallicize:{ icon: '⚙️',  color: '#cfd8dc', bg: 'rgba(60,60,70,0.75)',  label: 'Metal' },
-  ritual:     { icon: '🔮', color: '#f48fb1', bg: 'rgba(120,0,80,0.75)',   label: 'Ritual' },
+  vulnerable:    { icon: '💢', color: '#ff8f8f', bg: 'rgba(180,30,30,0.75)', label: 'Vuln' },
+  weak:          { icon: '🌀', color: '#ce93d8', bg: 'rgba(120,30,160,0.75)', label: 'Weak' },
+  frail:         { icon: '💨', color: '#b0bec5', bg: 'rgba(60,60,80,0.75)',   label: 'Frail' },
+  poison:        { icon: '☠️',  color: '#a5d6a7', bg: 'rgba(30,100,40,0.75)', label: 'Poison' },
+  strength:      { icon: '💪', color: '#ffb74d', bg: 'rgba(140,70,0,0.75)',   label: 'Str' },
+  dexterity:     { icon: '🦋', color: '#80deea', bg: 'rgba(0,100,120,0.75)', label: 'Dex' },
+  metallicize:   { icon: '⚙️',  color: '#cfd8dc', bg: 'rgba(60,60,70,0.75)',  label: 'Metal' },
+  ritual:        { icon: '🔮', color: '#f48fb1', bg: 'rgba(120,0,80,0.75)',   label: 'Ritual' },
+  thorns:        { icon: '🌵', color: '#66bb6a', bg: 'rgba(30,100,30,0.75)', label: 'Thorns' },
+  plated_armor:  { icon: '🛡️', color: '#90caf9', bg: 'rgba(10,50,100,0.75)', label: 'Armor' },
+  intangible:    { icon: '👻', color: '#eeeeee', bg: 'rgba(50,50,50,0.75)',  label: 'Intang' },
 };
 
 export default function StatusBadges({ statuses }: Props) {

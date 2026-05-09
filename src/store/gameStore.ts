@@ -697,15 +697,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       // Enemy action
       const enemyStrength = getStatusStacks(enemyStatuses, 'strength');
+      const isIntangible = getStatusStacks(playerStatuses, 'intangible') > 0;
       if (action === 'attack') {
         enemyBlock = 0;
         const rawAttack = enemy.baseAttack + enemyStrength;
-        const dmg = Math.max(0, rawAttack - playerBlock);
+        let dmg = Math.max(0, rawAttack - playerBlock);
+        // Intangible: reduce all damage to 1
+        if (isIntangible && dmg > 0) dmg = 1;
         if (dmg > 0) {
           playerHP = Math.max(0, playerHP - dmg);
           // Bronze Scales: deal 3 thorns damage back when hit
           if (hasRelic(relics, 'bronze_scales')) {
             enemyHP = Math.max(0, enemyHP - 3);
+          }
+          // Thorns status: deal stacks damage back when hit
+          const thornsStacks = getStatusStacks(playerStatuses, 'thorns');
+          if (thornsStacks > 0) {
+            enemyHP = Math.max(0, enemyHP - thornsStacks);
           }
         }
         // Apply enemy attack statuses to player
@@ -720,6 +728,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Block expiry: Barricade preserves all, Calipers caps at 15 (already done above), default: reset to 0
       if (!state.activePowers.includes('barricade') && !hasRelic(relics, 'calipers')) {
         playerBlock = 0;
+      }
+
+      // Plated Armor: gain stacks of block at start of each turn (after block reset)
+      const platedArmor = getStatusStacks(playerStatuses, 'plated_armor');
+      if (platedArmor > 0) {
+        playerBlock += platedArmor;
       }
       // If Barricade: block stays as-is
       // If Calipers: block was already capped to 15 in the Calipers step above, and we don't reset it

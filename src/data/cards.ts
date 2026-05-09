@@ -440,6 +440,26 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── SCRY CARDS ───────────────────────────────────────────────────────────────
+  scry_3: {
+    id: 'scry_3',
+    name: 'Foresight',
+    category: 'status',
+    description: 'Scry 3. Look at the top 3 cards and choose which to discard.',
+    cost: 0,
+    rarity: 'uncommon',
+    effect: () => ({ chargeChange: 0 }),
+  },
+  calm_scry: {
+    id: 'calm_scry',
+    name: 'Third Eye',
+    category: 'defense',
+    description: 'Gain 7 Block. Scry 3.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ playerBlockChange: 7 }),
+  },
+
   // ── DECK MANIPULATION CARDS ──────────────────────────────────────────────────
   exhume: {
     id: 'exhume',
@@ -1304,6 +1324,7 @@ export const REWARD_CARD_IDS = [
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
   // Uncommon (deck manipulation)
+  'scry_3', 'calm_scry',
   'recycle', 'masterful_stab', 'glacier', 'dropkick', 'thorns_card', 'plated_armor_card',
   // Rare (new)
   'intangible_card',
@@ -1350,6 +1371,7 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  scry_3: 'uncommon', calm_scry: 'uncommon',
   recycle: 'uncommon', masterful_stab: 'uncommon', glacier: 'uncommon', dropkick: 'uncommon',
   thorns_card: 'uncommon', plated_armor_card: 'uncommon',
   intangible_card: 'rare',

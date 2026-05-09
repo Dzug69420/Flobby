@@ -117,6 +117,8 @@ interface GameActions {
   usePotion: (potionId: string) => void;
   gainPotion: (potionId: string) => void;
   addStatusCardsToDeck: (cardDefId: string, count: number) => void;
+  scry: (amount: number) => void;
+  resolveScry: (keepIds: string[]) => void;
   resolveEvent: (choiceIndex: number) => void;
   restartGame: () => void;
   selectBossRelic: (relicId: string) => void;
@@ -186,6 +188,8 @@ const initialState: GameState = {
   doubleTapActive: false,
   charges: 0,
   stance: 'neutral' as const,
+  scryCards: [],
+  scryAmount: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -571,6 +575,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       afterCentennial.relics.includes('centennial_puzzle')
     ) {
       get().drawCards(3);
+    }
+
+    // Scry cards trigger scry mode
+    if (def.id === 'scry_3' || def.id === 'calm_scry') {
+      get().scry(3);
+      return; // Stop further processing - we're in scry mode now
     }
 
     // Exhume: move top exhaust card back to hand
@@ -1309,6 +1319,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const maxSlots = 3;
       if (state.potions.length >= maxSlots) return {};
       return { potions: [...state.potions, potionId] };
+    });
+  },
+
+  scry: (amount: number) => {
+    set((state) => {
+      const scryCards = state.deck.slice(0, amount);
+      return { scryCards, scryAmount: amount, phase: 'scry' };
+    });
+  },
+
+  resolveScry: (keepIds: string[]) => {
+    set((state) => {
+      const keep = state.scryCards.filter((c) => keepIds.includes(c.instanceId));
+      const discard = state.scryCards.filter((c) => !keepIds.includes(c.instanceId));
+      const newDeck = [
+        ...keep,
+        ...state.deck.slice(state.scryAmount),
+      ];
+      return {
+        deck: newDeck,
+        discard: [...state.discard, ...discard],
+        scryCards: [],
+        scryAmount: 0,
+        phase: 'combat',
+      };
     });
   },
 

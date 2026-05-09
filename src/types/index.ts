@@ -130,7 +130,7 @@ export interface RunRecord {
   relicCount: number;
 }
 
-export type GamePhase = 'start' | 'character_select' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'boss_relic' | 'gameover' | 'victory';
+export type GamePhase = 'start' | 'character_select' | 'blessing' | 'map' | 'combat' | 'reward' | 'rest' | 'shop' | 'event' | 'boss_relic' | 'scry' | 'gameover' | 'victory';
 
 export interface ShopItem {
   cardId: string;
@@ -183,6 +183,8 @@ export interface GameState {
   doubleTapActive: boolean;
   charges: number;
   stance: 'neutral' | 'calm' | 'wrath';
+  scryCards: CardInstance[];
+  scryAmount: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

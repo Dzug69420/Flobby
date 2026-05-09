@@ -14,6 +14,7 @@ import EventScreen from './src/screens/EventScreen';
 import BlessingScreen from './src/screens/BlessingScreen';
 import CharacterSelectScreen from './src/screens/CharacterSelectScreen';
 import BossRelicScreen from './src/screens/BossRelicScreen';
+import ScryScreen from './src/screens/ScryScreen';
 
 function Navigator() {
   const phase = useGameStore((s) => s.phase);
@@ -28,6 +29,7 @@ function Navigator() {
     case 'shop':     return <ShopScreen />;
     case 'event':      return <EventScreen />;
     case 'boss_relic': return <BossRelicScreen />;
+    case 'scry':       return <ScryScreen />;
     case 'gameover': return <GameOverScreen />;
     case 'victory':  return <VictoryScreen />;
     default:         return <StartScreen />;

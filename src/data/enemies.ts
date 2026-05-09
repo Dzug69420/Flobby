@@ -230,6 +230,20 @@ export const ENEMIES: EnemyDefinition[] = [
     bodySize: 150,
     faceEmoji: '👑',
   },
+  {
+    id: 'dark_flobby',
+    name: 'Dark Flobby',
+    maxHP: 140,
+    baseAttack: 18,
+    attackPattern: { type: 'cycle', pattern: ['attack', 'attack', 'defend', 'attack', 'attack', 'defend'] },
+    isBoss: true,
+    specialMechanic: { type: 'block_reduction', fraction: 0.15 },
+    color: '#1a1a2e',
+    bodySize: 160,
+    faceEmoji: '💀',
+    startingStatuses: [{ type: 'strength', stacks: 3 }],
+    attackStatuses: [{ type: 'poison', stacks: 2 }],
+  },
 ];
 
 export const ELITE_ENEMIES: EnemyDefinition[] = [

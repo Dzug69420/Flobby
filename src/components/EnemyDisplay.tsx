@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import { EnemyDefinition, StatusEffect } from '../types';
 import { COLORS } from '../constants/theme';
@@ -21,6 +21,22 @@ interface Props {
 export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnAction, stage, enemyStatuses, bossEnraged, turnNumber }: Props) {
   const wobble = useRef(new Animated.Value(1)).current;
   const intentBounce = useRef(new Animated.Value(0)).current;
+  const prevHP = useRef(enemyHP);
+  const [damageText, setDamageText] = useState<string | null>(null);
+  const damageAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const delta = prevHP.current - enemyHP;
+    if (delta > 0) {
+      setDamageText(`-${delta}`);
+      damageAnim.setValue(0);
+      Animated.sequence([
+        Animated.timing(damageAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(damageAnim, { toValue: 2, duration: 500, useNativeDriver: true }),
+      ]).start(() => setDamageText(null));
+    }
+    prevHP.current = enemyHP;
+  }, [enemyHP]);
 
   useEffect(() => {
     if (stage === 1) return;
@@ -155,7 +171,20 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
 
       {/* HP bar */}
       <View style={styles.hpSection}>
-        <Text style={styles.hpLabel}>{enemyHP}/{enemy.maxHP}</Text>
+        <View style={styles.hpLabelRow}>
+          <Text style={styles.hpLabel}>{enemyHP}/{enemy.maxHP}</Text>
+          {damageText && (
+            <Animated.Text style={[
+              styles.damageFloat,
+              {
+                opacity: damageAnim.interpolate({ inputRange: [0, 1, 2], outputRange: [0, 1, 0] }),
+                transform: [{ translateY: damageAnim.interpolate({ inputRange: [0, 1, 2], outputRange: [0, -12, -30] }) }],
+              },
+            ]}>
+              {damageText}
+            </Animated.Text>
+          )}
+        </View>
         <HPBar current={enemyHP} max={enemy.maxHP} height={14} showText={false} />
       </View>
 
@@ -282,6 +311,21 @@ const styles = StyleSheet.create({
     width: '50%',
     alignItems: 'center',
     gap: 3,
+  },
+  hpLabelRow: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  damageFloat: {
+    position: 'absolute',
+    top: -8,
+    right: -20,
+    color: '#ff4444',
+    fontSize: 22,
+    fontWeight: '900',
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
   },
   hpLabel: {
     color: '#ff6b6b',

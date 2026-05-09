@@ -49,6 +49,23 @@ const CATEGORY_ART: Record<string, string> = {
   power: '🔋',
 };
 
+const CARD_SPECIFIC_ART: Record<string, string> = {
+  poison_blade: '🗡️', gooey_stab: '🗡️', toxic_cloud: '☁️', weaken_strike: '💫',
+  bash: '💥', inflame: '🔥', flex: '💪', entrench: '🪨',
+  metallicize: '⚙️', barricade: '🏰', corruption: '😈', demon_form: '👿',
+  dark_embrace: '🌑', feel_no_pain: '😤', gobble_up: '🍖',
+  fortify: '🏗️', turtle_up: '🐢', barrier: '🫧',
+  adrenaline: '⚗️', hyper: '⚡', second_wind: '💨',
+  zoom_bonk: '💨', mob_rule: '👥', combo_strike: '🎯',
+  shiv: '🔪', ritual_dagger: '⚔️', offering: '🕯️',
+  apotheosis: '✨', fiend_fire: '🔥', wild_strike: '🌀',
+  headbutt: '🤜', body_slam: '💢', anger: '😡',
+  dropkick: '🦵', shockwave: '🌊', glacier: '❄️',
+  bloodletting: '🩸', exhume: '💀', miracle: '✨',
+  ghostly_armor: '👻', ethereal_slash: '👻',
+  feed: '🍖', limit_break: '💣',
+};
+
 const RARITY_COLORS: Record<string, string> = {
   common: '#9e9e9e',
   uncommon: '#5c6bc0',
@@ -162,7 +179,9 @@ export default function CardComponent({
 
         {/* Art area */}
         <View style={styles.artArea}>
-          <Text style={styles.artEmoji}>{CATEGORY_ART[definition.category]}</Text>
+          <Text style={styles.artEmoji}>
+            {CARD_SPECIFIC_ART[definition.id] ?? CATEGORY_ART[definition.category]}
+          </Text>
           {preview && (
             <View style={styles.previewRow}>
               {preview.damage !== undefined && (

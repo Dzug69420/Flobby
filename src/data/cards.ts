@@ -961,6 +961,53 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── CONDITIONAL / SCALING CARDS ──────────────────────────────────────────────
+  crush_joints: {
+    id: 'crush_joints',
+    name: 'Crush Joints',
+    category: 'attack',
+    description: 'Deal 8 damage. If enemy is Vulnerable, apply 1 Weak.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => {
+      const isVuln = ctx.enemyStatuses.some((s) => s.type === 'vulnerable' && s.stacks > 0);
+      return {
+        enemyHPChange: -8,
+        applyEnemyStatuses: isVuln ? [{ type: 'weak', stacks: 1 }] : [],
+      };
+    },
+  },
+  spirit_shield: {
+    id: 'spirit_shield',
+    name: 'Spirit Shield',
+    category: 'defense',
+    description: 'Gain 3 Block for each card in your hand.',
+    cost: 2,
+    rarity: 'uncommon',
+    effect: (ctx) => ({ playerBlockChange: 3 * ctx.cardsInHand.length }),
+  },
+  meditate: {
+    id: 'meditate',
+    name: 'Meditate',
+    category: 'status',
+    description: 'Enter Calm. Draw 1 card.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ drawCards: 1, setStance: 'calm' }),
+  },
+  sanctity: {
+    id: 'sanctity',
+    name: 'Sanctity',
+    category: 'defense',
+    description: 'Gain 6 Block. Draw 1 if you played a card this turn.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({
+      playerBlockChange: 6,
+      drawCards: ctx.cardsPlayedThisTurn > 0 ? 1 : 0,
+    }),
+  },
+
   // ── DEBUFF REMOVAL CARDS ─────────────────────────────────────────────────────
   cleanse: {
     id: 'cleanse',
@@ -1676,8 +1723,10 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
-  // Uncommon (purification)
-  'cleanse',
+  // Common (conditional)
+  'meditate',
+  // Uncommon (conditional)
+  'crush_joints', 'spirit_shield', 'sanctity', 'cleanse',
   // Rare (new)
   'talk_to_the_hand',
   // Common (new)
@@ -1744,6 +1793,8 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  crush_joints: 'uncommon', spirit_shield: 'uncommon', sanctity: 'uncommon',
+  meditate: 'common',
   cleanse: 'uncommon', talk_to_the_hand: 'rare',
   bite: 'common', beam_cell: 'common', frost_blast: 'common',
   master_of_strategy: 'common', flying_sleeves: 'common', empty_fist: 'common',

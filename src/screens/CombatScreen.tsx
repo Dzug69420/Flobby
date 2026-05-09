@@ -20,7 +20,7 @@ export default function CombatScreen() {
     currentStage, playerHP, playerMaxHP, playerBlock, playerEnergy, playerMaxEnergy,
     deck, hand, discard, currentEnemy, enemyHP, enemyBlock, enemyTurnAction,
     masterCardPool, playCard, endTurn, turnNumber, cardsPlayedThisTurn, goToMenu,
-    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts,
+    playerStatuses, enemyStatuses, gold, relics, potions, usePotion, exhaustPile, bossEnraged, activePowers, selectedCharacter, combatLog, sneckoCosts, burstActive, doubleTapActive,
   } = useGameStore();
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -206,7 +206,7 @@ export default function CombatScreen() {
         {(relics.length > 0 || activePowers.length > 0) && (
           <View style={styles.relicRow}>
             <RelicDisplay relics={relics} />
-            {activePowers.length > 0 && (
+            {(activePowers.length > 0 || burstActive || doubleTapActive) && (
               <View style={styles.powersRow}>
                 {activePowers.map((pid) => {
                   const def = masterCardPool[pid];
@@ -218,6 +218,18 @@ export default function CombatScreen() {
                     </View>
                   );
                 })}
+                {burstActive && (
+                  <View style={[styles.powerBadge, { borderColor: '#9b59b6', backgroundColor: 'rgba(155,89,182,0.2)' }]}>
+                    <Text style={styles.powerEmoji}>✨</Text>
+                    <Text style={[styles.powerName, { color: '#ce93d8' }]}>BURST!</Text>
+                  </View>
+                )}
+                {doubleTapActive && (
+                  <View style={[styles.powerBadge, { borderColor: '#e74c3c', backgroundColor: 'rgba(231,76,60,0.2)' }]}>
+                    <Text style={styles.powerEmoji}>⚔️</Text>
+                    <Text style={[styles.powerName, { color: '#ff8f8f' }]}>DOUBLE!</Text>
+                  </View>
+                )}
               </View>
             )}
           </View>

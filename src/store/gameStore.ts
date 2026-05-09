@@ -907,6 +907,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
+    // Mayhem: auto-play top card of deck
+    const mayhemState = get();
+    if (mayhemState.activePowers.includes('mayhem') && mayhemState.deck.length > 0) {
+      const topCard = mayhemState.deck[0];
+      const topDef = mayhemState.masterCardPool[topCard.definitionId];
+      if (topDef && !topDef.isUnplayable && mayhemState.playerEnergy >= (topDef.cost === -1 ? 1 : Math.max(0, topDef.cost))) {
+        // Remove from deck and add to hand first, then play it
+        set((s) => ({ deck: s.deck.slice(1), hand: [topCard, ...s.hand] }));
+        get().playCard(topCard.instanceId);
+      }
+    }
+
     // Evolve: draw 1 card per Status card drawn this turn
     const evolveState = get();
     if (evolveState.activePowers.includes('evolve')) {

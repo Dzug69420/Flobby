@@ -6,6 +6,7 @@ import { COLORS, FONTS, SPACING } from '../constants/theme';
 
 import HelpScreen from './HelpScreen';
 import CardGalleryScreen from './CardGalleryScreen';
+import RelicGalleryScreen from './RelicGalleryScreen';
 
 type Panel = 'menu' | 'options' | 'controls';
 
@@ -17,9 +18,11 @@ export default function StartScreen() {
   const [panel, setPanel] = useState<Panel>('menu');
   const [showHelp, setShowHelp] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const [showRelicGallery, setShowRelicGallery] = useState(false);
 
   if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
   if (showGallery) return <CardGalleryScreen onClose={() => setShowGallery(false)} />;
+  if (showRelicGallery) return <RelicGalleryScreen onClose={() => setShowRelicGallery(false)} />;
 
   const titleAnim = useRef(new Animated.Value(0)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
@@ -63,6 +66,7 @@ export default function StartScreen() {
               onControls={() => setPanel('controls')}
               onHelp={() => setShowHelp(true)}
               onGallery={() => setShowGallery(true)}
+              onRelicGallery={() => setShowRelicGallery(true)}
               ascensionLevel={ascensionLevel}
               runsCompleted={runsCompleted}
               onAscensionChange={setAscensionLevel}
@@ -94,10 +98,10 @@ const ASC_LABELS = [
 ];
 
 function MenuPanel({
-  onStart, onOptions, onControls, onHelp, onGallery,
+  onStart, onOptions, onControls, onHelp, onGallery, onRelicGallery,
   ascensionLevel, runsCompleted, onAscensionChange,
 }: {
-  onStart: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void;
+  onStart: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void; onRelicGallery: () => void;
   ascensionLevel: number; runsCompleted: number;
   onAscensionChange: (l: number) => void;
 }) {
@@ -131,6 +135,7 @@ function MenuPanel({
       <MenuButton label="🎮  CONTROLS" onPress={onControls} />
       <MenuButton label="📖  HOW TO PLAY" onPress={onHelp} />
       <MenuButton label="🃏  CARD GALLERY" onPress={onGallery} />
+      <MenuButton label="✨  RELIC GALLERY" onPress={onRelicGallery} />
       {runsCompleted > 0 && <Text style={styles.hint}>🏆 {runsCompleted} run{runsCompleted > 1 ? 's' : ''} completed</Text>}
       <Text style={styles.hint}>Defeat the boss to unlock higher ascensions!</Text>
     </View>

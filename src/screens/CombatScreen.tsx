@@ -457,7 +457,7 @@ export default function CombatScreen() {
           { opacity: damageFlashAnim },
         ]}
       />
-      <CardTooltip definition={tooltipDef} onClose={() => setTooltipDef(null)} />
+      <CardTooltip definition={tooltipDef} onClose={() => setTooltipDef(null)} combatCtx={combatCtx} />
     </View>
   );
 }

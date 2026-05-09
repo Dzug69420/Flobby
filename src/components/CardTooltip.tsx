@@ -1,11 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Modal } from 'react-native';
-import { CardDefinition } from '../types';
+import { CardDefinition, CombatContext } from '../types';
 import { COLORS } from '../constants/theme';
+import { computeCardPreview } from '../utils/gameLogic';
 
 interface Props {
   definition: CardDefinition | null;
   onClose: () => void;
+  combatCtx?: CombatContext;
+  overrideCost?: number;
 }
 
 const KEYWORD_DESCRIPTIONS: Record<string, string> = {
@@ -29,8 +32,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   power: '#66bb6a',
 };
 
-export default function CardTooltip({ definition, onClose }: Props) {
+export default function CardTooltip({ definition, onClose, combatCtx, overrideCost }: Props) {
   if (!definition) return null;
+
+  const preview = combatCtx ? computeCardPreview(definition, combatCtx) : null;
 
   const color = CATEGORY_COLORS[definition.category] ?? '#fff';
 
@@ -69,6 +74,22 @@ export default function CardTooltip({ definition, onClose }: Props) {
           {/* Description */}
           <View style={styles.body}>
             <Text style={styles.desc}>{definition.description}</Text>
+
+            {/* Live preview with modifiers */}
+            {preview && (preview.damage || preview.block) && (
+              <View style={styles.previewBox}>
+                <Text style={styles.previewTitle}>With current modifiers:</Text>
+                {preview.damage !== undefined && (
+                  <Text style={styles.previewDmg}>⚔️ Deals {preview.damage} damage</Text>
+                )}
+                {preview.block !== undefined && (
+                  <Text style={styles.previewBlk}>🛡️ Gains {preview.block} block</Text>
+                )}
+                {preview.draw !== undefined && (
+                  <Text style={styles.previewDraw}>🃏 Draws {preview.draw} cards</Text>
+                )}
+              </View>
+            )}
 
             {/* Keywords */}
             {keywords.length > 0 && (
@@ -153,4 +174,16 @@ const styles = StyleSheet.create({
   typeText: { fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
 
   hint: { color: 'rgba(255,255,255,0.2)', fontSize: 11, textAlign: 'center', paddingBottom: 12 },
+  previewBox: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 10,
+    gap: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  previewTitle: { color: COLORS.accentGold, fontSize: 11, fontWeight: 'bold', marginBottom: 2 },
+  previewDmg: { color: '#e74c3c', fontSize: 13, fontWeight: 'bold' },
+  previewBlk: { color: '#4fc3f7', fontSize: 13, fontWeight: 'bold' },
+  previewDraw: { color: '#9b59b6', fontSize: 13, fontWeight: 'bold' },
 });

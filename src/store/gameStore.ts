@@ -662,6 +662,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
     }
 
+    // Second Wind (second_wind2): exhaust all non-attacks in hand, gain 5 block per
+    if (def.id === 'second_wind2') {
+      const nonAttacks = state.hand.filter((c) => {
+        if (c.instanceId === instanceId) return false;
+        const d = state.masterCardPool[c.definitionId];
+        return d && d.category !== 'attack';
+      });
+      if (nonAttacks.length > 0) {
+        set((s) => ({
+          hand: s.hand.filter((c) => c.instanceId === instanceId || s.masterCardPool[c.definitionId]?.category === 'attack'),
+          exhaustPile: [...s.exhaustPile, ...nonAttacks],
+          playerBlock: s.playerBlock + nonAttacks.length * 5,
+        }));
+      }
+    }
+
+    // Recycle: exhaust most expensive card in hand, gain its energy
+    if (def.id === 'recycle') {
+      const handCards = state.hand.filter((c) => c.instanceId !== instanceId);
+      if (handCards.length > 0) {
+        const mostExpensive = handCards.reduce((best, c) => {
+          const d = state.masterCardPool[c.definitionId];
+          const bestD = state.masterCardPool[best.definitionId];
+          return (d?.cost ?? 0) > (bestD?.cost ?? 0) ? c : best;
+        });
+        const recycleDef = state.masterCardPool[mostExpensive.definitionId];
+        const energyGain = recycleDef?.cost === -1 ? state.playerEnergy : (recycleDef?.cost ?? 1);
+        set((s) => ({
+          hand: s.hand.filter((c) => c.instanceId !== mostExpensive.instanceId),
+          exhaustPile: [...s.exhaustPile, mostExpensive],
+          playerEnergy: Math.min(s.playerEnergy + energyGain, s.playerMaxEnergy + 3),
+        }));
+      }
+    }
+
     // Tempest: channel X lightning orbs
     if (def.id === 'tempest') {
       const energySpent = state.playerEnergy;

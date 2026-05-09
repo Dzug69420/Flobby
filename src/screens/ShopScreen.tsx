@@ -15,7 +15,7 @@ export default function ShopScreen() {
     gold, shopInventory, masterCardPool,
     deck, hand, discard,
     cardRemovalCost,
-    buyShopCard, removeCard, leaveShop,
+    buyShopCard, removeCard, leaveShop, restockShop,
   } = useGameStore();
 
   const [tab, setTab] = useState<'buy' | 'remove'>('buy');
@@ -135,9 +135,18 @@ export default function ShopScreen() {
           </>
         )}
 
-        <TouchableOpacity style={styles.leaveBtn} onPress={leaveShop}>
-          <Text style={styles.leaveBtnText}>Leave Shop →</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 10, margin: 16 }}>
+          <TouchableOpacity
+            style={[styles.leaveBtn, { flex: 1, opacity: gold >= 50 ? 1 : 0.5 }]}
+            onPress={() => gold >= 50 && restockShop()}
+            disabled={gold < 50}
+          >
+            <Text style={[styles.leaveBtnText, { color: COLORS.accentGold }]}>🔄 Restock (50🪙)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.leaveBtn, { flex: 1 }]} onPress={leaveShop}>
+            <Text style={styles.leaveBtnText}>Leave Shop →</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </LinearGradient>
   );

@@ -112,6 +112,7 @@ interface GameActions {
   buyShopCard: (cardId: string, price: number) => void;
   removeCard: (instanceId: string, price: number) => void;
   leaveShop: () => void;
+  restockShop: () => void;
   gainRelic: (relicId: string) => void;
   usePotion: (potionId: string) => void;
   gainPotion: (potionId: string) => void;
@@ -1197,6 +1198,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   leaveShop: () => set({ phase: 'map' }),
+
+  restockShop: () => {
+    set((state) => {
+      if (state.gold < 50) return {};
+      const newInventory = generateShopInventory(REWARD_CARD_WEIGHTS);
+      return { gold: state.gold - 50, shopInventory: newInventory };
+    });
+  },
 
   gainRelic: (relicId: string) => {
     set((state) => {

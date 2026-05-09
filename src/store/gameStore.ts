@@ -616,6 +616,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().drawCards(3);
     }
 
+    // Madness: randomize all hand card costs
+    if (def.id === 'madness') {
+      set((s) => {
+        const newSnecko: Record<string, number> = { ...s.sneckoCosts };
+        for (const card of s.hand) {
+          if (card.instanceId !== instanceId) {
+            newSnecko[card.instanceId] = Math.floor(Math.random() * 4);
+          }
+        }
+        return { sneckoCosts: newSnecko };
+      });
+    }
+
+    // Tempest: channel X lightning orbs
+    if (def.id === 'tempest') {
+      const energySpent = state.playerEnergy;
+      for (let i = 0; i < energySpent; i++) {
+        get().playCard = get().playCard; // trigger channel
+        set((s) => {
+          let orbs = [...s.orbs, 'lightning' as const];
+          let enemyHP = s.enemyHP;
+          let enemyBlock = s.enemyBlock;
+          while (orbs.length > s.maxOrbs) {
+            orbs.shift();
+            const dmg = Math.max(0, 8 - enemyBlock);
+            enemyBlock = Math.max(0, enemyBlock - 8);
+            enemyHP = Math.max(0, enemyHP - dmg);
+          }
+          return { orbs, enemyHP, enemyBlock };
+        });
+      }
+    }
+
     // Scry cards trigger scry mode
     if (def.id === 'scry_3' || def.id === 'calm_scry') {
       get().scry(3);

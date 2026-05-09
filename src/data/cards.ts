@@ -961,6 +961,71 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── MORE UTILITY CARDS ───────────────────────────────────────────────────────
+  madness: {
+    id: 'madness',
+    name: 'Madness',
+    category: 'status',
+    description: 'Randomize the costs of all cards in your hand. Exhaust.',
+    cost: 1,
+    rarity: 'uncommon',
+    exhaust: true,
+    effect: () => ({}),
+  },
+  swift_slice: {
+    id: 'swift_slice',
+    name: 'Swift Slice',
+    category: 'attack',
+    description: 'Deal 5 damage 3 times.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: () => ({ enemyHPChange: -15, hits: 3 }),
+  },
+  finisher: {
+    id: 'finisher',
+    name: 'Finisher',
+    category: 'attack',
+    description: 'Deal 4 damage for each Attack played this turn.',
+    cost: 1,
+    rarity: 'uncommon',
+    effect: (ctx) => ({
+      enemyHPChange: -(4 * Math.max(1, ctx.cardsPlayedThisTurn)),
+    }),
+  },
+  tempest: {
+    id: 'tempest',
+    name: 'Tempest',
+    category: 'attack',
+    description: 'Channel X Lightning orbs. Exhaust.',
+    cost: -1,
+    rarity: 'rare',
+    exhaust: true,
+    effect: (ctx) => ({
+      enemyHPChange: -(ctx.playerEnergy * 3),
+    }),
+  },
+  beam_cell: {
+    id: 'beam_cell',
+    name: 'Beam Cell',
+    category: 'attack',
+    description: 'Deal 3 damage. Apply 1 Weak.',
+    cost: 0,
+    rarity: 'common',
+    effect: () => ({
+      enemyHPChange: -3,
+      applyEnemyStatuses: [{ type: 'weak', stacks: 1 }],
+    }),
+  },
+  frost_blast: {
+    id: 'frost_blast',
+    name: 'Frost Blast',
+    category: 'defense',
+    description: 'Gain 5 Block. Channel a Frost Orb.',
+    cost: 1,
+    rarity: 'common',
+    effect: () => ({ playerBlockChange: 5, channelOrb: 'frost' }),
+  },
+
   // ── X COST CARDS ─────────────────────────────────────────────────────────────
   whirlwind: {
     id: 'whirlwind',
@@ -1429,6 +1494,12 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Common (new)
+  'beam_cell', 'frost_blast',
+  // Uncommon (new)
+  'madness', 'swift_slice', 'finisher',
+  // Rare (new)
+  'tempest',
   // Common (orbs)
   'zap', 'chill',
   // Uncommon (orbs + deck manipulation)
@@ -1480,6 +1551,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  beam_cell: 'common', frost_blast: 'common',
+  madness: 'uncommon', swift_slice: 'uncommon', finisher: 'uncommon',
+  tempest: 'rare',
   zap: 'common', chill: 'common',
   void_orb: 'uncommon', dualcast: 'uncommon', consume: 'uncommon',
   capacitor: 'rare', defragment: 'rare', storm: 'rare',

@@ -188,6 +188,9 @@ export interface GameState {
   scryAmount: number;
   orbs: Array<'lightning' | 'frost' | 'dark'>;
   maxOrbs: number;
+  totalDamageDealt: number;
+  totalDamageTaken: number;
+  totalBlockGained: number;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

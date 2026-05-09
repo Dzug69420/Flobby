@@ -6,7 +6,7 @@ import { COLORS, FONTS, SPACING } from '../constants/theme';
 import { ALL_RELICS } from '../data/relics';
 
 export default function VictoryScreen() {
-  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold, currentRunScore, bestScore, relics } = useGameStore();
+  const { playerHP, playerMaxHP, deck, hand, discard, restartGame, goToMenu, ascensionLevel, runsCompleted, gold, currentRunScore, bestScore, relics, totalDamageDealt, totalDamageTaken, totalBlockGained } = useGameStore();
   const deckSize = deck.length + hand.length + discard.length;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -64,6 +64,15 @@ export default function VictoryScreen() {
             <Text style={[styles.statLine, { color: COLORS.accentGold }]}>🏆 NEW BEST SCORE!</Text>
           )}
           <Text style={styles.statLine}>Runs Completed: <Text style={styles.statVal}>🏆 {runsCompleted}</Text></Text>
+          {totalDamageDealt > 0 && (
+            <Text style={styles.statLine}>Damage Dealt: <Text style={styles.statVal}>⚔️ {totalDamageDealt.toLocaleString()}</Text></Text>
+          )}
+          {totalDamageTaken > 0 && (
+            <Text style={styles.statLine}>Damage Taken: <Text style={styles.statVal}>💔 {totalDamageTaken}</Text></Text>
+          )}
+          {totalBlockGained > 0 && (
+            <Text style={styles.statLine}>Total Block: <Text style={styles.statVal}>🛡️ {totalBlockGained.toLocaleString()}</Text></Text>
+          )}
         </View>
 
         {/* Relics Gallery */}

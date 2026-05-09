@@ -192,6 +192,9 @@ const initialState: GameState = {
   scryAmount: 0,
   orbs: [],
   maxOrbs: 3,
+  totalDamageDealt: 0,
+  totalDamageTaken: 0,
+  totalBlockGained: 0,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -590,6 +593,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         exhaustPile: newExhaustPile,
         activePowers,
         combatLog: newLog,
+        totalDamageDealt: s.totalDamageDealt + (modifiedDelta.enemyHPChange && modifiedDelta.enemyHPChange < 0 ? Math.abs(modifiedDelta.enemyHPChange) : 0),
+        totalBlockGained: s.totalBlockGained + (modifiedDelta.playerBlockChange && modifiedDelta.playerBlockChange > 0 ? modifiedDelta.playerBlockChange : 0),
         attackCardsPlayedTotal: newAttackTotal,
         attackPlayedThisTurn: s.attackPlayedThisTurn || isAttackCard,
         sneckoCosts: newSneckoCosts,
@@ -959,6 +964,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Art of War: gain 1 energy if no attacks played last turn
       const artOfWarBonus = hasRelic(relics, 'art_of_war') && !state.attackPlayedThisTurn ? 1 : 0;
 
+      // Track damage taken this turn
+      const damageTakenThisTurn = action === 'attack'
+        ? Math.max(0, state.playerHP - playerHP)
+        : 0;
+
       return {
         playerHP,
         playerBlock,
@@ -977,6 +987,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         attackPlayedThisTurn: false,
         combatLog: newCombatLog,
         stance: nextStance as 'neutral' | 'calm' | 'wrath',
+        totalDamageTaken: state.totalDamageTaken + damageTakenThisTurn,
       };
     });
 

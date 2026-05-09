@@ -1010,6 +1010,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock = 0;
       }
 
+      // Warped Tongs: upgrade random card in hand at combat start (turn 0 = first turn)
+      // Already handled in travelToNode for combat_start relics
+
       // Plated Armor: gain stacks of block at start of each turn (after block reset)
       const platedArmor = getStatusStacks(playerStatuses, 'plated_armor');
       if (platedArmor > 0) {
@@ -1233,6 +1236,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const burningBloodHeal = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
     // Mango: gain 1 max HP after every combat
     const mangoBonus = hasRelic(state.relics, 'mango') ? 1 : 0;
+    // Meat on the Bone: heal 12 HP if at or below 50% HP at combat end
+    const meatBonus = hasRelic(state.relics, 'meat_on_the_bone') &&
+      state.playerHP <= state.playerMaxHP / 2 ? 12 : 0;
 
     // Track enemy defeat
     set((s) => ({ enemiesDefeated: s.enemiesDefeated + 1 }));
@@ -1295,7 +1301,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const prayerWheelBonus = hasRelic(state.relics, 'prayer_wheel') ? 4 : 3;
     const choices = pickRewardCards(REWARD_CARD_IDS, prayerWheelBonus, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
     const newMaxHP = state.playerMaxHP + mangoBonus;
-    const healedHP = Math.min(state.playerHP + 10 + burningBloodHeal, newMaxHP);
+    const healedHP = Math.min(state.playerHP + 10 + burningBloodHeal + meatBonus, newMaxHP);
     set({
       phase: 'reward',
       rewardChoices: choices,
@@ -1376,6 +1382,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (hasRelic(relics, 'thread_and_needle')) {
         startStatuses = mergeStatuses(startStatuses, [{ type: 'metallicize', stacks: 4 }]);
       }
+      if (hasRelic(relics, 'golden_eye')) startExtraCards += 1; // Scry +1 handled in scry action
       const sneckoExtraCards = hasRelic(relics, 'snecko_eye') ? 2 : 0;
 
       // Separate innate cards from the rest
@@ -1389,6 +1396,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
         c.instanceId !== bottledCard?.instanceId
       );
       const shuffledNormal = shuffle(normalDefs);
+
+      // Warped Tongs: upgrade a random upgradable card at combat start
+      const allDeckForTongs = [...allDeckCards];
+      if (hasRelic(relics, 'warped_tongs')) {
+        const upgradable = allDeckForTongs.filter((c) => state.masterCardPool[c.definitionId]?.upgradeId);
+        if (upgradable.length > 0) {
+          const toUpgrade = upgradable[Math.floor(Math.random() * upgradable.length)];
+          const defT = state.masterCardPool[toUpgrade.definitionId];
+          if (defT?.upgradeId) {
+            const idx = allDeckCards.findIndex((c) => c.instanceId === toUpgrade.instanceId);
+            if (idx >= 0) allDeckCards[idx] = { ...allDeckCards[idx], definitionId: defT.upgradeId };
+          }
+        }
+      }
 
       const drawCount = HAND_SIZE + startExtraCards + sneckoExtraCards;
       const guaranteedCards = [

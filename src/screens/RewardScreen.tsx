@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   },
   cardsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
     gap: SPACING.md,
     marginBottom: SPACING.lg,

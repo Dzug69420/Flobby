@@ -961,6 +961,51 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     }),
   },
 
+  // ── SILENT-STYLE CARDS ───────────────────────────────────────────────────────
+  neutralize: {
+    id: 'neutralize', name: 'Neutralize', category: 'attack',
+    description: 'Deal 3 damage. Apply 1 Weak.', cost: 0, rarity: 'common',
+    effect: () => ({ enemyHPChange: -3, applyEnemyStatuses: [{ type: 'weak', stacks: 1 }] }),
+  },
+  acrobatics: {
+    id: 'acrobatics', name: 'Acrobatics', category: 'status',
+    description: 'Draw 3 cards.', cost: 1, rarity: 'common',
+    effect: () => ({ drawCards: 3 }),
+  },
+  deadly_poison: {
+    id: 'deadly_poison', name: 'Deadly Poison', category: 'attack',
+    description: 'Deal 4 damage. Apply 5 Poison.', cost: 1, rarity: 'common',
+    effect: () => ({ enemyHPChange: -4, applyEnemyStatuses: [{ type: 'poison', stacks: 5 }] }),
+  },
+  catalyst: {
+    id: 'catalyst', name: 'Catalyst', category: 'status',
+    description: 'Double enemy Poison stacks. Exhaust.', cost: 1, rarity: 'uncommon', exhaust: true,
+    effect: (ctx) => {
+      const poison = ctx.enemyStatuses.find((s) => s.type === 'poison')?.stacks ?? 0;
+      return { applyEnemyStatuses: [{ type: 'poison', stacks: poison }] };
+    },
+  },
+  riddling_knife: {
+    id: 'riddling_knife', name: 'Riddling Knife', category: 'attack',
+    description: 'Deal 3 damage 3 times.', cost: 1, rarity: 'common',
+    effect: () => ({ enemyHPChange: -9, hits: 3 }),
+  },
+  noxious_fumes: {
+    id: 'noxious_fumes', name: 'Noxious Fumes', category: 'power',
+    description: 'At start of each turn, apply 2 Poison to enemy.', cost: 1, rarity: 'uncommon',
+    effect: () => ({}),
+  },
+  die_die_die: {
+    id: 'die_die_die', name: 'Die Die Die', category: 'attack',
+    description: 'Deal 13 damage. Exhaust.', cost: 1, rarity: 'uncommon', exhaust: true,
+    effect: () => ({ enemyHPChange: -13 }),
+  },
+  infinite_blades: {
+    id: 'infinite_blades', name: 'Infinite Blades', category: 'power',
+    description: 'At the start of each turn, add a Shiv to your hand.', cost: 1, rarity: 'rare',
+    effect: () => ({}),
+  },
+
   // ── IRONCLAD-STYLE CARDS ─────────────────────────────────────────────────────
   brutality: {
     id: 'brutality',
@@ -1811,6 +1856,12 @@ export const REWARD_CARD_IDS = [
   'capacitor', 'defragment', 'storm',
   // Rare (new)
   'reaper', 'bludgeon', 'mayhem', 'juggernaut',
+  // Common (Silent)
+  'neutralize', 'acrobatics', 'deadly_poison', 'riddling_knife',
+  // Uncommon (Silent)
+  'catalyst', 'noxious_fumes', 'die_die_die',
+  // Rare (Silent)
+  'infinite_blades',
   // Common (Ironclad)
   'thick_skin',
   // Uncommon (Ironclad)
@@ -1891,6 +1942,9 @@ export const REWARD_CARD_WEIGHTS: Record<string, 'common' | 'uncommon' | 'rare'>
   charge_up: 'uncommon', discharge: 'uncommon', lightning_strike: 'uncommon',
   eruption: 'uncommon', inner_peace: 'uncommon', conclude: 'uncommon',
   reaper: 'rare', bludgeon: 'rare', mayhem: 'rare', juggernaut: 'rare',
+  neutralize: 'common', acrobatics: 'common', deadly_poison: 'common', riddling_knife: 'common',
+  catalyst: 'uncommon', noxious_fumes: 'uncommon', die_die_die: 'uncommon',
+  infinite_blades: 'rare',
   thick_skin: 'common', rampage: 'uncommon', rampage_plus: 'uncommon',
   brutality: 'rare', the_bomb: 'rare',
   pray: 'common', battle_trance2: 'uncommon', fasting: 'rare',

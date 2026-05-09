@@ -1224,6 +1224,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Battle Hymn: add free Shiv (0-cost attack) to hand at turn start
+    // Noxious Fumes: apply 2 Poison to enemy at turn start
+    if (get().activePowers.includes('noxious_fumes')) {
+      set((s) => ({
+        enemyStatuses: mergeStatuses(s.enemyStatuses, [{ type: 'poison', stacks: 2 }]),
+      }));
+    }
+
+    // Infinite Blades: add a Shiv to hand at turn start
+    if (get().activePowers.includes('infinite_blades')) {
+      set((s) => ({
+        hand: [...s.hand, { instanceId: generateId(), definitionId: 'shiv' }],
+      }));
+    }
+
     const battleHymnState = get();
     if (battleHymnState.activePowers.includes('battle_hymn')) {
       set((s) => ({

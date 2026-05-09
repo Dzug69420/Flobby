@@ -301,7 +301,9 @@ export default function CombatScreen() {
             >
               <Text style={styles.energyFraction}>{playerEnergy}/{playerMaxEnergy}</Text>
             </LinearGradient>
-            <Text style={styles.pileLabelLeft}>🃏 {deck.length}</Text>
+            <TouchableOpacity onPress={() => { setDeckViewTab('deck'); setShowDeckViewer(true); }}>
+              <Text style={styles.pileLabelLeft}>🃏 {deck.length}</Text>
+            </TouchableOpacity>
             {cardsPlayedThisTurn > 0 && (
               <Text style={styles.playedLabel}>▶ {cardsPlayedThisTurn}</Text>
             )}
@@ -339,9 +341,13 @@ export default function CombatScreen() {
               energy={playerEnergy}
               maxEnergy={playerMaxEnergy}
             />
-            <Text style={styles.pileLabelRight}>🗑 {discard.length}</Text>
+            <TouchableOpacity onPress={() => { setDeckViewTab('discard'); setShowDeckViewer(true); }}>
+              <Text style={styles.pileLabelRight}>🗑 {discard.length}</Text>
+            </TouchableOpacity>
             {exhaustPile.length > 0 && (
-              <Text style={styles.pileLabelRight}>🔥 {exhaustPile.length}</Text>
+              <TouchableOpacity onPress={() => { setDeckViewTab('exhaust'); setShowDeckViewer(true); }}>
+                <Text style={styles.pileLabelRight}>🔥 {exhaustPile.length}</Text>
+              </TouchableOpacity>
             )}
           </View>
         </View>

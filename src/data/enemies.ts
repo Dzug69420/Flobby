@@ -1,6 +1,46 @@
 import { EnemyDefinition } from '../types';
 
 export const ENEMIES: EnemyDefinition[] = [
+  // ── MID-GAME ENEMIES ──────────────────────────────────────────────────────────
+  {
+    id: 'mirror_blob',
+    name: 'Mirror Blob',
+    maxHP: 62,
+    baseAttack: 11,
+    attackPattern: { type: 'cycle', pattern: ['defend', 'attack', 'attack', 'defend'] },
+    isBoss: false,
+    color: '#e8daef',
+    bodySize: 100,
+    faceEmoji: '🪞',
+    startingBlock: 8,
+    attackStatuses: [{ type: 'frail', stacks: 1 }],
+  },
+  {
+    id: 'thornback',
+    name: 'Thornback',
+    maxHP: 50,
+    baseAttack: 8,
+    attackPattern: { type: 'consistent' },
+    isBoss: false,
+    color: '#27ae60',
+    bodySize: 90,
+    faceEmoji: '🌵',
+    startingStatuses: [{ type: 'thorns', stacks: 4 }],
+  },
+  {
+    id: 'frost_guardian',
+    name: 'Frost Guardian',
+    maxHP: 68,
+    baseAttack: 10,
+    attackPattern: { type: 'alternating', firstTurn: 'defend' },
+    isBoss: false,
+    color: '#5dade2',
+    bodySize: 108,
+    faceEmoji: '❄️',
+    startingBlock: 12,
+    attackStatuses: [{ type: 'frail', stacks: 2 }],
+  },
+
   // Early floors (1-3)
   {
     id: 'baby_blob',

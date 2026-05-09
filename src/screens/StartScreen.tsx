@@ -7,6 +7,7 @@ import { COLORS, FONTS, SPACING } from '../constants/theme';
 import HelpScreen from './HelpScreen';
 import CardGalleryScreen from './CardGalleryScreen';
 import RelicGalleryScreen from './RelicGalleryScreen';
+import StatsScreen from './StatsScreen';
 
 type Panel = 'menu' | 'options' | 'controls';
 
@@ -20,10 +21,12 @@ export default function StartScreen() {
   const [showHelp, setShowHelp] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [showRelicGallery, setShowRelicGallery] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   if (showHelp) return <HelpScreen onClose={() => setShowHelp(false)} />;
   if (showGallery) return <CardGalleryScreen onClose={() => setShowGallery(false)} />;
   if (showRelicGallery) return <RelicGalleryScreen onClose={() => setShowRelicGallery(false)} />;
+  if (showStats) return <StatsScreen onClose={() => setShowStats(false)} />;
 
   const titleAnim = useRef(new Animated.Value(0)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
@@ -69,6 +72,7 @@ export default function StartScreen() {
               onHelp={() => setShowHelp(true)}
               onGallery={() => setShowGallery(true)}
               onRelicGallery={() => setShowRelicGallery(true)}
+              onStats={() => setShowStats(true)}
               ascensionLevel={ascensionLevel}
               runsCompleted={runsCompleted}
               onAscensionChange={setAscensionLevel}
@@ -100,10 +104,11 @@ const ASC_LABELS = [
 ];
 
 function MenuPanel({
-  onStart, onContinue, onOptions, onControls, onHelp, onGallery, onRelicGallery,
+  onStart, onContinue, onOptions, onControls, onHelp, onGallery, onRelicGallery, onStats,
   ascensionLevel, runsCompleted, onAscensionChange,
 }: {
-  onStart: () => void; onContinue: () => void; onOptions: () => void; onControls: () => void; onHelp: () => void; onGallery: () => void; onRelicGallery: () => void;
+  onStart: () => void; onContinue: () => void; onOptions: () => void; onControls: () => void;
+  onHelp: () => void; onGallery: () => void; onRelicGallery: () => void; onStats: () => void;
   ascensionLevel: number; runsCompleted: number;
   onAscensionChange: (l: number) => void;
 }) {
@@ -139,6 +144,7 @@ function MenuPanel({
       <MenuButton label="📖  HOW TO PLAY" onPress={onHelp} />
       <MenuButton label="🃏  CARD GALLERY" onPress={onGallery} />
       <MenuButton label="✨  RELIC GALLERY" onPress={onRelicGallery} />
+      <MenuButton label="📈  STATISTICS" onPress={onStats} />
       {runsCompleted > 0 && <Text style={styles.hint}>🏆 {runsCompleted} run{runsCompleted > 1 ? 's' : ''} completed</Text>}
       <Text style={styles.hint}>Defeat the boss to unlock higher ascensions!</Text>
     </View>

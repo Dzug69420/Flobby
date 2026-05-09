@@ -23,7 +23,7 @@ function buildStartingDeck(): CardInstance[] {
 }
 
 function computeEnemyAction(
-  pattern: { type: string; firstTurn?: string; pattern?: string[]; attackChance?: number },
+  pattern: { type: string; firstTurn?: string; pattern?: string[]; attackChance?: number; chargeTurns?: number; chargeMultiplier?: number },
   turnNumber: number
 ): 'attack' | 'defend' {
   if (pattern.type === 'consistent' || pattern.type === 'boss_pattern') return 'attack';
@@ -31,9 +31,12 @@ function computeEnemyAction(
     return (pattern.pattern[turnNumber % pattern.pattern.length] ?? 'attack') as 'attack' | 'defend';
   }
   if (pattern.type === 'random') {
-    // Use seeded random based on turnNumber for predictability
     const seed = (turnNumber * 9301 + 49297) % 233280;
     return (seed / 233280) < (pattern.attackChance ?? 0.7) ? 'attack' : 'defend';
+  }
+  if (pattern.type === 'charge') {
+    const chargeTurns = pattern.chargeTurns ?? 2;
+    return (turnNumber % (chargeTurns + 1) === chargeTurns) ? 'attack' : 'defend';
   }
   const isEven = turnNumber % 2 === 0;
   const attackOnEven = pattern.firstTurn === 'attack';
@@ -872,7 +875,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const isIntangible = getStatusStacks(playerStatuses, 'intangible') > 0;
       if (action === 'attack') {
         enemyBlock = 0;
-        const rawAttack = enemy.baseAttack + enemyStrength;
+        // Charge pattern: multiply attack on release turn
+        const isChargeTurn = enemy.attackPattern.type === 'charge' &&
+          state.turnNumber % ((enemy.attackPattern as { chargeTurns: number }).chargeTurns + 1) ===
+          (enemy.attackPattern as { chargeTurns: number }).chargeTurns;
+        const chargeMultiplier = isChargeTurn
+          ? ((enemy.attackPattern as { chargeMultiplier?: number }).chargeMultiplier ?? 2)
+          : 1;
+        const rawAttack = Math.floor((enemy.baseAttack + enemyStrength) * chargeMultiplier);
         let dmg = Math.max(0, rawAttack - playerBlock);
         // Wrath: take double damage in Wrath stance
         if (state.stance === 'wrath' && dmg > 0) dmg = Math.floor(dmg * 2);

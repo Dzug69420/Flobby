@@ -80,6 +80,7 @@ export type AttackPattern =
   | { type: 'alternating'; firstTurn: 'attack' | 'defend' }
   | { type: 'cycle'; pattern: Array<'attack' | 'defend'> }
   | { type: 'random'; attackChance: number }
+  | { type: 'charge'; chargeTurns: number; chargeMultiplier: number }
   | { type: 'boss_pattern' };
 
 export type BossMechanic =

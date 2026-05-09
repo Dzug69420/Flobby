@@ -179,6 +179,19 @@ export const ENEMIES: EnemyDefinition[] = [
     bodySize: 115,
     faceEmoji: '💀',
   },
+  // Charge enemy
+  {
+    id: 'charger',
+    name: 'Charging Blob',
+    maxHP: 60,
+    baseAttack: 11,
+    attackPattern: { type: 'charge', chargeTurns: 2, chargeMultiplier: 3 },
+    isBoss: false,
+    color: '#f39c12',
+    bodySize: 95,
+    faceEmoji: '⚡',
+  },
+
   // Late-game enemies (floors 10-12)
   {
     id: 'crimson_beast',

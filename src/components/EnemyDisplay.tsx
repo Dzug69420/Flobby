@@ -63,13 +63,18 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
 
   const isBoss = enemy.isBoss;
   const isElite = enemy.isElite;
+  const isChargePattern = enemy.attackPattern.type === 'charge';
   const nextTurns = turnNumber !== undefined && enemy.attackPattern.type !== 'random'
     ? previewNextTurns(enemy.attackPattern, turnNumber, 3)
     : null;
   const isAttacking = enemyTurnAction === 'attack';
+  const isCharging = !isAttacking && isChargePattern;
   const enemyStrength = enemyStatuses.find((s) => s.type === 'strength')?.stacks ?? 0;
+  const chargeMultiplier = isChargePattern && isAttacking
+    ? ((enemy.attackPattern as { chargeMultiplier?: number }).chargeMultiplier ?? 2)
+    : 1;
   const intentValue = isAttacking
-    ? enemy.baseAttack + enemyStrength
+    ? Math.floor((enemy.baseAttack + enemyStrength) * chargeMultiplier)
     : Math.floor(enemy.baseAttack * 0.8);
   const intentStatusIcons = isAttacking && enemy.attackStatuses && enemy.attackStatuses.length > 0
     ? enemy.attackStatuses.map((s) => {
@@ -112,9 +117,11 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
           { transform: [{ translateY: intentBounce }] },
         ]}
       >
-        <Text style={styles.intentIcon}>{isAttacking ? '🗡️' : '🛡️'}</Text>
+        <Text style={styles.intentIcon}>
+          {isCharging ? '⚡' : isAttacking ? '🗡️' : '🛡️'}
+        </Text>
         <Text style={[styles.intentValue, isAttacking ? styles.intentAttackColor : styles.intentDefendColor]}>
-          {intentValue}
+          {isCharging ? 'CHARGE' : intentValue}
         </Text>
         {intentStatusIcons !== '' && (
           <Text style={styles.intentStatusIcons}>{intentStatusIcons}</Text>

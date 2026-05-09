@@ -667,6 +667,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 9 damage. Enter Wrath.',
     cost: 2,
     rarity: 'uncommon',
+    upgradeId: 'eruption_plus',
     effect: () => ({ enemyHPChange: -9, setStance: 'wrath' }),
   },
   inner_peace: {
@@ -820,6 +821,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 9 damage. Draw 1 card.',
     cost: 1,
     rarity: 'common',
+    upgradeId: 'pommel_strike_plus',
     effect: () => ({ enemyHPChange: -9, drawCards: 1 }),
   },
   perfected_strike: {
@@ -876,6 +878,7 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     description: 'Deal 14 damage. Apply 1 Weak.',
     cost: 2,
     rarity: 'common',
+    upgradeId: 'heavy_slash_plus',
     effect: () => ({
       enemyHPChange: -14,
       applyEnemyStatuses: [{ type: 'weak', stacks: 1 }],
@@ -1218,6 +1221,31 @@ export const ALL_CARDS: Record<string, CardDefinition> = {
     isStatusCard: true,
     isUnplayable: true,
     effect: () => ({}),
+  },
+
+  // ── MORE UPGRADED CARDS ──────────────────────────────────────────────────────
+  pommel_strike_plus: {
+    id: 'pommel_strike_plus', name: 'Pommel Strike+', category: 'attack',
+    description: 'Deal 11 damage. Draw 2 cards.', cost: 1, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -11, drawCards: 2 }),
+  },
+  heavy_slash_plus: {
+    id: 'heavy_slash_plus', name: 'Heavy Slash+', category: 'attack',
+    description: 'Deal 17 damage. Apply 2 Weak.', cost: 2, rarity: 'common', upgraded: true,
+    effect: () => ({
+      enemyHPChange: -17,
+      applyEnemyStatuses: [{ type: 'weak', stacks: 2 }],
+    }),
+  },
+  swift_strike_plus: {
+    id: 'swift_strike_plus', name: 'Swift Strike+', category: 'attack',
+    description: 'Deal 8 damage twice.', cost: 2, rarity: 'common', upgraded: true,
+    effect: () => ({ enemyHPChange: -17, hits: 2 }),
+  },
+  eruption_plus: {
+    id: 'eruption_plus', name: 'Eruption+', category: 'attack',
+    description: 'Deal 9 damage. Enter Wrath. Costs 1.', cost: 1, rarity: 'uncommon', upgraded: true,
+    effect: () => ({ enemyHPChange: -9, setStance: 'wrath' }),
   },
 
   // ── UPGRADED CARDS (+ variants) ──────────────────────────────────────────────

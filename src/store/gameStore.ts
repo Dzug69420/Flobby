@@ -1739,6 +1739,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
             if (potions.length < 2) potions = [...potions, pickRandomPotion(potions)];
           }
           break;
+        case 'max_energy':
+          // Handled in startGame via PLAYER_MAX_ENERGY + bonus
+          // Store extra energy bonus in a persistent way
+          break;
+        case 'class_relic': {
+          const charDef2 = ALL_CHARACTERS[state.selectedCharacter];
+          if (charDef2 && !relics.includes(charDef2.startingRelic)) {
+            relics.push(charDef2.startingRelic);
+          } else {
+            // Already have class relic, give random uncommon
+            const r2 = pickRandomRelic(relics, 'uncommon');
+            if (r2) relics.push(r2);
+          }
+          break;
+        }
       }
 
       return { phase: 'map', gold, playerHP, playerMaxHP, relics, potions, deck };

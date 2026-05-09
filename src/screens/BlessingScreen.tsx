@@ -20,6 +20,8 @@ const ALL_BLESSINGS: Blessing[] = [
   { id: 'remove_card', title: 'Purify', description: 'Remove a Bonk from your starter deck.', emoji: '🗑️' },
   { id: 'upgrade_two', title: 'Forge Ahead', description: 'Upgrade 2 cards in your starting deck.', emoji: '⚒️' },
   { id: 'two_potions', title: 'Alchemy', description: 'Start with 2 random potions.', emoji: '🧪' },
+  { id: 'max_energy', title: 'Power Cell', description: 'Start with 4 max energy this run.', emoji: '⚡' },
+  { id: 'class_relic', title: "Fighter's Crest", description: 'Gain your character class\'s signature relic.', emoji: '🏆' },
 ];
 
 function pickThree(): Blessing[] {

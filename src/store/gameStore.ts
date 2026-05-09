@@ -1636,6 +1636,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         case 'vulnerable_potion':
           enemyStatuses = mergeStatuses(enemyStatuses, [{ type: 'vulnerable', stacks: 3 }]);
           break;
+        case 'speed_potion':
+          playerStatuses = mergeStatuses(playerStatuses, [
+            { type: 'strength', stacks: 1 },
+            { type: 'dexterity', stacks: 1 },
+          ]);
+          break;
+        case 'cultist_potion':
+          playerStatuses = mergeStatuses(playerStatuses, [{ type: 'ritual', stacks: 1 }]);
+          break;
+        case 'distilled_chaos':
+          drawCards = 3;
+          break;
       }
 
       return {

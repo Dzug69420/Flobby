@@ -79,6 +79,45 @@ export const ALL_POTIONS: Record<string, PotionDefinition> = {
   },
 };
 
+// Additional potions
+Object.assign(ALL_POTIONS, {
+  speed_potion: {
+    id: 'speed_potion',
+    name: 'Speed Potion',
+    description: 'Gain 1 Dexterity permanently. Gain 1 Strength permanently.',
+    emoji: '⚡',
+    color: '#ffeb3b',
+  },
+  ancient_potion: {
+    id: 'ancient_potion',
+    name: 'Ancient Potion',
+    description: 'Gain 1 Artifact. Blocks the next debuff applied.',
+    emoji: '🏺',
+    color: '#795548',
+  },
+  cultist_potion: {
+    id: 'cultist_potion',
+    name: 'Cultist Potion',
+    description: 'Gain 1 Ritual (Strength each turn).',
+    emoji: '🕯️',
+    color: '#9c27b0',
+  },
+  fairy_in_a_bottle: {
+    id: 'fairy_in_a_bottle',
+    name: 'Fairy in a Bottle',
+    description: 'When you would die, heal to 30% HP instead. Exhaust.',
+    emoji: '🧚',
+    color: '#e91e63',
+  },
+  distilled_chaos: {
+    id: 'distilled_chaos',
+    name: 'Distilled Chaos',
+    description: 'Play the top 3 cards of your deck.',
+    emoji: '🌀',
+    color: '#673ab7',
+  },
+});
+
 export const POTION_POOL = Object.keys(ALL_POTIONS);
 
 export function pickRandomPotion(exclude: string[] = []): string {

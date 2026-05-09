@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { loadPersisted, savePersisted } from '../utils/persistence';
 import { GameState, GamePhase, CardInstance, CombatContext, StatusEffect, StatusEffectType, MapNode, ShopItem, RunRecord } from '../types';
 import { ALL_CARDS, REWARD_CARD_IDS, REWARD_CARD_WEIGHTS } from '../data/cards';
 import { ENEMIES, ELITE_ENEMIES } from '../data/enemies';
@@ -131,6 +132,7 @@ interface GameActions {
   discardFromHand: (instanceId: string) => void;
   selectBlessing: (blessingId: string) => void;
   setAscensionLevel: (level: number) => void;
+  loadSavedData: () => void;
   goToMenu: () => void;
 }
 
@@ -1225,12 +1227,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         deckSize: s.deck.length + s.hand.length + s.discard.length,
         relicCount: s.relics.length,
       };
+      const newBestScore2 = Math.max(s.bestScore, score);
       set({
         phase: 'gameover',
         currentRunScore: score,
-        bestScore: Math.max(s.bestScore, score),
+        bestScore: newBestScore2,
         runHistory: [record, ...s.runHistory].slice(0, 10),
       });
+      savePersisted({ bestScore: newBestScore2, runsCompleted: s.runsCompleted, runHistory: [record, ...s.runHistory].slice(0, 10) });
       return;
     }
 
@@ -1978,11 +1982,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         deckSize: state.deck.length + state.hand.length + state.discard.length,
         relicCount: state.relics.length + 1,
       };
+      const newRunHistory = [record, ...state.runHistory].slice(0, 10);
+      savePersisted({
+        bestScore: state.bestScore,
+        runsCompleted: state.runsCompleted,
+        runHistory: newRunHistory,
+        ascensionLevel: state.ascensionLevel,
+      });
       return {
         phase: 'victory',
         relics: [...state.relics, relicId],
         bossRelicChoices: [],
-        runHistory: [record, ...state.runHistory].slice(0, 10),
+        runHistory: newRunHistory,
       };
     });
   },
@@ -2091,6 +2102,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setAscensionLevel: (level: number) => {
     set({ ascensionLevel: Math.max(0, Math.min(10, level)) });
+    savePersisted({ ascensionLevel: Math.max(0, Math.min(10, level)) });
+  },
+
+  loadSavedData: () => {
+    loadPersisted().then((data) => {
+      const updates: Partial<typeof initialState> = {};
+      if (typeof data.bestScore === 'number') updates.bestScore = data.bestScore;
+      if (typeof data.runsCompleted === 'number') updates.runsCompleted = data.runsCompleted;
+      if (typeof data.ascensionLevel === 'number') updates.ascensionLevel = data.ascensionLevel;
+      if (Array.isArray(data.runHistory)) updates.runHistory = data.runHistory as typeof initialState.runHistory;
+      if (typeof data.selectedCharacter === 'string') updates.selectedCharacter = data.selectedCharacter;
+      if (Object.keys(updates).length > 0) set(updates);
+    });
   },
 
   restartGame: () => {

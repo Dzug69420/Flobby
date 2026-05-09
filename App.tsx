@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useGameStore } from './src/store/gameStore';
@@ -18,6 +18,11 @@ import ScryScreen from './src/screens/ScryScreen';
 
 function Navigator() {
   const phase = useGameStore((s) => s.phase);
+  const loadSavedData = useGameStore((s) => s.loadSavedData);
+
+  useEffect(() => {
+    loadSavedData();
+  }, []);
   switch (phase) {
     case 'start':          return <StartScreen />;
     case 'character_select': return <CharacterSelectScreen />;

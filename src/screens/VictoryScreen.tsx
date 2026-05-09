@@ -33,21 +33,37 @@ export default function VictoryScreen() {
         <Text style={styles.subtitle}>You defeated Flobby!</Text>
 
         <View style={styles.statsBox}>
-          <Text style={styles.statLine}>Remaining HP: <Text style={styles.statVal}>{playerHP} / {playerMaxHP}</Text></Text>
-          <Text style={styles.statLine}>Final Deck Size: <Text style={styles.statVal}>{deckSize} cards</Text></Text>
-          <Text style={styles.statLine}>Gold Remaining: <Text style={styles.statVal}>🪙 {gold}</Text></Text>
-          <Text style={styles.statLine}>Runs Completed: <Text style={styles.statVal}>🏆 {runsCompleted}</Text></Text>
+          <Text style={styles.statLine}>HP: <Text style={styles.statVal}>{playerHP}/{playerMaxHP}</Text>
+            <Text style={styles.statCalc}> (+{playerHP * 2} pts)</Text>
+          </Text>
+          <Text style={styles.statLine}>Deck: <Text style={styles.statVal}>{deckSize} cards</Text>
+            <Text style={styles.statCalc}> (+{deckSize * 5} pts)</Text>
+          </Text>
+          <Text style={styles.statLine}>Gold: <Text style={styles.statVal}>🪙 {gold}</Text>
+            <Text style={styles.statCalc}> (+{Math.floor(gold * 0.5)} pts)</Text>
+          </Text>
+          <Text style={styles.statLine}>Relics: <Text style={styles.statVal}>{relics.length}</Text>
+            <Text style={styles.statCalc}> (+{relics.length * 25} pts)</Text>
+          </Text>
+          <Text style={styles.statLine}>Floors: <Text style={styles.statVal}>15/15</Text>
+            <Text style={styles.statCalc}> (+750 pts)</Text>
+          </Text>
           {ascensionLevel > 0 && (
-            <Text style={styles.statLine}>Ascension Unlocked: <Text style={[styles.statVal, { color: '#ce93d8' }]}>Asc {ascensionLevel}</Text></Text>
+            <Text style={styles.statLine}>Ascension Bonus: <Text style={[styles.statVal, { color: '#ce93d8' }]}>Asc {ascensionLevel}</Text>
+              <Text style={styles.statCalc}> (+{ascensionLevel * 100} pts)</Text>
+            </Text>
           )}
-          <Text style={styles.statLine}>Score: <Text style={[styles.statVal, { color: '#66bb6a' }]}>⭐ {currentRunScore.toLocaleString()}</Text></Text>
+          <View style={styles.scoreDivider} />
+          <Text style={styles.statLine}>
+            TOTAL SCORE: <Text style={[styles.statVal, { color: '#66bb6a', fontSize: 18 }]}>⭐ {currentRunScore.toLocaleString()}</Text>
+          </Text>
           {bestScore > currentRunScore && (
             <Text style={styles.statLine}>Best Score: <Text style={styles.statVal}>⭐ {bestScore.toLocaleString()}</Text></Text>
           )}
           {bestScore === currentRunScore && currentRunScore > 0 && (
             <Text style={[styles.statLine, { color: COLORS.accentGold }]}>🏆 NEW BEST SCORE!</Text>
           )}
-          <Text style={styles.statLine}>All 15 floors cleared! 🎉</Text>
+          <Text style={styles.statLine}>Runs Completed: <Text style={styles.statVal}>🏆 {runsCompleted}</Text></Text>
         </View>
 
         {/* Relics Gallery */}
@@ -106,8 +122,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.bossGold,
   },
-  statLine: { color: COLORS.textSecondary, fontSize: 15, marginBottom: SPACING.xs },
+  statLine: { color: COLORS.textSecondary, fontSize: 14, marginBottom: SPACING.xs },
   statVal: { color: COLORS.bossGold, fontWeight: 'bold' },
+  statCalc: { color: 'rgba(255,215,0,0.5)', fontSize: 11 },
+  scoreDivider: { height: 1, backgroundColor: 'rgba(255,215,0,0.2)', marginVertical: 6 },
   relicsSection: {
     width: '100%',
     marginBottom: SPACING.md,

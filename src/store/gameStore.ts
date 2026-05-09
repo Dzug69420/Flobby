@@ -202,6 +202,7 @@ const initialState: GameState = {
   enemiesDefeated: 0,
   necronomiconUsedThisTurn: false,
   firstBlockThisTurn: true,
+  lastTriggeredRelic: null,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],

@@ -192,7 +192,13 @@ export default function EnemyDisplay({ enemy, enemyHP, enemyBlock, enemyTurnActi
             </Animated.Text>
           )}
         </View>
-        <HPBar current={enemyHP} max={enemy.maxHP} height={14} showText={false} />
+        <HPBar
+          current={enemyHP}
+          max={enemy.maxHP}
+          height={14}
+          showText={false}
+          showThreshold={isBoss ? 0.5 : undefined}
+        />
       </View>
 
       {/* Status effects */}

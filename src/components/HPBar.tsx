@@ -7,9 +7,10 @@ interface Props {
   max: number;
   height?: number;
   showText?: boolean;
+  showThreshold?: number;
 }
 
-export default function HPBar({ current, max, height = 12, showText = true }: Props) {
+export default function HPBar({ current, max, height = 12, showText = true, showThreshold }: Props) {
   const widthAnim = useRef(new Animated.Value(current / max)).current;
 
   useEffect(() => {
@@ -34,6 +35,12 @@ export default function HPBar({ current, max, height = 12, showText = true }: Pr
     <View style={styles.container}>
       <View style={[styles.track, { height }]}>
         <Animated.View style={[styles.fill, { width: widthInterpolated, backgroundColor: barColor, height }]} />
+        {showThreshold !== undefined && (
+          <View style={[
+            styles.threshold,
+            { left: `${showThreshold * 100}%` as unknown as number, height },
+          ]} />
+        )}
       </View>
       {showText && (
         <Text style={styles.label}>
@@ -53,6 +60,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   fill: { borderRadius: 6 },
+  threshold: {
+    position: 'absolute',
+    top: 0,
+    width: 2,
+    backgroundColor: 'rgba(255,165,0,0.8)',
+    borderRadius: 1,
+  },
   label: {
     color: COLORS.textSecondary,
     fontSize: FONTS.statLabel,

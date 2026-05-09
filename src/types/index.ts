@@ -192,6 +192,8 @@ export interface GameState {
   totalDamageTaken: number;
   totalBlockGained: number;
   enemiesDefeated: number;
+  necronomiconUsedThisTurn: boolean;
+  firstBlockThisTurn: boolean;
   sneckoCosts: Record<string, number>;
   bottledCardId: string | null;
   bossRelicChoices: string[];

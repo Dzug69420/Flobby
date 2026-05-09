@@ -196,6 +196,8 @@ const initialState: GameState = {
   totalDamageTaken: 0,
   totalBlockGained: 0,
   enemiesDefeated: 0,
+  necronomiconUsedThisTurn: false,
+  firstBlockThisTurn: true,
   sneckoCosts: {},
   bottledCardId: null,
   bossRelicChoices: [],
@@ -527,6 +529,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
         playerBlock += 3;
       }
 
+      // Necronomicon: first 2+ cost card each turn is played twice
+      let necroDoubled = false;
+      if (
+        hasRelic(s.relics, 'necronomicon') &&
+        !s.necronomiconUsedThisTurn &&
+        actualCost >= 2
+      ) {
+        necroDoubled = true;
+        if (modifiedDelta.enemyHPChange) modifiedDelta.enemyHPChange *= 2;
+        if (modifiedDelta.playerBlockChange) modifiedDelta.playerBlockChange *= 2;
+      }
+
+      // Lucky Flower: first block this turn gains 15% bonus
+      if (
+        modifiedDelta.playerBlockChange && modifiedDelta.playerBlockChange > 0 &&
+        s.firstBlockThisTurn && hasRelic(s.relics, 'lucky_flower')
+      ) {
+        modifiedDelta.playerBlockChange = Math.floor(modifiedDelta.playerBlockChange * 1.15);
+      }
+
       // Talisman: gain 1 energy when a Power card is played
       if (def.category === 'power' && hasRelic(s.relics, 'talisman')) {
         playerEnergy = Math.min(playerEnergy + 1, s.playerMaxEnergy + 3);
@@ -605,6 +627,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         stance: (modifiedDelta.setStance ?? s.stance) as 'neutral' | 'calm' | 'wrath',
         orbs,
         maxOrbs,
+        necronomiconUsedThisTurn: s.necronomiconUsedThisTurn || necroDoubled,
+        firstBlockThisTurn: s.firstBlockThisTurn && !(modifiedDelta.playerBlockChange && modifiedDelta.playerBlockChange > 0),
       };
     });
 
@@ -989,6 +1013,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         combatLog: newCombatLog,
         stance: nextStance as 'neutral' | 'calm' | 'wrath',
         totalDamageTaken: state.totalDamageTaken + damageTakenThisTurn,
+        necronomiconUsedThisTurn: false,
+        firstBlockThisTurn: true,
       };
     });
 
@@ -1083,6 +1109,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const state = get();
     // Burning Blood: heal 6 HP after every combat
     const burningBloodHeal = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
+    // Mango: gain 1 max HP after every combat
+    const mangoBonus = hasRelic(state.relics, 'mango') ? 1 : 0;
 
     // Track enemy defeat
     set((s) => ({ enemiesDefeated: s.enemiesDefeated + 1 }));
@@ -1141,12 +1169,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Elite rooms give a relic reward
     const eliteRelic = isElite ? pickRandomRelic(state.relics, 'common') : null;
 
-    const choices = pickRewardCards(REWARD_CARD_IDS, 3, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
-    const healedHP = Math.min(state.playerHP + 10 + burningBloodHeal, state.playerMaxHP);
+    // Prayer Wheel: extra card reward for normal enemies
+    const prayerWheelBonus = hasRelic(state.relics, 'prayer_wheel') ? 4 : 3;
+    const choices = pickRewardCards(REWARD_CARD_IDS, prayerWheelBonus, REWARD_CARD_WEIGHTS).map((id) => ALL_CARDS[id]);
+    const newMaxHP = state.playerMaxHP + mangoBonus;
+    const healedHP = Math.min(state.playerHP + 10 + burningBloodHeal, newMaxHP);
     set({
       phase: 'reward',
       rewardChoices: choices,
       playerHP: healedHP,
+      playerMaxHP: newMaxHP,
       gold: state.gold + goldGained,
       lastGoldReward: goldGained,
       relics: eliteRelic ? [...state.relics, eliteRelic] : state.relics,

@@ -195,6 +195,7 @@ const initialState: GameState = {
   scryAmount: 0,
   orbs: [],
   maxOrbs: 3,
+  actProgress: 0,
   totalDamageDealt: 0,
   totalDamageTaken: 0,
   totalBlockGained: 0,
@@ -1259,7 +1260,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (state.currentEnemy?.isBoss) {
       const bossGold = 50;
-      const newAscension = Math.min(state.ascensionLevel + 1, 10);
+      const newAscension = state.runsCompleted === 0 ? state.ascensionLevel : Math.min(state.ascensionLevel + 1, 10);
+      // Check if there are more acts to complete
+      const isLastAct = state.currentAct >= 1; // For now, 1 act = full game
+      if (!isLastAct) {
+        // Generate next act
+        const newMap = generateMap();
+        const burningBloodHeal2 = hasRelic(state.relics, 'burning_blood') ? 6 : 0;
+        set({
+          phase: 'map',
+          currentAct: state.currentAct + 1,
+          currentFloor: 0,
+          actProgress: state.actProgress + 1,
+          map: newMap,
+          gold: state.gold + bossGold,
+          playerHP: Math.min(state.playerHP + burningBloodHeal2, state.playerMaxHP),
+          playerStatuses: [],
+          enemyStatuses: [],
+        });
+        return;
+      }
       // Score calculation
       const score = Math.floor(
         (state.currentFloor + 1) * 50 +         // floors cleared

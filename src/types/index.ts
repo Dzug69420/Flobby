@@ -146,6 +146,7 @@ export interface GameState {
   map: MapNode[];
   currentFloor: number;
   currentAct: number;
+  actProgress: number;
   gold: number;
   lastGoldReward: number;
   shopInventory: ShopItem[];
